@@ -1,0 +1,32 @@
+{
+    "Node action": "steal painting",
+    "SAND": [
+        {
+            "Node action": "turn security off",
+            "AND" : [
+                {
+                    "Node action": "disable camera 1"
+                },
+                {
+                    "Node action": "disable camera 2"
+                }
+            ]
+        },
+        {
+            "Node action": "enter museum",
+            "OR" : [
+                {
+                    "Node action": "enter door a"
+                },
+                {
+                    "Node action": "enter door b"
+                }
+            ]
+        },
+        {
+            "Node action": "take painting"
+        }
+
+    ]
+
+}
