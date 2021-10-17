@@ -1,6 +1,6 @@
 "steal painting"
 "turn security off"
-"disable camera 1" 
+"disable camera 1"
 "disable camera 2"
 "enter museum"
 "enter door a"
@@ -20,13 +20,14 @@
 Attaques possibles :
 d1 true
 d2 true
-ae true
+ea true
 eb false
-tp true
+em true
 
 d1 true
 d2 true
-eb true
+ea true
+eb false
 em true
 
 d1 true
