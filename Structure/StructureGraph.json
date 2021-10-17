@@ -1,30 +1,38 @@
 {
     "Node action": "steal painting",
-    "SAND": [
+    "Type":"SAND",
+    "Child": [
         {
             "Node action": "turn security off",
-            "AND" : [
+            "Type":"AND",
+            "Child" : [
                 {
-                    "Node action": "disable camera 1"
+                    "Node action": "disable camera 1",
+                    "Type":"LEAF"
                 },
                 {
-                    "Node action": "disable camera 2"
+                    "Node action": "disable camera 2",
+                    "Type":"LEAF"
                 }
             ]
         },
         {
             "Node action": "enter museum",
-            "OR" : [
+            "Type":"OR",
+            "Child" : [
                 {
-                    "Node action": "enter door a"
+                    "Node action": "enter door a",
+                    "Type":"LEAF"
                 },
                 {
-                    "Node action": "enter door b"
+                    "Node action": "enter door b",
+                    "Type":"LEAF"
                 }
             ]
         },
         {
-            "Node action": "take painting"
+            "Node action": "take painting",
+            "Type":"LEAF"
         }
     ]
 }
