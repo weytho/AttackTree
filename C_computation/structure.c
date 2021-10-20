@@ -7,7 +7,7 @@ List* JsonReader(struct json_object *parsed_json, List *list, int root){
    // READ THE JSON //
    struct json_object *action;
    struct json_object *type;
-   json_object_object_get_ex(parsed_json, "Node action", &action);
+   json_object_object_get_ex(parsed_json, "Action", &action);
    json_object_object_get_ex(parsed_json, "Type", &type);
 
    // CREATE + FILL THE NODE
@@ -36,7 +36,6 @@ List* JsonReader(struct json_object *parsed_json, List *list, int root){
       size_t n_children;
       json_object_object_get_ex(parsed_json, "Child", &children);
       n_children = json_object_array_length(children);
-      printf("Nbr children : %lu\n", n_children);
       for(int i=0; i<n_children; i++){
          list = JsonReader(json_object_array_get_idx(children, i), list, 0);
       }
