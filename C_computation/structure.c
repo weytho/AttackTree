@@ -49,12 +49,12 @@ int main(int argc, char *argv[]) {
    printf("Path to file is : %s \n", path);
    
    FILE *fp; 
-   char buffer[1024];
+   char buffer[1024*2];
 
    struct json_object *parsed_json;
 
    fp = fopen(path,"r");
-   fread(buffer, 1024, 1, fp);
+   fread(buffer, 1024*2, 1, fp);
    fclose(fp);
 
    parsed_json = json_tokener_parse(buffer);

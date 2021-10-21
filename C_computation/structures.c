@@ -1,7 +1,7 @@
 typedef struct s_Node Node;
 struct s_Node {
    char  title[50];
-   char  type[10];
+   char  type[5];
    int   root;
    int   leaf;
 };
@@ -41,4 +41,16 @@ List* list_add (List *list, Node* data)
       return list;
    else 
       return NULL;
+}
+
+void list_free (List *list)
+{
+   List *runner = list;
+   while(runner != NULL)
+   {
+      runner = runner->next;
+      free(list->data);
+      free(list);
+      list = runner;
+   }
 }
