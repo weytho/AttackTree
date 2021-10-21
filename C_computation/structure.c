@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<json-c/json.h>
 #include"structures.c"
+#include <string.h>
 
 List* JsonReader(struct json_object *parsed_json, List *list, int root){
 
@@ -14,7 +15,7 @@ List* JsonReader(struct json_object *parsed_json, List *list, int root){
    Node *node = malloc(sizeof(Node));
    if (node == NULL){
       printf("[Node] Malloc error\n");
-      return;
+      return NULL;
    }
    strcpy(node->title, json_object_get_string(action));
    strcpy(node->type, json_object_get_string(type));
@@ -46,6 +47,7 @@ List* JsonReader(struct json_object *parsed_json, List *list, int root){
 int main(int argc, char *argv[]) {
    
    char *path = argv[1];
+   path = "/home/flo/Desktop/Github/AttackTree/FloTest/test.json";
    printf("Path to file is : %s \n", path);
    
    FILE *fp; 

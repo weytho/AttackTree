@@ -25,29 +25,50 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 
 class CustomNode(ctypes.Structure):
-    _fields_ = [('name', ctypes.c_char * 16),
-        ('value', ctypes.c_int),
-        ('c', ctypes.c_int)]
+    _fields_ = [('title', ctypes.c_char * 50),
+        ('type', ctypes.c_char * 5),
+        ('root', ctypes.c_int),
+        ('leaf', ctypes.c_int)]
 
 class CustomList(ctypes.Structure):
-    _fields_ = [('value',  ctypes.c_int),
-        ('next', ctypes.c_void_p),
+    _fields_ = [('next', ctypes.c_void_p),
         ('data', ctypes.c_void_p)]
 
 class Worker(QObject):
     finished = pyqtSignal()
-    #progress = pyqtSignal(int)
 
     def run(self):
         dirname = os.path.dirname(__file__)
         so_file = os.path.join(dirname, 'testlib.so')
         my_function = ctypes.CDLL(so_file)
         s = ctypes.create_string_buffer(self.pathFile.encode('utf-8'))
-        my_function.mainfct.restype = ctypes.c_char_p
+        my_function.mainfct.restype = ctypes.c_void_p
         my_function.mainfct.argtypes = [ctypes.c_char_p]
-        my_function.mainfct(s)
+        newlist = CustomList.from_address(my_function.mainfct(s))
+
+        node_list = []
+        # .decode('utf-8') better way ?
+        if newlist != None :
+            tmp_node = CustomNode.from_address(newlist.data)
+            newdict = {'type': tmp_node.type.decode('utf-8'),'leaf': tmp_node.leaf, 'root': tmp_node.root}
+            newtuple = (tmp_node.title.decode('utf-8'), newdict)
+            node_list.append(newtuple)
+
+            while newlist.next != None:
+                newlist = CustomList.from_address(newlist.next)
+                tmp_node = CustomNode.from_address(newlist.data)
+                newdict = {'type': tmp_node.type.decode('utf-8'),'leaf': tmp_node.leaf, 'root': tmp_node.root}
+                newtuple = (tmp_node.title.decode('utf-8'), newdict)
+                node_list.append(newtuple)
+
+        print(node_list)
+
+        edge_list = []
+
+
         
         #print("THIS IS STRUCUTRE")
+        '''
         my_function.getNode.restype = ctypes.c_void_p
         print("GETTING ...")
         answer = CustomNode.from_address(my_function.getNode())
@@ -71,6 +92,9 @@ class Worker(QObject):
 
         my_function.freeNode(ctypes.byref(answer))
         my_function.freeList(ctypes.byref(newlist))
+        '''
+
+        my_function.freeList(newlist)
         time.sleep(5)
         self.finished.emit()
 
