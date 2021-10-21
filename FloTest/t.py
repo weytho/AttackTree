@@ -7,12 +7,13 @@ from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 # https://stackoverflow.com/questions/44726280/include-matplotlib-in-pyqt5-with-hover-labels
 # https://networkx.org/documentation/stable/reference/classes/digraph.html
 # https://stackoverflow.com/questions/56424297/how-to-draw-a-digraph-in-a-org-chart-fashion
+# https://stackoverflow.com/questions/38661635/ctypes-struct-returned-from-library
 import matplotlib.pyplot as plt
 import numpy as np
 import networkx as nx
 import graphviz
 import time
-from PyQt5.QtCore import QObject, QSocketNotifier, QThread, pyqtSignal
+from PyQt5.QtCore import QObject, QThread, pyqtSignal
 import ctypes
 import os
 
@@ -23,6 +24,16 @@ from PyQt5.QtWidgets import (
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 
+class CustomNode(ctypes.Structure):
+    _fields_ = [('name', ctypes.c_char * 16),
+        ('value', ctypes.c_int),
+        ('c', ctypes.c_int)]
+
+class CustomList(ctypes.Structure):
+    _fields_ = [('value',  ctypes.c_int),
+        ('next', ctypes.c_void_p),
+        ('data', ctypes.c_void_p)]
+
 class Worker(QObject):
     finished = pyqtSignal()
     #progress = pyqtSignal(int)
@@ -32,12 +43,34 @@ class Worker(QObject):
         so_file = os.path.join(dirname, 'testlib.so')
         my_function = ctypes.CDLL(so_file)
         s = ctypes.create_string_buffer(self.pathFile.encode('utf-8'))
-        my_function.main.restype = ctypes.c_char_p
-        my_function.main.argtypes = [ctypes.c_char_p]
-        my_function.main(s)
-        my_function.strGet.restype = ctypes.c_char_p
-        answer = my_function.strGet()
-        print(answer)
+        my_function.mainfct.restype = ctypes.c_char_p
+        my_function.mainfct.argtypes = [ctypes.c_char_p]
+        my_function.mainfct(s)
+        
+        #print("THIS IS STRUCUTRE")
+        my_function.getNode.restype = ctypes.c_void_p
+        print("GETTING ...")
+        answer = CustomNode.from_address(my_function.getNode())
+        print(answer.name, answer.value, answer.c)
+
+        my_function.getList.restype = ctypes.c_void_p
+        print("GETTING ...")
+        newlist = CustomList.from_address(my_function.getList())
+        print(newlist.value)
+        print(newlist.data)
+        print(newlist.next)
+
+        tmp_node = CustomNode.from_address(newlist.data)
+        print(tmp_node.name, tmp_node.value, tmp_node.c)
+
+        if newlist.next != None:
+            next = CustomNode.from_address(newlist.next)
+            print(next)
+        else:
+            print("No next to this list")
+
+        my_function.freeNode(ctypes.byref(answer))
+        my_function.freeList(ctypes.byref(newlist))
         time.sleep(5)
         self.finished.emit()
 
@@ -45,14 +78,11 @@ class Worker(QObject):
 class Window(QDialog):
     def __init__(self, parent=None):
         super().__init__()
-
         # a figure instance to plot on
         self.figure = plt.figure()
-        
         self.width = 1000
         self.height = 800
         self.setGeometry(0, 0, self.width, self.height)
-
         # this is the Canvas Widget that 
         # displays the 'figure'it takes the
         # 'figure' instance as a parameter to __init__
