@@ -13,7 +13,7 @@ import numpy as np
 import networkx as nx
 import graphviz
 import time
-from PyQt5.QtCore import QObject, QSocketNotifier, QThread, pyqtSignal
+from PyQt5.QtCore import QObject, QThread, pyqtSignal
 import ctypes
 import os
 
@@ -29,6 +29,11 @@ class CustomNode(ctypes.Structure):
         ('value', ctypes.c_int),
         ('c', ctypes.c_int)]
 
+class CustomList(ctypes.Structure):
+    _fields_ = [('value',  ctypes.c_int),
+        ('next', ctypes.c_void_p),
+        ('data', ctypes.c_void_p)]
+
 class Worker(QObject):
     finished = pyqtSignal()
     #progress = pyqtSignal(int)
@@ -38,18 +43,34 @@ class Worker(QObject):
         so_file = os.path.join(dirname, 'testlib.so')
         my_function = ctypes.CDLL(so_file)
         s = ctypes.create_string_buffer(self.pathFile.encode('utf-8'))
-        my_function.main.restype = ctypes.c_char_p
-        my_function.main.argtypes = [ctypes.c_char_p]
-        my_function.main(s)
+        my_function.mainfct.restype = ctypes.c_char_p
+        my_function.mainfct.argtypes = [ctypes.c_char_p]
+        my_function.mainfct(s)
         
         #print("THIS IS STRUCUTRE")
         my_function.getNode.restype = ctypes.c_void_p
-        #print("GETTING ...")
+        print("GETTING ...")
         answer = CustomNode.from_address(my_function.getNode())
-        #print("GETTING THERE")
-        #print(answer)
-        #print(answer.name, answer.value, answer.c)
+        print(answer.name, answer.value, answer.c)
+
+        my_function.getList.restype = ctypes.c_void_p
+        print("GETTING ...")
+        newlist = CustomList.from_address(my_function.getList())
+        print(newlist.value)
+        print(newlist.data)
+        print(newlist.next)
+
+        tmp_node = CustomNode.from_address(newlist.data)
+        print(tmp_node.name, tmp_node.value, tmp_node.c)
+
+        if newlist.next != None:
+            next = CustomNode.from_address(newlist.next)
+            print(next)
+        else:
+            print("No next to this list")
+
         my_function.freeNode(ctypes.byref(answer))
+        my_function.freeList(ctypes.byref(newlist))
         time.sleep(5)
         self.finished.emit()
 

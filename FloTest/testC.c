@@ -14,11 +14,15 @@ typedef struct Node
     int c;
 } CustomNode;
 
-/*int main (int argc, char * argv[]) { 
+typedef struct List
+{
+	int value;
+	struct List * next;
+	CustomNode * data;
+} CustomList;
 
-}*/
 
-int main(char * path) {
+int mainfct(char * path) {
    	printf("path in C %s\n", path);
    	FILE *fp;
 	char buffer[1024];
@@ -55,7 +59,44 @@ CustomNode *getNode() {
   	return n;
 }
 
+CustomList *getList() {
+	//printf("heheheh");
+	CustomList *l;
+	CustomList init;
+	//printf("pointer is %p\n", (void *) getNode());
+	init.value = 666;
+	init.data = getNode();
+	init.next = NULL;
+	//printf("pointer is %p\n", (void *) init.next);
+	l = malloc(sizeof(CustomList));
+	*l = init;
+  	return l;
+}
+
 void freeNode(CustomNode *n) {
 	free(n);
 }
 
+void freeList(CustomList *l) {
+	CustomList* tmp;
+   	while (l != NULL)
+    {
+       tmp = l;
+	   free(tmp->data);
+       l = l->next;
+       free(tmp);
+    }
+}
+
+int main (int argc, char * argv[]) { 
+	printf("STARTING \n");
+
+	CustomList * l = getList();
+	CustomNode * n = getNode();
+
+	printf("l pointer : %p", (void *) l);
+	//printf("HHHHHHHHHHHHHH %s, ",l->data->name);
+	freeNode(n);
+	freeList(l);
+	return 0;
+}
