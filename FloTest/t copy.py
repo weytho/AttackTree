@@ -2,7 +2,6 @@ import sys
 from PyQt5 import QtCore, QtGui
 from PyQt5 import QtWidgets
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
-# gcc -shared -Wl,-soname,testlib -o testlib.so -fPIC testlib.c
 # pyuic5 -o main_window_ui.py ui/main_window.ui
 # https://stackoverflow.com/questions/44726280/include-matplotlib-in-pyqt5-with-hover-labels
 # https://networkx.org/documentation/stable/reference/classes/digraph.html
@@ -12,9 +11,6 @@ import numpy as np
 import networkx as nx
 import graphviz
 import time
-from PyQt5.QtCore import QObject, QSocketNotifier, QThread, pyqtSignal
-import ctypes
-import os
 
 from PyQt5.QtWidgets import (
     QApplication, QDialog, QPushButton, QVBoxLayout
@@ -22,33 +18,13 @@ from PyQt5.QtWidgets import (
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
-
-class Worker(QObject):
-    finished = pyqtSignal()
-    #progress = pyqtSignal(int)
-
-    def run(self):
-        dirname = os.path.dirname(__file__)
-        so_file = os.path.join(dirname, 'testlib.so')
-        my_function = ctypes.CDLL(so_file)
-        s = ctypes.create_string_buffer(self.pathFile.encode('utf-8'))
-        my_function.main.restype = ctypes.c_char_p
-        my_function.main.argtypes = [ctypes.c_char_p]
-        my_function.main(s)
-        my_function.strGet.restype = ctypes.c_char_p
-        answer = my_function.strGet()
-        print(answer)
-        time.sleep(5)
-        self.finished.emit()
-
-
 class Window(QDialog):
     def __init__(self, parent=None):
         super().__init__()
 
         # a figure instance to plot on
         self.figure = plt.figure()
-        
+
         self.width = 1000
         self.height = 800
         self.setGeometry(0, 0, self.width, self.height)
@@ -133,32 +109,14 @@ class Window(QDialog):
     def getfiles(self):
         fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Single File', QtCore.QDir.currentPath() , '*.json')
         self.pathFile.setText(fileName)
-        # Step 2: Create a QThread object
-        self.thread = QThread()
-        # Step 3: Create a worker object
-        self.worker = Worker()
-
-        self.worker.pathFile = fileName
-        # Step 4: Move worker to the thread
-        self.worker.moveToThread(self.thread)
-        # Step 5: Connect signals and slots
-        self.thread.started.connect(self.worker.run)
-        self.worker.finished.connect(self.thread.quit)
-        self.worker.finished.connect(self.worker.deleteLater)
-        self.thread.finished.connect(self.thread.deleteLater)
-        # Step 6: Start the thread
-        self.thread.start()
-
-        # Final resets
-        self.button.setEnabled(False)
-        self.thread.finished.connect(
-            lambda: self.button.setEnabled(True)
-        )
         self.plot()
 
 # driver code
 if __name__ == '__main__':
+    print("Ya")
     app = QApplication(sys.argv)
+    print("Yo")
     win = Window()
     win.show()
     sys.exit(app.exec())
+    exit()
