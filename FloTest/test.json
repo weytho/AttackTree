@@ -1,0 +1,38 @@
+{
+    "Node action": "steal painting",
+    "Type":"SAND",
+    "Child": [
+        {
+            "Node action": "turn security off",
+            "Type":"AND",
+            "Child" : [
+                {
+                    "Node action": "disable camera 1",
+                    "Type":"LEAF"
+                },
+                {
+                    "Node action": "disable camera 2",
+                    "Type":"LEAF"
+                }
+            ]
+        },
+        {
+            "Node action": "enter museum",
+            "Type":"OR",
+            "Child" : [
+                {
+                    "Node action": "enter door a",
+                    "Type":"LEAF"
+                },
+                {
+                    "Node action": "enter door b",
+                    "Type":"LEAF"
+                }
+            ]
+        },
+        {
+            "Node action": "take painting",
+            "Type":"LEAF"
+        }
+    ]
+}
