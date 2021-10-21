@@ -1,8 +1,9 @@
 #include<stdio.h>
+#include<string.h>
 #include<json-c/json.h>
 #include"structures.c"
 
-List* JsonReader(struct json_object *parsed_json, List *list, int root){
+void JsonReader(struct json_object *parsed_json, List **list, EList **edges, Node *parent, int root){
 
    // READ THE JSON //
    struct json_object *action;
@@ -14,7 +15,6 @@ List* JsonReader(struct json_object *parsed_json, List *list, int root){
    Node *node = malloc(sizeof(Node));
    if (node == NULL){
       printf("[Node] Malloc error\n");
-      return;
    }
    strcpy(node->title, json_object_get_string(action));
    strcpy(node->type, json_object_get_string(type));
@@ -25,10 +25,25 @@ List* JsonReader(struct json_object *parsed_json, List *list, int root){
       node->leaf = 1;
 
    // ADD IT TO THE LIST
-   if (node->root)
-      list = list_create(node);
+   if (node->root == 1)
+      *list = list_create(node);
    else 
-      list = list_add(list, node);
+      *list = list_add(*list, node);
+
+   // ADD THE EDGE
+   if (node->root == 1){}
+   else{
+      Edge *ed = malloc(sizeof(Edge));
+      memcpy(ed->parent, parent->title, sizeof(char)*50);
+      memcpy(ed->child, node->title,sizeof(char)*50);
+      if (*edges == NULL)
+      {
+         *edges = elist_create(ed);
+      }
+      else{
+         *edges = elist_add(*edges, ed);
+      }
+   }
 
    // LOOK FOR ITS CHILDRENS
    if (node->leaf == 0) {
@@ -37,10 +52,9 @@ List* JsonReader(struct json_object *parsed_json, List *list, int root){
       json_object_object_get_ex(parsed_json, "Child", &children);
       n_children = json_object_array_length(children);
       for(int i=0; i<n_children; i++){
-         list = JsonReader(json_object_array_get_idx(children, i), list, 0);
+         JsonReader(json_object_array_get_idx(children, i), list, edges, node, 0);
       }
    }
-   return list;
 }
 
 int main(int argc, char *argv[]) {
@@ -58,9 +72,14 @@ int main(int argc, char *argv[]) {
    fclose(fp);
 
    parsed_json = json_tokener_parse(buffer);
-   List *list = JsonReader(parsed_json, list, 1);
-
-   printf("Node : %s \n", list->data->title);
+   EList *edges = NULL;
+   List *list = NULL;
+   JsonReader(parsed_json, &list, &edges, NULL, 1);
+   if(edges == NULL)
+   {
+      printf("Ceci est un crash \n");
+      return 0;
+   }
 
    List* runner = list;
    int count = 0;
@@ -74,7 +93,18 @@ int main(int argc, char *argv[]) {
       runner = runner->next;
    }
 
+   EList* runner2 = edges;
+   count = 0;
+   while(runner2 != NULL){
+      count ++;
+      printf("count : %d \n", count);
+      printf("Edges parent : %s \n", runner2->data->parent);
+      printf("Edges child  : %s \n", runner2->data->child);
+      runner2 = runner2->next;
+   }
+
    list_free(list);
+   elist_free(edges);
 
    return 0;
 }
