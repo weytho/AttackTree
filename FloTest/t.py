@@ -34,6 +34,10 @@ class CustomList(ctypes.Structure):
     _fields_ = [('next', ctypes.c_void_p),
         ('data', ctypes.c_void_p)]
 
+class FullList(ctypes.Structure):
+    _fields_ = [('nl', ctypes.c_void_p),
+        ('el', ctypes.c_void_p)]
+
 class Worker(QObject):
     finished = pyqtSignal()
 
@@ -44,7 +48,10 @@ class Worker(QObject):
         s = ctypes.create_string_buffer(self.pathFile.encode('utf-8'))
         my_function.mainfct.restype = ctypes.c_void_p
         my_function.mainfct.argtypes = [ctypes.c_char_p]
-        newlist = CustomList.from_address(my_function.mainfct(s))
+
+        fulllist = FullList.from_address(my_function.mainfct(s))
+    
+        newlist = CustomList.from_address(fulllist.nl)
 
         node_list = []
         # .decode('utf-8') better way ?
