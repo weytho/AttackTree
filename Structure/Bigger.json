@@ -1,0 +1,58 @@
+{
+    "Action": "A",
+    "Type":"SAND",
+    "Child": [
+        {
+            "Action": "B",
+            "Type":"AND",
+            "Child" : [
+                {
+                    "Action": "C",
+                    "Type":"LEAF"
+                },
+                {
+                    "Action": "D",
+                    "Type":"LEAF"
+                }
+            ]
+        },
+        {
+            "Action": "E",
+            "Type":"OR",
+            "Child" : [
+                {
+                    "Action": "F",
+                    "Type":"LEAF"
+                },
+                {
+                    "Action": "G",
+                    "Type":"LEAF"
+                }
+            ]
+        },
+        {
+            "Action": "H",
+            "Type":"OR",
+            "Child" : [
+                {
+                    "Action": "I",
+                    "Type":"LEAF"
+                },
+                {
+                    "Action": "J",
+                    "Type":"AND",
+                    "Child" : [
+                        {
+                            "Action": "K",
+                            "Type":"LEAF"
+                        },
+                        {
+                            "Action": "L",
+                            "Type":"LEAF"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
