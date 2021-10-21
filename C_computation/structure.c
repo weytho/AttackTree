@@ -74,5 +74,7 @@ int main(int argc, char *argv[]) {
       runner = runner->next;
    }
 
+   list_free(list);
+
    return 0;
 }
