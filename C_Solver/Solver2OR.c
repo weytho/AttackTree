@@ -140,8 +140,8 @@ List* Solver(struct json_object *parsed_json, List *list, int truth, int departO
       json_object_object_get_ex(parsed_json, "Child", &children);
       n_children = json_object_array_length(children);
       for(int i=0; i<n_children; i++){
-        list = Solver(json_object_array_get_idx(children, i), list, 1,i*number_of_attacks, number_of_attacks);//i);
-        list = Solver(json_object_array_get_idx(children, i), list, 0,(1-i)*number_of_attacks, number_of_attacks);//1-i);
+        list = Solver(json_object_array_get_idx(children, i), list, 1,i*number_of_attacks, number_of_attacks); // HERE TO DO REGARDING (departOR, lenOR)
+        list = Solver(json_object_array_get_idx(children, i), list, 0,(1-i)*number_of_attacks, number_of_attacks);
       }
       return list;
    }
