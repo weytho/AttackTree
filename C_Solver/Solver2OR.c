@@ -3,7 +3,7 @@
 #include<string.h>
 #include"truthStructure.c"
 
-List* Solver(struct json_object *parsed_json, List *list, int truth, int orPart){
+List* Solver(struct json_object *parsed_json, List *list, int truth, int departOR, int lenOR){
    // READ THE JSON //
    struct json_object *action;
    struct json_object *type;
@@ -28,7 +28,7 @@ List* Solver(struct json_object *parsed_json, List *list, int truth, int orPart)
       if(list == NULL){
          list = list_create(var);
       }
-      else if(orPart<0){
+      else if(departOR<0){
          List * runner1 = list;
          while(runner1 != NULL){
             TNode *cp = malloc(sizeof(TNode));
@@ -51,19 +51,12 @@ List* Solver(struct json_object *parsed_json, List *list, int truth, int orPart)
       }
       else{
          List * runner1 = list;
-         int nbr_attacks = 0;
-         while(runner1!=NULL){
+        for(int i=0; i<departOR;i++){
             runner1=runner1->next;
-            nbr_attacks++;
-         }
-         runner1 = list;
-         if(orPart == 1){
-            for(int i=0; i<nbr_attacks/2;i++){
-               runner1=runner1->next;
-            }
-         }
-         int cnt = 0;
-         while(runner1 != NULL && cnt <nbr_attacks/2){
+        }
+
+        int cnt = 0;
+        while(runner1 != NULL && cnt <lenOR){
             TNode *cp = malloc(sizeof(TNode));
             memcpy(cp,var,sizeof(TNode));
             if(runner1->data == NULL)
@@ -72,16 +65,16 @@ List* Solver(struct json_object *parsed_json, List *list, int truth, int orPart)
                runner1 = runner1->next;
             }
             else {
-               TNode *runner2 = runner1->data;
-               while(runner2->next != NULL){
+                TNode *runner2 = runner1->data;
+                while(runner2->next != NULL){
                   runner2 = runner2->next;
-               }
-               runner2->next = cp;
-               runner1 = runner1->next;
+                }
+                runner2->next = cp;
+                runner1 = runner1->next;
             }
             cnt++;
-         }
-         free(var);
+        }
+        free(var);
       }
       return list;
    }
@@ -91,7 +84,7 @@ List* Solver(struct json_object *parsed_json, List *list, int truth, int orPart)
       json_object_object_get_ex(parsed_json, "Child", &children);
       n_children = json_object_array_length(children);
       for(int i=0; i<n_children; i++){
-         list = Solver(json_object_array_get_idx(children, i), list, truth, orPart);
+         list = Solver(json_object_array_get_idx(children, i), list, truth, departOR, lenOR);
       }
       return list;
    }
@@ -101,7 +94,7 @@ List* Solver(struct json_object *parsed_json, List *list, int truth, int orPart)
       json_object_object_get_ex(parsed_json, "Child", &children);
       n_children = json_object_array_length(children);
       for(int i=0; i<n_children; i++){
-         list = Solver(json_object_array_get_idx(children, i), list, truth, orPart);
+         list = Solver(json_object_array_get_idx(children, i), list, truth, departOR, lenOR);
       }
       return list;
    }
@@ -147,8 +140,8 @@ List* Solver(struct json_object *parsed_json, List *list, int truth, int orPart)
       json_object_object_get_ex(parsed_json, "Child", &children);
       n_children = json_object_array_length(children);
       for(int i=0; i<n_children; i++){
-         list = Solver(json_object_array_get_idx(children, i), list, 1,i);//i);
-         list = Solver(json_object_array_get_idx(children, i), list, 0,1-i);//1-i);
+        list = Solver(json_object_array_get_idx(children, i), list, 1,i*number_of_attacks, number_of_attacks);//i);
+        list = Solver(json_object_array_get_idx(children, i), list, 0,(1-i)*number_of_attacks, number_of_attacks);//1-i);
       }
       return list;
    }
@@ -174,7 +167,7 @@ int main(int argc, char *argv[]) {
    List *list = NULL;
    List *ret = NULL;
    parsed_json = json_tokener_parse(buffer);
-   ret = Solver(parsed_json, list, 1,-1);
+   ret = Solver(parsed_json, list, 1,-1, 0);
 
    List* runner = ret;
    int count = 0;
