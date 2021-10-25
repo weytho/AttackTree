@@ -1,41 +1,41 @@
 {
-    "Action": "A",
+    "Action": "A1",
     "Type":"SAND",
     "Child": [
         {
-            "Action": "O",
+            "Action": "A",
             "Type":"LEAF"
         },
         {
-            "Action": "B",
-            "Type":"OR",
+            "Action": "A2",
+            "Type":"AND",
             "Child" : [
+                {
+                    "Action": "B",
+                    "Type":"LEAF"
+                },
                 {
                     "Action": "C",
                     "Type":"LEAF"
-                },
-                {
-                    "Action": "D",
-                    "Type":"LEAF"
                 }
             ]
         },
         {
-            "Action": "E",
+            "Action": "A3",
             "Type":"OR",
             "Child" : [
                 {
-                    "Action": "F",
+                    "Action": "D",
                     "Type":"LEAF"
                 },
                 {
-                    "Action": "G",
+                    "Action": "E",
                     "Type":"LEAF"
                 }
             ]
         },
         {
-            "Action": "H",
+            "Action": "F",
             "Type":"LEAF"
         }
     ]

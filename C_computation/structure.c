@@ -3,7 +3,7 @@
 #include<json-c/json.h>
 #include"structures.c"
 
-void JsonReader(struct json_object *parsed_json, List **list, EList **edges, Node *parent, int root){
+void JsonReader(struct json_object *parsed_json, List **list, EList **edges, Formula **form, Node *parent, int root){
 
    // READ THE JSON //
    struct json_object *action;
@@ -45,15 +45,59 @@ void JsonReader(struct json_object *parsed_json, List **list, EList **edges, Nod
       }
    }
 
+   // ADD to formula
+   if (node->leaf == 1){
+      Formula *newVar = malloc(sizeof(Formula));
+      newVar->data = json_object_get_string(action);
+      newVar->next = NULL;
+      if((*form) == NULL){
+         (*form) = newVar;
+      }
+      else{
+         Formula *runner = *(form);
+         while(runner->next != NULL){
+            runner = runner->next;
+         }
+         runner->next = newVar;
+      }
+   }
+
    // LOOK FOR ITS CHILDRENS
    if (node->leaf == 0) {
       struct json_object *children;
       size_t n_children;
       json_object_object_get_ex(parsed_json, "Child", &children);
       n_children = json_object_array_length(children);
-      for(int i=0; i<n_children; i++){
-         JsonReader(json_object_array_get_idx(children, i), list, edges, node, 0);
+      Formula *left = Parenthesis("LEFT");
+      if((*form) == NULL){
+         (*form) = left;
       }
+      else{
+         Formula *runner = *(form);
+         while(runner->next != NULL){
+            runner = runner->next;
+         }
+         runner->next = left;
+      }
+      
+      for(int i=0; i<n_children; i++){
+         JsonReader(json_object_array_get_idx(children, i), list, edges, form, node, 0);
+         if(i<n_children-1){
+            Formula *t = Parenthesis(json_object_get_string(type));
+            Formula *runner = *(form);
+            while(runner->next != NULL){
+               runner = runner->next;
+            }
+            runner->next = t; 
+         }
+      }
+
+      Formula *right = Parenthesis("RIGHT");
+      Formula *runner = *(form);
+      while(runner->next != NULL){
+         runner = runner->next;
+      }
+      runner->next = right;     
    }
 }
 
@@ -74,12 +118,8 @@ int main(int argc, char *argv[]) {
    parsed_json = json_tokener_parse(buffer);
    EList *edges = NULL;
    List *list = NULL;
-   JsonReader(parsed_json, &list, &edges, NULL, 1);
-   if(edges == NULL)
-   {
-      printf("Ceci est un crash \n");
-      return 0;
-   }
+   Formula *form = NULL;
+   JsonReader(parsed_json, &list, &edges, &form, NULL, 1);
 
    List* runner = list;
    int count = 0;
@@ -103,8 +143,18 @@ int main(int argc, char *argv[]) {
       runner2 = runner2->next;
    }
 
+
+   Formula* runner3 = form;
+   while(runner3 != NULL){
+      printf("%s",runner3->data);
+      runner3 = runner3->next;
+   }
+   printf("\n");
+   
+
    list_free(list);
    elist_free(edges);
+   form_free(form);
 
    return 0;
 }
