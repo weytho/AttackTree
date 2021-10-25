@@ -1,0 +1,20 @@
+{
+    "Action": "A",
+    "Type":"SAND",
+    "Child": [
+        {
+            "Action": "F",
+            "Type":"OR",
+            "Child" : [
+                {
+                    "Action": "A",
+                    "Type":"LEAF"
+                },
+                {
+                    "Action": "B",
+                    "Type":"LEAF"
+                }
+            ]
+        }
+    ]
+}

@@ -16,6 +16,8 @@ List* Solver(struct json_object *parsed_json, List *list, int truth, int departO
    // LEAF NODE : CREATION OF TNODE TO WRITE ON THE TRACE
    if (!strcmp(json_object_get_string(type), "LEAF" )){
 
+      printf("[LEAF] var : %s | departOR : %d\n", json_object_get_string(action), departOR);
+         
       TNode *var = malloc(sizeof(TNode));
       var->variable = json_object_get_string(action);
       if(truth == 1){
@@ -50,13 +52,14 @@ List* Solver(struct json_object *parsed_json, List *list, int truth, int departO
          free(var);
       }
       else{
+         printf("[LEAF] var : %s | truth %d : | depOR : %d | lenOr : %d\n", json_object_get_string(action), truth, departOR, lenOR);
          List * runner1 = list;
-        for(int i=0; i<departOR;i++){
+         for(int i=0; i<departOR;i++){
             runner1=runner1->next;
-        }
+         }
 
-        int cnt = 0;
-        while(runner1 != NULL && cnt <lenOR){
+         int cnt = 0;
+         while(runner1 != NULL && cnt <lenOR){
             TNode *cp = malloc(sizeof(TNode));
             memcpy(cp,var,sizeof(TNode));
             if(runner1->data == NULL)
@@ -99,6 +102,7 @@ List* Solver(struct json_object *parsed_json, List *list, int truth, int departO
       return list;
    }
    else if (!strcmp(json_object_get_string(type), "OR" )){
+      printf("[OR] \n");
       // BRANCHING DUE TO OR STATEMENT
       int number_of_attacks = 0; // ATTENTION SI 0 ! TODO
       List *counter = list;
@@ -112,6 +116,7 @@ List* Solver(struct json_object *parsed_json, List *list, int truth, int departO
       {
          tail = tail->next;
       }
+      printf("[OR] number_of_attacks : %d\n",number_of_attacks);
 
       // COPIE DES ATTAQUES
       for(int i=0; i<number_of_attacks;i++) // TODO QUID SI OR AVEC PLUS QUE 2 ? -> REMETTRE LES 3 en 2
@@ -140,8 +145,19 @@ List* Solver(struct json_object *parsed_json, List *list, int truth, int departO
       json_object_object_get_ex(parsed_json, "Child", &children);
       n_children = json_object_array_length(children);
       for(int i=0; i<n_children; i++){
-        list = Solver(json_object_array_get_idx(children, i), list, 1,i*number_of_attacks, number_of_attacks); // HERE TO DO REGARDING (departOR, lenOR)
-        list = Solver(json_object_array_get_idx(children, i), list, 0,(1-i)*number_of_attacks, number_of_attacks);
+         printf("[OR] child n : %d\n",i);
+         printf("[OR] departOR T n : %d\n",i*(number_of_attacks));
+         printf("[OR] departOR F n : %d\n",(1-i)*(number_of_attacks));
+         printf("[OR] lenOR n : %d\n",number_of_attacks);
+         if(truth == -1){
+            printf("[OR] 1 call per child\n");
+            list = Solver(json_object_array_get_idx(children, i), list, 0,departOR, lenOR);
+         }
+         else{
+         printf("[OR] 2 calls per child\n");
+         list = Solver(json_object_array_get_idx(children, i), list, 1,i*(number_of_attacks), number_of_attacks);//departOR+i*lenOR, lenOR); // HERE TO DO REGARDING (departOR, lenOR)
+         list = Solver(json_object_array_get_idx(children, i), list, 0,(1-i)*(number_of_attacks), number_of_attacks);// departOR+(1-i)*lenOR, lenOR);
+         }
       }
       return list;
    }
@@ -167,7 +183,7 @@ int main(int argc, char *argv[]) {
    List *list = NULL;
    List *ret = NULL;
    parsed_json = json_tokener_parse(buffer);
-   ret = Solver(parsed_json, list, 1,-1, 0);
+   ret = Solver(parsed_json, list, 1,-1, 1);
 
    List* runner = ret;
    int count = 0;

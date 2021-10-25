@@ -3,8 +3,12 @@
     "Type":"SAND",
     "Child": [
         {
+            "Action": "O",
+            "Type":"LEAF"
+        },
+        {
             "Action": "B",
-            "Type":"AND",
+            "Type":"OR",
             "Child" : [
                 {
                     "Action": "C",
