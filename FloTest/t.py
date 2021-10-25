@@ -9,6 +9,7 @@ from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 # https://stackoverflow.com/questions/56424297/how-to-draw-a-digraph-in-a-org-chart-fashion
 # https://stackoverflow.com/questions/38661635/ctypes-struct-returned-from-library
 import matplotlib.pyplot as plt
+from networkx.algorithms.traversal.edgebfs import edge_bfs
 import numpy as np
 import networkx as nx
 import graphviz
@@ -16,6 +17,7 @@ import time
 from PyQt5.QtCore import QObject, QThread, pyqtSignal
 import ctypes
 import os
+import PIL
 
 from PyQt5.QtWidgets import (
     QApplication, QDialog, QPushButton, QVBoxLayout
@@ -30,6 +32,10 @@ class CustomNode(ctypes.Structure):
         ('root', ctypes.c_int),
         ('leaf', ctypes.c_int)]
 
+class EdgeNode(ctypes.Structure):
+    _fields_ = [('parent', ctypes.c_char * 50),
+        ('child', ctypes.c_char * 50)]
+
 class CustomList(ctypes.Structure):
     _fields_ = [('next', ctypes.c_void_p),
         ('data', ctypes.c_void_p)]
@@ -42,6 +48,9 @@ class Worker(QObject):
     finished = pyqtSignal()
 
     def run(self):
+        print("WORKER")
+        self.node_list= []
+        self.edge_list = []
         dirname = os.path.dirname(__file__)
         so_file = os.path.join(dirname, 'testlib.so')
         my_function = ctypes.CDLL(so_file)
@@ -53,57 +62,39 @@ class Worker(QObject):
     
         newlist = CustomList.from_address(fulllist.nl)
 
-        node_list = []
         # .decode('utf-8') better way ?
         if newlist != None :
             tmp_node = CustomNode.from_address(newlist.data)
             newdict = {'type': tmp_node.type.decode('utf-8'),'leaf': tmp_node.leaf, 'root': tmp_node.root}
             newtuple = (tmp_node.title.decode('utf-8'), newdict)
-            node_list.append(newtuple)
+            self.node_list.append(newtuple)
 
             while newlist.next != None:
                 newlist = CustomList.from_address(newlist.next)
                 tmp_node = CustomNode.from_address(newlist.data)
                 newdict = {'type': tmp_node.type.decode('utf-8'),'leaf': tmp_node.leaf, 'root': tmp_node.root}
                 newtuple = (tmp_node.title.decode('utf-8'), newdict)
-                node_list.append(newtuple)
+                self.node_list.append(newtuple)
 
-        print(node_list)
+        newEdgeList = CustomList.from_address(fulllist.el)
 
-        edge_list = []
+        if newEdgeList != None :
+            tmp_node = EdgeNode.from_address(newEdgeList.data)
+            newtuple = (tmp_node.parent.decode('utf-8'),tmp_node.child.decode('utf-8'))
+            self.edge_list.append(newtuple)
 
-
-        
-        #print("THIS IS STRUCUTRE")
-        '''
-        my_function.getNode.restype = ctypes.c_void_p
-        print("GETTING ...")
-        answer = CustomNode.from_address(my_function.getNode())
-        print(answer.name, answer.value, answer.c)
-
-        my_function.getList.restype = ctypes.c_void_p
-        print("GETTING ...")
-        newlist = CustomList.from_address(my_function.getList())
-        print(newlist.value)
-        print(newlist.data)
-        print(newlist.next)
-
-        tmp_node = CustomNode.from_address(newlist.data)
-        print(tmp_node.name, tmp_node.value, tmp_node.c)
-
-        if newlist.next != None:
-            next = CustomNode.from_address(newlist.next)
-            print(next)
-        else:
-            print("No next to this list")
-
-        my_function.freeNode(ctypes.byref(answer))
-        my_function.freeList(ctypes.byref(newlist))
-        '''
+            while newEdgeList.next != None:
+                newEdgeList = CustomList.from_address(newEdgeList.next)
+                tmp_node = EdgeNode.from_address(newEdgeList.data)
+                newtuple = (tmp_node.parent.decode('utf-8'),tmp_node.child.decode('utf-8'))
+                self.edge_list.append(newtuple)
 
         my_function.freeList(newlist)
-        time.sleep(5)
+        my_function.freeList(newEdgeList)
+        time.sleep(2)
+        #self.data.emit(node_list, edge_list)
         self.finished.emit()
+        #self.plot
 
 
 class Window(QDialog):
@@ -129,6 +120,9 @@ class Window(QDialog):
         self.pathFile = QtWidgets.QTextEdit(self)
         self.pathFile.setFixedSize(self.width, 30)
 
+        self.tracesFound = QtWidgets.QTextEdit(self)
+        self.tracesFound.setFixedSize(self.width, 60)
+
         # creating a Vertical Box layout
         layout = QVBoxLayout()
         # adding tool bar to the layout
@@ -139,54 +133,76 @@ class Window(QDialog):
         layout.addWidget(self.button)   
 
         layout.addWidget(self.pathFile)  
+        layout.addWidget(self.tracesFound)  
         # setting layout to the main window
         self.setLayout(layout)
+        # TODO ENLEVER :
+        self.getfiles()
 
-    def get_canvas(self):
+    def get_canvas(self, ln, le):
 
         # example stackoverflow
 
-        le = [('D', 'N', {'weight': 3}), ('D', 'I', {'weight': 3}), ('D', 'E', {'weight': 1}), ('I', 'J', {'weight': 2}), ('L', 'M', {'weight': 2}), ('G', 'H', {'weight': 2}), ('H', 'C', {'weight': 1}), ('C', 'D', {'weight': 2}), ('C', 'K', {'weight': 1}), ('B', 'C', {'weight': 2}), ('A', 'B', {'weight': 2}), ('K', 'L', {'weight': 2}), ('E', 'F', {'weight': 2})]
-        ln = [('D', {'leaf': 'no', 'root': 'no'}), ('N', {'leaf': 'yes', 'root': 'no'}), ('I', {'leaf': 'no', 'root': 'no'}), ('L', {'leaf': 'no', 'root': 'no'}), ('M', {'leaf': 'yes', 'root': 'no'}), ('J', {'leaf': 'yes', 'root': 'no'}), ('G', {'leaf': 'no', 'root': 'yes'}), ('H', {'leaf': 'no', 'root': 'no'}), ('C', {'leaf': 'no', 'root': 'no'}), ('B', {'leaf': 'no', 'root': 'no'}), ('A', {'leaf': 'no', 'root': 'yes'}), ('K', {'leaf': 'no', 'root': 'no'}), ('E', {'leaf': 'no', 'root': 'no'}), ('F', {'leaf': 'yes', 'root': 'no'})]
-    
+        # Image URLs for graph nodes
+        icons = {
+            "AND": "icons/router_black_144x144.png",
+            "OR": "icons/switch_black_144x144.png",
+            "SAND": "icons/computer_black_144x144.png",
+        }
+        
         g = nx.DiGraph()
+
         g.add_nodes_from(ln)
-        g.add_edges_from(le)
+        labels = {n: n for n in g}
+        #g.add_edges_from(le)
 
-        elarge = [(u, v) for (u, v, d) in g.edges(data=True) if d['weight'] == 3 ]
-        enormal = [(u, v) for (u, v, d) in g.edges(data=True) if d['weight'] == 2 ]
-        esmall = [(u, v) for (u, v, d) in g.edges(data=True) if d['weight'] == 1 ]
+        types = [(u, d['type']) for (u, d) in g.nodes(data=True)]
+        types_dict= {}
 
-        nleaf = [(u) for (u, d) in g.nodes(data=True) if d['leaf'] == 'yes' ]
-        nroot = [(u) for (u, d) in g.nodes(data=True) if d['root'] == 'yes' ]
+        for i in range(len(types)):
+            types_dict[types[i][0]] = types[i][1]
 
-        edge_labels = dict([((u,v,),d['weight']) for u,v,d in g.edges(data=True)])
+        logic_nodes = []
+        new_le = []
+        labels_logic = {}
+        logic_edge = []
+        for (u, d) in g.nodes(data=True):
+            if d['leaf'] == 0:
+                name = u + '_' + "LOGIC"#d['type']
+                print(name)
+                node = (name, {'type': 'logic'})
+                logic_nodes.append(node)
+                edge = (u, name)
+                labels_logic[name] = d['type']
+                logic_edge.append(edge)
+
+        g.add_nodes_from(logic_nodes)
+        
+        for (u, v) in le:
+            edge = (u + '_' + "LOGIC", v)
+            new_le.append(edge)
+
+        g.add_edges_from(logic_edge)
+        g.add_edges_from(new_le)
 
         pos = nx.nx_agraph.graphviz_layout(g, prog='dot')
 
-        # nodes
-        nx.draw_networkx_nodes(g, pos, node_size=500, node_color='#AAAAAA')
-        nx.draw_networkx_nodes(g, pos, nodelist=nleaf, node_color='#00BB00', node_size=500)
-        nx.draw_networkx_nodes(g, pos, nodelist=nroot, node_color='#9999FF', node_size=500)
-
         # edges
-        nx.draw_networkx_edges(g, pos, edgelist=elarge, width=2, alpha=0.8, edge_color='g', style='dotted')
-        nx.draw_networkx_edges(g, pos, edgelist=enormal, width=2, alpha=0.8, edge_color='b', style='dashed')
-        nx.draw_networkx_edges(g, pos, edgelist=esmall, width=2, alpha=0.8, edge_color='b', style='solid')
-
+        nx.draw_networkx_edges(g, pos, edgelist=logic_edge, arrows=False, width=2, alpha=0.8, edge_color='black', style='solid')
+        nx.draw_networkx_edges(g, pos, edgelist=new_le, arrows=False, width=2, alpha=0.8, edge_color='black', style='solid')
         # labels
-        nx.draw_networkx_edge_labels(g,pos,edge_labels=edge_labels)
-        nx.draw_networkx_labels(g, pos, font_size=14, font_color='w', font_family='sans-serif')
+        nx.draw_networkx_labels(g, pos, labels, font_size=14, font_color='black', font_family='sans-serif', bbox=dict(facecolor="white", edgecolor='black', boxstyle='round,pad=0.8'))
+        nx.draw_networkx_labels(g, pos, labels_logic, font_size=14, font_color='b', font_family='sans-serif', bbox=dict(facecolor="white", edgecolor='black', boxstyle='round,pad=0.8'))
 
         plt.axis('off')
         plt.subplots_adjust(left=0.00, right=1.0, bottom=0.00, top=1.0, hspace = 0, wspace=0)
         self.figure = plt.gcf()
 
     # action called by the import button
-    def plot(self):
+    def plot(self, node_list, edge_list):
         # clearing old figure
         self.figure.clear()
-        self.get_canvas()
+        self.get_canvas(node_list, edge_list)
         self.canvas.draw()
         print("pressed")
 
@@ -204,8 +220,10 @@ class Window(QDialog):
         self.worker.moveToThread(self.thread)
         # Step 5: Connect signals and slots
         self.thread.started.connect(self.worker.run)
+        #self.worker.finished.connect(lambda: print(self.worker.finished))
         self.worker.finished.connect(self.thread.quit)
-        self.worker.finished.connect(self.worker.deleteLater)
+        # A REMETTRE
+        self.worker.finished.connect(self.cleaning)
         self.thread.finished.connect(self.thread.deleteLater)
         # Step 6: Start the thread
         self.thread.start()
@@ -215,7 +233,16 @@ class Window(QDialog):
         self.thread.finished.connect(
             lambda: self.button.setEnabled(True)
         )
-        self.plot()
+
+    def cleaning(self):
+        #print("INSIDE")
+        #print(self.worker.node_list)
+        new_nl = self.worker.node_list
+        new_el = self.worker.edge_list
+        self.worker.deleteLater
+        self.plot(new_nl, new_el)
+        print(new_nl)
+        
 
 # driver code
 if __name__ == '__main__':
