@@ -104,14 +104,15 @@ void JsonReader(struct json_object *parsed_json, List **list, EList **edges, For
 int main(int argc, char *argv[]) {
    
    char *path = argv[1];
+   //path = "/home/flo/Desktop/Github/AttackTree/Structure/StructureGraph.json";
    printf("Path to file is : %s \n", path);
    
-   FILE *fp; 
+   //FILE *fp; 
    char buffer[1024*2];
 
    struct json_object *parsed_json;
 
-   fp = fopen(path,"r");
+   FILE *fp = fopen(path,"r");
    fread(buffer, 1024*2, 1, fp);
    fclose(fp);
 
@@ -119,6 +120,7 @@ int main(int argc, char *argv[]) {
    EList *edges = NULL;
    List *list = NULL;
    Formula *form = NULL;
+
    JsonReader(parsed_json, &list, &edges, &form, NULL, 1);
 
    List* runner = list;

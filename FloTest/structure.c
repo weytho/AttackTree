@@ -1,30 +1,15 @@
 #include<stdio.h>
+#include<string.h>
 #include<json-c/json.h>
-#include <string.h>
-#include <stdlib.h>
-#include "structures.c"
-// sudo apt install libjson-c-dev
-// gcc -shared -Wl,-soname,testlib -o testlib.so -fPIC testC.c -ljson-c
-// /bin/python3 /home/flo/Desktop/Github/AttackTree/testThread.py
-// https://stackoverflow.com/questions/38661635/ctypes-struct-returned-from-library
-
-typedef struct full_List FList;
-struct full_List {
-   List *nl;
-   EList *el;
-   Formula *fo;
-};
+#include"structures.c"
 
 void JsonReader(struct json_object *parsed_json, List **list, EList **edges, Formula **form, Node *parent, int root){
 
    // READ THE JSON //
    struct json_object *action;
    struct json_object *type;
-   printf("ENTERING \n");
    json_object_object_get_ex(parsed_json, "Action", &action);
-   printf("ENTERING \n");
    json_object_object_get_ex(parsed_json, "Type", &type);
-   printf("ENTERING \n");
 
    // CREATE + FILL THE NODE
    Node *node = malloc(sizeof(Node));
@@ -49,9 +34,6 @@ void JsonReader(struct json_object *parsed_json, List **list, EList **edges, For
    if (node->root == 1){}
    else{
       Edge *ed = malloc(sizeof(Edge));
-      if (ed == NULL){
-         printf("[Node] ED Malloc error\n");
-      }
       memcpy(ed->parent, parent->title, sizeof(char)*50);
       memcpy(ed->child, node->title,sizeof(char)*50);
       if (*edges == NULL)
@@ -66,9 +48,6 @@ void JsonReader(struct json_object *parsed_json, List **list, EList **edges, For
    // ADD to formula
    if (node->leaf == 1){
       Formula *newVar = malloc(sizeof(Formula));
-      if (newVar == NULL){
-         printf("[Node] Malloc Formula error\n");
-      }
       newVar->data = json_object_get_string(action);
       newVar->next = NULL;
       if((*form) == NULL){
@@ -89,9 +68,7 @@ void JsonReader(struct json_object *parsed_json, List **list, EList **edges, For
       size_t n_children;
       json_object_object_get_ex(parsed_json, "Child", &children);
       n_children = json_object_array_length(children);
-      printf("CCCCCCCCCCCCCCCcc\n");
       Formula *left = Parenthesis("LEFT");
-      printf("DDDDDDDDDDDDDDDDDD\n");
       if((*form) == NULL){
          (*form) = left;
       }
@@ -106,9 +83,7 @@ void JsonReader(struct json_object *parsed_json, List **list, EList **edges, For
       for(int i=0; i<n_children; i++){
          JsonReader(json_object_array_get_idx(children, i), list, edges, form, node, 0);
          if(i<n_children-1){
-            printf("YYYYYYYYYYYYYYYYYYYYYYY\n");
             Formula *t = Parenthesis(json_object_get_string(type));
-            printf("ZZZZZZZZZZZZZZZZZZZZZZZZ\n");
             Formula *runner = *(form);
             while(runner->next != NULL){
                runner = runner->next;
@@ -116,7 +91,6 @@ void JsonReader(struct json_object *parsed_json, List **list, EList **edges, For
             runner->next = t; 
          }
       }
-      printf("DHGZJQGSJDHQGSJDHGQSJDHQGSDJHQSGDJQDHG\n");
 
       Formula *right = Parenthesis("RIGHT");
       Formula *runner = *(form);
@@ -127,46 +101,37 @@ void JsonReader(struct json_object *parsed_json, List **list, EList **edges, For
    }
 }
 
+int main(int argc, char *argv[]) {
+   
+   char *path = argv[1];
+   printf("Path to file is : %s \n", path);
+   
+   FILE *fp; 
+   char buffer[1024*2];
 
-FList * mainfct(char * path) {
-	//path = "/home/flo/Desktop/Github/AttackTree/FloTest/StructureGraph.json";
-	printf("Path to file is : %s \n", path);
-   printf("FLO\n");
-	FILE *fp; 
-   printf("FLO\n");
-	char buffer[1024*2];
-   printf("FLO\n");
-	struct json_object *parsed_json;
-   printf("FLO00000000000000000\n");
-	fp = fopen(path,"r");
-   printf("FLO00000\n");
-	fread(buffer, 1024*2, 1, fp);
-	fclose(fp);
-   printf("FLO2\n");
-	parsed_json = json_tokener_parse(buffer);
-	EList *edges = NULL;
-	List *list = NULL;
+   struct json_object *parsed_json;
+
+   fp = fopen(path,"r");
+   fread(buffer, 1024*2, 1, fp);
+   fclose(fp);
+
+   parsed_json = json_tokener_parse(buffer);
+   EList *edges = NULL;
+   List *list = NULL;
    Formula *form = NULL;
-   printf("FLO233333\n");
-	JsonReader(parsed_json, &list, &edges, &form, NULL, 1);
-   printf("FLO22222\n");
-	if(edges == NULL)
-	{
-		printf("Ceci est un crash \n");
-		return 0;
-	}
+   JsonReader(parsed_json, &list, &edges, &form, NULL, 1);
 
-	List* runner = list;
-	int count = 0;
-	while(runner != NULL){
-		count ++;
-		printf("count : %d \n", count);
-		printf("Node title : %s \n", runner->data->title);
-		printf("Node type  : %s \n", runner->data->type);
-		printf("Node root  : %d \n", runner->data->root);
-		printf("Node leaf  : %d \n", runner->data->leaf);
-		runner = runner->next;
-	}
+   List* runner = list;
+   int count = 0;
+   while(runner != NULL){
+      count ++;
+      printf("count : %d \n", count);
+      printf("Node title : %s \n", runner->data->title);
+      printf("Node type  : %s \n", runner->data->type);
+      printf("Node root  : %d \n", runner->data->root);
+      printf("Node leaf  : %d \n", runner->data->leaf);
+      runner = runner->next;
+   }
 
    EList* runner2 = edges;
    count = 0;
@@ -178,8 +143,6 @@ FList * mainfct(char * path) {
       runner2 = runner2->next;
    }
 
-   //list_free(list);
-   //elist_free(edges);
 
    Formula* runner3 = form;
    while(runner3 != NULL){
@@ -187,47 +150,11 @@ FList * mainfct(char * path) {
       runner3 = runner3->next;
    }
    printf("\n");
+   
 
-   FList *fl;
-   FList init;
+   list_free(list);
+   elist_free(edges);
+   form_free(form);
 
-   init.el = edges;
-   init.nl = list;
-   init.fo = form;
-
-   fl = malloc(sizeof(FList));
-   if (fl == NULL){
-      printf("[Node] Malloc  fl error\n");
-   }
-   *fl = init;
-
-   return fl;
-}
-
-void freeList(List *l) {
-	list_free(l);
-}
-
-void freeEList(EList *l) {
-	elist_free(l);
-}
-
-void freeForm(Formula *l) {
-	form_free(l);
-}
-
-int main (int argc, char * argv[]) { 
-	printf("STARTING \n");
-
-	char *path = "/home/flo/Desktop/Github/AttackTree/Structure/StructureGraph.json";
-	mainfct(path);
-
-	//CustomList * l = getList();
-	//CustomNode * n = getNode();
-	printf("START");
-	//printf("l pointer : %p", (void *) l);
-	//printf("HHHHHHHHHHHHHH %s, ",l->data->name);
-	//freeNode(n);
-	//freeList(l);
-	return 0;
+   return 0;
 }

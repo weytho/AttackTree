@@ -17,6 +17,7 @@ import time
 from PyQt5.QtCore import QObject, QThread, pyqtSignal
 import ctypes
 import os
+import itertools
 import PIL
 
 from PyQt5.QtWidgets import (
@@ -36,13 +37,18 @@ class EdgeNode(ctypes.Structure):
     _fields_ = [('parent', ctypes.c_char * 50),
         ('child', ctypes.c_char * 50)]
 
+class FormulaNode(ctypes.Structure):
+    _fields_ = [('data', ctypes.c_char_p),
+        ('next', ctypes.c_void_p)]
+
 class CustomList(ctypes.Structure):
     _fields_ = [('next', ctypes.c_void_p),
         ('data', ctypes.c_void_p)]
 
 class FullList(ctypes.Structure):
     _fields_ = [('nl', ctypes.c_void_p),
-        ('el', ctypes.c_void_p)]
+        ('el', ctypes.c_void_p),
+        ('fo', ctypes.c_void_p)]
 
 class Worker(QObject):
     finished = pyqtSignal()
@@ -51,15 +57,18 @@ class Worker(QObject):
         print("WORKER")
         self.node_list= []
         self.edge_list = []
+        self.formula = []
         dirname = os.path.dirname(__file__)
         so_file = os.path.join(dirname, 'testlib.so')
         my_function = ctypes.CDLL(so_file)
+        print("YOOOOO")
         s = ctypes.create_string_buffer(self.pathFile.encode('utf-8'))
+        print("KEN")
         my_function.mainfct.restype = ctypes.c_void_p
         my_function.mainfct.argtypes = [ctypes.c_char_p]
-
+        print("2")
         fulllist = FullList.from_address(my_function.mainfct(s))
-    
+        print("2")
         newlist = CustomList.from_address(fulllist.nl)
 
         # .decode('utf-8') better way ?
@@ -89,12 +98,61 @@ class Worker(QObject):
                 newtuple = (tmp_node.parent.decode('utf-8'),tmp_node.child.decode('utf-8'))
                 self.edge_list.append(newtuple)
 
+        newFormula = FormulaNode.from_address(fulllist.fo)
+
+        if newFormula != None :
+            newdata = newFormula.data.decode('utf-8')
+            self.formula.append(newdata)
+
+            while newFormula.next != None:
+                newFormula = FormulaNode.from_address(newFormula.next)
+                newdata = newFormula.data.decode('utf-8')
+                self.formula.append(newdata)
+
+        print("SELF FORMULA ONE")
+        print(self.formula)
+
+        good_formula = []
+        str_formula = ""
+        for e in self.formula:
+            str_formula = str_formula + e
+            #print(e)
+            d = set()
+            t = ()
+            d.add((
+                e,
+                True
+            ))
+            good_formula.append(d)
+
+        print(good_formula)
+        print(str_formula)
+        self.str_formula = str_formula
+        #brute_force(good_formula)
+
         my_function.freeList(newlist)
-        my_function.freeList(newEdgeList)
+        #my_function.freeEList(newEdgeList)
+        #my_function.freeForm(newFormula)
         time.sleep(2)
         #self.data.emit(node_list, edge_list)
         self.finished.emit()
         #self.plot
+
+def brute_force(cnf):
+    literals = set()
+    for conj in cnf:
+        for disj in conj:
+            literals.add(disj[0])
+
+    literals = list(literals)
+    n = len(literals)
+    
+    for seq in itertools.product([True,False], repeat=n):
+        a = set(zip(literals, seq))
+
+        if all([bool(disj.intersection(a)) for disj in cnf]):
+            print(True)
+            print(a)
 
 
 class Window(QDialog):
@@ -239,6 +297,7 @@ class Window(QDialog):
         #print(self.worker.node_list)
         new_nl = self.worker.node_list
         new_el = self.worker.edge_list
+        self.tracesFound.setText(self.worker.str_formula)
         self.worker.deleteLater
         self.plot(new_nl, new_el)
         print(new_nl)

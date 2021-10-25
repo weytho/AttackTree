@@ -68,7 +68,6 @@ struct e_List {
 
 EList* elist_create(Edge* data)
 {
-   printf("elist_create \n");
    EList *list = malloc(sizeof(EList));
    if(list){
       list->data = data;
@@ -79,7 +78,6 @@ EList* elist_create(Edge* data)
 
 EList* elist_add (EList *list, Edge* data)
 {
-   printf("elist_add \n");
    EList **plist = &list;
    while (*plist){
       plist = &(*plist)->next;
@@ -101,4 +99,47 @@ void elist_free (EList *list)
       free(list);
       list = runner;
    }
+}
+
+
+// -------- Formula
+
+typedef struct b_Form Formula;
+struct b_Form {
+   char *data;
+   Formula *next;
+};
+
+void form_free(Formula *form){
+   Formula *runner = form;
+   while (runner != NULL)
+   {
+      runner = runner->next;
+      free(form);
+      form = runner;
+   }
+}
+
+Formula * Parenthesis(char* type){
+   printf("AAAAAAAAAAAAAAAAAAA\n");
+   Formula* n = malloc(sizeof(Formula));
+   printf("JFJFJJFJJF\n");
+   n->next = NULL;
+   if(!strncmp("LEFT",type,5)){
+      n->data = "( ";
+   }
+   else if(!strncmp("RIGHT",type,6)){
+      n->data = " )";
+   }
+   else if(!strncmp("AND",type,4)){
+      n->data = " AND ";
+   }
+   else if(!strncmp("OR",type,3)){
+      n->data = " OR ";
+   }
+   else{
+      n->data = " SAND ";
+   }
+   return n;
+   printf("AAAAAAAAAAAAAA\n");
 }
