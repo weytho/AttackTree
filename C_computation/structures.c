@@ -7,6 +7,7 @@ struct s_Node {
    char  type[5];
    int   root;
    int   leaf;
+   int   cost;
 }; 
 
 typedef struct s_List List;
@@ -138,4 +139,5 @@ Formula * Parenthesis(char* type){
    else{
       new->data = " SAND ";
    }
+   return new;
 }

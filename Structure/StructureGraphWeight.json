@@ -1,0 +1,48 @@
+{
+    "Action": "A1",
+    "Type":"SAND",
+    "Child": [
+        {
+            "Action": "A",
+            "Type":"LEAF",
+            "Cost":1
+        },
+        {
+            "Action": "A2",
+            "Type":"AND",
+            "Child" : [
+                {
+                    "Action": "B",
+                    "Type":"LEAF",
+                    "Cost":4
+                },
+                {
+                    "Action": "C",
+                    "Type":"LEAF",
+                    "Cost":2
+                }
+            ]
+        },
+        {
+            "Action": "A3",
+            "Type":"OR",
+            "Child" : [
+                {
+                    "Action": "D",
+                    "Type":"LEAF",
+                    "Cost":3
+                },
+                {
+                    "Action": "E",
+                    "Type":"LEAF",
+                    "Cost":2
+                }
+            ]
+        },
+        {
+            "Action": "F",
+            "Type":"LEAF",
+            "Cost":4
+        }
+    ]
+}

@@ -3,11 +3,12 @@
 #include<json-c/json.h>
 #include"structures.c"
 
-void JsonReader(struct json_object *parsed_json, List **list, EList **edges, Formula **form, Node *parent, int root){
+int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Formula **form, Node *parent, int root){
 
    // READ THE JSON //
    struct json_object *action;
    struct json_object *type;
+   struct json_object *costleaf;
    json_object_object_get_ex(parsed_json, "Action", &action);
    json_object_object_get_ex(parsed_json, "Type", &type);
 
@@ -21,8 +22,11 @@ void JsonReader(struct json_object *parsed_json, List **list, EList **edges, For
    node->root = root;
    if (strcmp(json_object_get_string(type), "LEAF" ))
       node->leaf = 0;
-   else 
+   else {
       node->leaf = 1;
+      json_object_object_get_ex(parsed_json, "Cost", &costleaf);
+      node->cost = json_object_get_int(costleaf);
+   }
 
    // ADD IT TO THE LIST
    if (node->root == 1)
@@ -79,9 +83,16 @@ void JsonReader(struct json_object *parsed_json, List **list, EList **edges, For
          }
          runner->next = left;
       }
+
+      int and_cost = 0;
+      int or_cost = 999999;
       
       for(int i=0; i<n_children; i++){
-         JsonReader(json_object_array_get_idx(children, i), list, edges, form, node, 0);
+         int cost = JsonReader(json_object_array_get_idx(children, i), list, edges, form, node, 0);
+         and_cost = and_cost + cost;
+         if(cost < or_cost){
+            or_cost = cost;
+         }
          if(i<n_children-1){
             Formula *t = Parenthesis(json_object_get_string(type));
             Formula *runner = *(form);
@@ -97,8 +108,16 @@ void JsonReader(struct json_object *parsed_json, List **list, EList **edges, For
       while(runner->next != NULL){
          runner = runner->next;
       }
-      runner->next = right;     
+      runner->next = right;   
+
+      if(!strcmp(json_object_get_string(type), "OR" )) {
+         node->cost = or_cost;
+      }
+      else{
+         node->cost = and_cost;
+      }
    }
+   return node->cost;
 }
 
 int main(int argc, char *argv[]) {
@@ -119,7 +138,7 @@ int main(int argc, char *argv[]) {
    EList *edges = NULL;
    List *list = NULL;
    Formula *form = NULL;
-   JsonReader(parsed_json, &list, &edges, &form, NULL, 1);
+   int cost = JsonReader(parsed_json, &list, &edges, &form, NULL, 1);
 
    List* runner = list;
    int count = 0;
@@ -130,6 +149,7 @@ int main(int argc, char *argv[]) {
       printf("Node type  : %s \n", runner->data->type);
       printf("Node root  : %d \n", runner->data->root);
       printf("Node leaf  : %d \n", runner->data->leaf);
+      printf("Node cost  : %d \n", runner->data->cost);
       runner = runner->next;
    }
 
@@ -150,6 +170,8 @@ int main(int argc, char *argv[]) {
       runner3 = runner3->next;
    }
    printf("\n");
+
+   printf("Total cost is %d\n",cost);
    
 
    list_free(list);
