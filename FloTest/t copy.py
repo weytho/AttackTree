@@ -93,6 +93,16 @@ class Window(QDialog):
         nx.draw_networkx_edge_labels(g,pos,edge_labels=edge_labels)
         nx.draw_networkx_labels(g, pos, font_size=14, font_color='w', font_family='sans-serif')
 
+        '''
+        pos_higher = {}
+        y_off = 1  # offset on the y axis
+
+        for k, v in pos.items():
+            pos_higher[k] = (v[0], v[1]+y_off)
+
+        nx.draw_networkx_labels(g, pos_higher, labels)
+        '''
+
         plt.axis('off')
         plt.subplots_adjust(left=0.00, right=1.0, bottom=0.00, top=1.0, hspace = 0, wspace=0)
         self.figure = plt.gcf()

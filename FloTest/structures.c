@@ -1,4 +1,4 @@
-
+#include<stdio.h>
 // -------- NODES
 
 typedef struct s_Node Node;
@@ -7,6 +7,7 @@ struct s_Node {
    char  type[5];
    int   root;
    int   leaf;
+   int   cost;
 }; 
 
 typedef struct s_List List;
@@ -121,25 +122,22 @@ void form_free(Formula *form){
 }
 
 Formula * Parenthesis(char* type){
-   printf("AAAAAAAAAAAAAAAAAAA\n");
-   Formula* n = malloc(sizeof(Formula));
-   printf("JFJFJJFJJF\n");
-   n->next = NULL;
+   Formula* new = malloc(sizeof(Formula));
+   new->next = NULL;
    if(!strncmp("LEFT",type,5)){
-      n->data = "( ";
+      new->data = "( ";
    }
    else if(!strncmp("RIGHT",type,6)){
-      n->data = " )";
+      new->data = " )";
    }
    else if(!strncmp("AND",type,4)){
-      n->data = " AND ";
+      new->data = " AND ";
    }
    else if(!strncmp("OR",type,3)){
-      n->data = " OR ";
+      new->data = " OR ";
    }
    else{
-      n->data = " SAND ";
+      new->data = " SAND ";
    }
-   return n;
-   printf("AAAAAAAAAAAAAA\n");
+   return new;
 }

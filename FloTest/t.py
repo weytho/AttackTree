@@ -31,7 +31,8 @@ class CustomNode(ctypes.Structure):
     _fields_ = [('title', ctypes.c_char * 50),
         ('type', ctypes.c_char * 5),
         ('root', ctypes.c_int),
-        ('leaf', ctypes.c_int)]
+        ('leaf', ctypes.c_int),
+        ('cost', ctypes.c_int)]
 
 class EdgeNode(ctypes.Structure):
     _fields_ = [('parent', ctypes.c_char * 50),
@@ -74,14 +75,14 @@ class Worker(QObject):
         # .decode('utf-8') better way ?
         if newlist != None :
             tmp_node = CustomNode.from_address(newlist.data)
-            newdict = {'type': tmp_node.type.decode('utf-8'),'leaf': tmp_node.leaf, 'root': tmp_node.root}
+            newdict = {'type': tmp_node.type.decode('utf-8'),'leaf': tmp_node.leaf, 'root': tmp_node.root, 'cost': tmp_node.cost}
             newtuple = (tmp_node.title.decode('utf-8'), newdict)
             self.node_list.append(newtuple)
 
             while newlist.next != None:
                 newlist = CustomList.from_address(newlist.next)
                 tmp_node = CustomNode.from_address(newlist.data)
-                newdict = {'type': tmp_node.type.decode('utf-8'),'leaf': tmp_node.leaf, 'root': tmp_node.root}
+                newdict = {'type': tmp_node.type.decode('utf-8'),'leaf': tmp_node.leaf, 'root': tmp_node.root, 'cost': tmp_node.cost}
                 newtuple = (tmp_node.title.decode('utf-8'), newdict)
                 self.node_list.append(newtuple)
 
@@ -223,8 +224,10 @@ class Window(QDialog):
         logic_nodes = []
         new_le = []
         labels_logic = {}
+        labels_cost = {}
         logic_edge = []
         for (u, d) in g.nodes(data=True):
+            labels_cost[u] = d['cost']
             if d['leaf'] == 0:
                 name = u + '_' + "LOGIC"#d['type']
                 print(name)
@@ -251,6 +254,14 @@ class Window(QDialog):
         # labels
         nx.draw_networkx_labels(g, pos, labels, font_size=14, font_color='black', font_family='sans-serif', bbox=dict(facecolor="white", edgecolor='black', boxstyle='round,pad=0.8'))
         nx.draw_networkx_labels(g, pos, labels_logic, font_size=14, font_color='b', font_family='sans-serif', bbox=dict(facecolor="white", edgecolor='black', boxstyle='round,pad=0.8'))
+
+        pos_higher = {}
+        y_off = -20  # offset on the y axis
+
+        for k, v in pos.items():
+            pos_higher[k] = (v[0], v[1]+y_off)
+
+        nx.draw_networkx_labels(g, pos_higher, labels_cost,  font_size=10, font_color='b', font_family='sans-serif', bbox=dict(facecolor="white", edgecolor='black', boxstyle='round,pad=0.2'))
 
         plt.axis('off')
         plt.subplots_adjust(left=0.00, right=1.0, bottom=0.00, top=1.0, hspace = 0, wspace=0)
