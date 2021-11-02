@@ -481,6 +481,45 @@ DLL_List * createDLLNode(char * title, char * type){
    return new_DLL;
 }
 
+json_object * build_json(json_object * parent , DLL_List * tree){
+
+   json_object_object_add(parent, "Action", json_object_new_string(tree->n->title));
+   json_object_object_add(parent, "Type", json_object_new_string(tree->n->type));
+
+
+   DLL_List * new_tree = tree->children;
+   if( new_tree != NULL ){
+      json_object *children = json_object_new_array();
+      json_object_object_add(parent, "Child", children);
+      while (new_tree != NULL) {
+         json_object *tmp_root = json_object_new_object();
+         json_object_array_add(children, build_json(tmp_root, new_tree));
+         new_tree = new_tree->next;
+      }
+   }
+
+   return parent;
+}
+
+void create_Json_file(DLL_List * wholeTree){
+
+   printf(" NAME FINAL IS %s\n", wholeTree->n->title);
+   const char *filename = "StructureTestingParser.json";
+   json_object *root = json_object_new_object();
+
+   // FULL RECURSIF PLEASE
+   DLL_List * new_tree = wholeTree;
+   json_object * new_root = build_json(root, new_tree);
+
+   if (json_object_to_file_ext(filename, new_root, JSON_C_TO_STRING_PRETTY))
+      printf("Error: failed to save %s!!\n", filename);
+   else
+      printf("%s saved.\n", filename);
+
+   // cleanup and exit
+   json_object_put(root);
+}
+
 ///////////////////////
 int parser(char * toParse) {
    size_t size = strlen(toParse) + 1;
@@ -558,6 +597,8 @@ int parser(char * toParse) {
    /*###########*/
    printf("ENNNNNNNND\n");
    printDLL_List(whole_list);
+
+   create_Json_file(whole_list);
 
    /*###########*/
 
