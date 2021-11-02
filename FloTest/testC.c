@@ -302,6 +302,7 @@ DLL_List * addToEndList(DLL_List *head_list, DLL_List *node){
 DLL_List * extractFromList(DLL_List *head_list, char *name){
    DLL_List * current = head_list;
    DLL_List * last = NULL;
+   DLL_List * new_current;
    while (current != NULL) {
       if (strcmp(current->n->title, name) == 0){
          if (last == NULL){
@@ -317,30 +318,38 @@ DLL_List * extractFromList(DLL_List *head_list, char *name){
 
    current = head_list->parents;
    while (current != NULL) {
-      if (strcmp(current->n->title, name) == 0){
-         if (last == NULL){
-            head_list = current->next;
-            return current;
+      new_current = current;
+      while (new_current != NULL) {
+         if (strcmp(new_current->n->title, name) == 0){
+            if (last == NULL){
+               head_list = new_current->next;
+               return new_current;
+            }
+            last->next = new_current->next;
+            return new_current;
          }
-         last->next = current->next;
-         return current;
+         last = new_current;
+         new_current = new_current->next;
       }
-      last = current;
-      current = current->next;
+      current = current->parents;
    }
 
    current = head_list->children;
    while (current != NULL) {
-      if (strcmp(current->n->title, name) == 0){
-         if (last == NULL){
-            head_list = current->next;
-            return current;
+      new_current = current;
+      while (new_current != NULL) {
+         if (strcmp(new_current->n->title, name) == 0){
+            if (last == NULL){
+               head_list = new_current->next;
+               return new_current;
+            }
+            last->next = new_current->next;
+            return new_current;
          }
-         last->next = current->next;
-         return current;
+         last = new_current;
+         new_current = new_current->next;
       }
-      last = current;
-      current = current->next;
+      current = current->children;
    }
    return NULL;
 }
@@ -360,24 +369,32 @@ int isInList(DLL_List *head_list, char * name){
       }
       current = current->next;
    }
-
+   printf("YOYO\n");
    DLL_List * curr2 = head_list->parents;
    while (curr2 != NULL) {
-      printf("Name found 2 %s, \n", curr2->n->title);
-      if (strcmp(curr2->n->title, name) == 0){
-         return 1;
+      DLL_List * curr21 = curr2;
+      while (curr21 != NULL) {
+         printf("Name found 2 %s, \n", curr21->n->title);
+         if (strcmp(curr21->n->title, name) == 0){
+            return 1;
+         }
+         curr21 = curr21->next;
       }
-      curr2 = curr2->next;
+      curr2 = curr2->parents;
    }
 
+   printf("YOYO\n");
    DLL_List * curr3 = head_list->children;
    while (curr3 != NULL) {
-      printf("Name found 3 %s, \n", curr3->n->title);
-      if (strcmp(curr3->n->title, name) == 0){
-         return 1;
+      DLL_List * curr31 = curr3;
+      while (curr31 != NULL) {
+         printf("Name found 3 %s, \n", curr31->n->title);
+         if (strcmp(curr31->n->title, name) == 0){
+            return 1;
+         }
+         curr31 = curr31->next;
       }
-      curr3 = curr3->next;
-
+      curr3 = curr3->children;
    }
 
    return 0;
@@ -391,19 +408,28 @@ DLL_List * getFromList(DLL_List *head_list, char * name){
       }
       current = current->next;
    }
+   DLL_List * new_current;
    current = head_list->parents;
    while (current != NULL) {
-      if (strcmp(current->n->title, name) == 0){
-         return current;
+      new_current = current;
+      while (new_current != NULL) {
+         if (strcmp(new_current->n->title, name) == 0){
+            return new_current;
+         }
+         new_current = new_current->next;
       }
-      current = current->next;
+      current = current->parents;
    }
    current = head_list->children;
    while (current != NULL) {
-      if (strcmp(current->n->title, name) == 0){
-         return current;
+      new_current = current;
+      while (new_current != NULL) {
+         if (strcmp(new_current->n->title, name) == 0){
+            return new_current;
+         }
+         new_current = new_current->next;
       }
-      current = current->next;
+      current = current->children;
    }
    return NULL;
 }
