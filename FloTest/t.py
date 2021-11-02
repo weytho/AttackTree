@@ -21,7 +21,7 @@ import itertools
 import PIL
 
 from PyQt5.QtWidgets import (
-    QApplication, QDialog, QPushButton, QVBoxLayout
+    QApplication, QDialog, QHBoxLayout, QPushButton, QVBoxLayout
 )
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -139,6 +139,31 @@ class Worker(QObject):
         self.finished.emit()
         #self.plot
 
+class ParserWorker(QObject):
+    finished = pyqtSignal()
+
+    def run(self):
+
+        self.node_list= []
+
+        dirname = os.path.dirname(__file__)
+        so_file = os.path.join(dirname, 'testlib.so')
+        my_function = ctypes.CDLL(so_file)
+
+        s = ctypes.create_string_buffer(self.fullText.encode('utf-8'))
+
+        my_function.parser.restype = ctypes.c_int
+        my_function.parser.argtypes = [ctypes.c_char_p]
+        ret = FullList.from_address(my_function.parser(s))
+
+        time.sleep(2)
+        self.finished.emit()
+
+        if ret != None :
+            print("NICE WE GOT HERE")
+            pass
+
+
 def brute_force(cnf):
     literals = set()
     for conj in cnf:
@@ -173,8 +198,10 @@ class Window(QDialog):
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
         # Just some button connected to 'plot' method
         self.button = QPushButton('Import')
+        self.buttonParse = QPushButton('Create JSON')
         # adding action to the button
         self.button.clicked.connect(self.getfiles)
+        self.buttonParse.clicked.connect(self.parser)
         # print file path
         self.pathFile = QtWidgets.QTextEdit(self)
         self.pathFile.setFixedSize(self.width, 30)
@@ -182,32 +209,50 @@ class Window(QDialog):
         self.tracesFound = QtWidgets.QTextEdit(self)
         self.tracesFound.setFixedSize(self.width, 60)
 
+        layout = QHBoxLayout()
         # creating a Vertical Box layout
-        layout = QVBoxLayout()
+        Vlayout_left = QVBoxLayout()
+        Vlayout_right= QVBoxLayout()
+        layout.addLayout(Vlayout_left)
+        layout.addLayout(Vlayout_right)
         # adding tool bar to the layout
-        layout.addWidget(self.toolbar)         
+        Vlayout_left.addWidget(self.toolbar)         
         # adding canvas to the layout
-        layout.addWidget(self.canvas)    
+        Vlayout_left.addWidget(self.canvas)    
         # adding push button to the layout
-        layout.addWidget(self.button)   
+        Vlayout_left.addWidget(self.button)   
 
-        layout.addWidget(self.pathFile)  
-        layout.addWidget(self.tracesFound)  
+        Vlayout_left.addWidget(self.pathFile)  
+        Vlayout_left.addWidget(self.tracesFound)  
         # setting layout to the main window
+
+        self.grammarText = QtWidgets.QTextEdit(self)
+        self.grammarText.setFixedWidth(400)
+        Vlayout_right.addWidget(self.grammarText)
+        Vlayout_right.addWidget(self.buttonParse)
+
         self.setLayout(layout)
         # TODO ENLEVER :
-        self.getfiles()
+        #self.getfiles()
+        str = """
+        G -OR-> {A1, A2}
+        A1 -AND-> { OR1, A12}
+        OR1 -OR-> {A111, A112}
+        A112 -OR->{A1121,A1122,A1123}
+
+            D12 -AND-> {M12}
+        D1 -AND-> {M1}
+
+        D2 -AND-> {M2}
+        
+        """
+        self.grammarText.setText(str)
+        self.parser()
+
 
     def get_canvas(self, ln, le):
 
         # example stackoverflow
-
-        # Image URLs for graph nodes
-        icons = {
-            "AND": "icons/router_black_144x144.png",
-            "OR": "icons/switch_black_144x144.png",
-            "SAND": "icons/computer_black_144x144.png",
-        }
         
         g = nx.DiGraph()
 
@@ -312,6 +357,22 @@ class Window(QDialog):
         self.worker.deleteLater
         self.plot(new_nl, new_el)
         print(new_nl)
+
+    def parser(self):
+        self.parser_thread = QThread()
+        self.parser_worker = ParserWorker()
+        self.parser_worker.fullText = self.grammarText.toPlainText()
+        self.parser_worker.moveToThread(self.parser_thread)
+        self.parser_thread.started.connect(self.parser_worker.run)
+        self.parser_worker.finished.connect(self.parser_thread.quit)
+        self.parser_worker.finished.connect(self.parser_worker.deleteLater)
+        self.parser_thread.finished.connect(self.parser_thread.deleteLater)
+        self.parser_thread.start()
+        # Final resets
+        self.buttonParse.setEnabled(False)
+        self.parser_thread.finished.connect(
+            lambda: self.buttonParse.setEnabled(True)
+        )
         
 
 # driver code

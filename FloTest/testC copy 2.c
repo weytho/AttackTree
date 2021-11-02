@@ -258,115 +258,15 @@ typedef struct childrenLL ChildLL;
 struct childrenLL {
       char name[50];
       ChildLL* next;
-      Node *nod;
 };
 
 typedef struct treeLL TreeLL;
 struct treeLL {
       Node* n;
       TreeLL* next;
-      TreeLL* children;
+      ChildLL* children;
 };
 
-///////////////////////
-typedef struct properLL LL_List;
-struct properLL {
-      LL_List *next;
-      char name [50];
-};
-
-typedef struct doubleLL DLL;
-struct doubleLL {
-      Node* n;
-      LL_List* parents;
-      LL_List* children;
-};
-
-typedef struct custom_List DLL_List;
-struct custom_List {
-      DLL_List *next;
-      DLL *data;
-};
-
-void addToEndList(DLL_List *head_list, DLL *node){
-   
-   DLL_List * current = head_list;
-   while (current->next != NULL) {
-      current = current->next;
-   }
-   current->next = (DLL_List *) malloc(sizeof(DLL_List));
-   current->next->data = node;
-   current->next->next = NULL;
-
-}
-
-int isInList(DLL_List *head_list, DLL *node){
-   DLL_List * current = head_list;
-   while (current->data != NULL) {
-      printf("AAA %s\n", current->data->n->title);
-      printf("BBB %s\n", node->n->title);
-      if (strcmp(current->data->n->title, node->n->title) == 0){
-         return 1;
-      }
-      current = current->next;
-   }
-   return 0;
-}
-
-DLL * getFromList(DLL_List *head_list, DLL *node){
-   DLL_List * current = head_list;
-   while (current->data != NULL) {
-      if (strcmp(current->data->n->title, node->n->title) == 0){
-         return current->data;
-      }
-      current = current->next;
-   }
-   return NULL;
-}
-
-void addParents(DLL *node, DLL *parent){
-
-   LL_List * current = node->parents;
-   while (current->next != NULL) {
-      current = current->next;
-   }
-   current->next = (LL_List *) malloc(sizeof(LL_List));
-   memcpy(current->next->name, parent->n->title, sizeof(current->next->name));
-   current->next->next = NULL;
-
-}
-
-void addChildren(DLL *node, DLL *child){
-   
-   LL_List * current = node->children;
-   while (current->next != NULL) {
-      current = current->next;
-   }
-   current->next = (LL_List *) malloc(sizeof(LL_List));
-   memcpy(current->next->name, child->n->title, sizeof(current->next->name));
-   current->next->next = NULL;
-
-}
-
-DLL * createDLLNode(char * title, char * type){
-
-   DLL * new_DLL = malloc(sizeof(DLL));
-   LL_List * new_parents = malloc(sizeof(LL_List));
-   LL_List * new_children = malloc(sizeof(LL_List));
-   Node * new_Node = malloc(sizeof(Node));
-
-   memcpy(new_Node->title, title, sizeof(new_Node->title));
-   memcpy(new_Node->type, type, sizeof(new_Node->type));
-
-   new_DLL->n = new_Node;
-   new_DLL->children = new_children;
-   new_DLL->parents = new_parents;
-
-   return new_DLL;
-
-}
-
-///////////////////////
 int parser(char * toParse) {
    size_t size = strlen(toParse) + 1;
    char * RawText = malloc(size * sizeof(char));
@@ -385,99 +285,66 @@ int parser(char * toParse) {
 
 	char *ptr = strtok_r(RawText, delim, &saveptr);
 
-   DLL * initTree = malloc(sizeof(TreeLL));
-   DLL * headTree = initTree;
-   printf("0000000\n");
+   TreeLL * initTree = malloc(sizeof(TreeLL));
+   TreeLL * headTree = initTree;
 
-   DLL_List * whole_list = malloc(sizeof(DLL_List));
-
-	while (ptr != NULL && !is_empty(ptr))	{
-      printf("111111111\n");
+	while (ptr != NULL && !is_empty(ptr))
+	{
+      
       size_t size2 = strlen(ptr) + 1;
+
       char *ptr_copy = malloc(size2 * sizeof(char));
       memcpy(ptr_copy, ptr, size2);
       char *ptr2 = strtok_r(ptr_copy, delim2, &saveptr2);
-     
-      if(ptr2 != NULL) {
+      //printf("# %s\n", ptr2);
+      if(ptr2 != NULL){
+         Node * tmp = malloc(sizeof(Node));
 
-         char *ptr3 = strtok_r(NULL, delim3, &saveptr2);
+         memcpy(tmp->title, ptr2, sizeof(tmp->title));
 
-         DLL * dll_node = createDLLNode(ptr2, ptr3);
-
-         if( isInList(whole_list, dll_node) == 0){
-            addToEndList(whole_list, dll_node);
-         } else {
-            dll_node = getFromList(whole_list, dll_node);
-         }
+         ptr2 = strtok_r(NULL, delim3, &saveptr2);
+         //printf("#2 %s\n", ptr2);
+         memcpy(tmp->type, ptr2, sizeof(tmp->type));
 
          ptr2 = strtok_r(NULL, delim4, &saveptr2);
-         printf("AAARRRR %s \n", ptr2);
-         while (ptr2 != NULL)   {
-
-            DLL * tmp_dll = createDLLNode(ptr2, "");
-            if( isInList(whole_list, tmp_dll) == 0 ){
-               addToEndList(whole_list, tmp_dll);
-            } else {
-               tmp_dll = getFromList(whole_list, tmp_dll);
-            }
-
-            addChildren(dll_node, tmp_dll);
-            addParents(tmp_dll, dll_node);
-
+         //printf("#3 %s\n", ptr2);
+         ChildLL * init_child = malloc(sizeof(ChildLL));
+         ChildLL * headChild = init_child;
+   
+         while (ptr2 != NULL)
+         {
+            memcpy(init_child->name, ptr2, sizeof(init_child->name));
+            ChildLL * tmp_child = malloc(sizeof(ChildLL));
             ptr2 = strtok_r(NULL, delim5, &saveptr2);
+            if (ptr2 != NULL){
+               init_child->next = tmp_child;
+               init_child = tmp_child;
+            }
          }
+
+         TreeLL * tmp_tree = malloc(sizeof(TreeLL));
+         initTree->n = tmp;
+         initTree->children = headChild;
+         initTree->next = tmp_tree;
+         initTree = tmp_tree;
 
       }
       ptr = strtok_r(NULL, delim, &saveptr);
+      
 	}
 
-
-   /*###########*/
-
-
-   /*###########*/
-
-   DLL_List * current = whole_list;
-   printf("HHDDDDDDDDDDDD\n");
-   while (current->next != NULL) {
-      printf("HHHHH %s\n",  current->next->data->n->title);
-      current = current->next;
-   }
-
-   DLL_List * current2 = whole_list;
-   printf("DDDDDEEEEEEEEEE\n");
-   while (current2->next != NULL) {
-      printf("555555 %s\n",  current2->next->data->parents->name);
-      if(current2->next->data->parents->name == NULL){
-         printf("FOUND\n");
+   while(headTree->next != NULL){
+      printf("#+++++++++++++ %s\n", headTree->n->title);
+      printf("#+++ %s\n", headTree->n->type);
+      printf("#++++++++ %s\n", headTree->children->name);
+      while(headTree->children->next != NULL){
+         printf("#++++++++ %s\n", headTree->children->next->name);
+         headTree->children = headTree->children->next;
       }
-      current2 = current2->next;
+      headTree = headTree->next;
    }
 
-   DLL_List * current3 = whole_list;
-   printf("TRRRRRRRRRRRRRRR\n");
-   while (current3->next != NULL) {
-      printf("122111 %s\n",  current3->next->data->children->name);
-      if(current3->next->data->parents->name == NULL){
-         printf("FOUND\n");
-      }
-      current3 = current3->next;
-   }
 
    printf("###############\n");
 	return 0;
 }
-
-/*int checkIn(PLL *list, char *name){
-   PLL * tmp_list = malloc(sizeof(PLL));
-   tmp_list = list;
-   while(tmp_list != NULL){
-      if (strcmp(tmp_list->name, name) ){
-         printf("FOUND ONE : %s %s\n", name, tmp_list->name);
-         return 1;
-      }
-      tmp_list = tmp_list->next;
-   }
-   return 0;
-}*/
-
