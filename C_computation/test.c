@@ -3,13 +3,16 @@
 #include<json-c/json.h>
 #include"structures.c"
 
-void JsonReader(struct json_object *parsed_json, List **list, EList **edges, Formula **form, Node *parent, int root){
+int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Formula **form, Node *parent, int root){
 
    // READ THE JSON //
    struct json_object *action;
    struct json_object *type;
+   struct json_object *costleaf;
+   struct json_object *CMcost;
    json_object_object_get_ex(parsed_json, "Action", &action);
    json_object_object_get_ex(parsed_json, "Type", &type);
+   json_object_object_get_ex(parsed_json, "CMcost", &CMcost);
 
    // CREATE + FILL THE NODE
    Node *node = malloc(sizeof(Node));
@@ -19,10 +22,14 @@ void JsonReader(struct json_object *parsed_json, List **list, EList **edges, For
    strcpy(node->title, json_object_get_string(action));
    strcpy(node->type, json_object_get_string(type));
    node->root = root;
+   node->CM = 0;
    if (strcmp(json_object_get_string(type), "LEAF" ))
       node->leaf = 0;
-   else 
+   else {
       node->leaf = 1;
+      json_object_object_get_ex(parsed_json, "Cost", &costleaf);
+      node->cost = json_object_get_int(costleaf) + json_object_get_int(CMcost);
+   }
 
    // ADD IT TO THE LIST
    if (node->root == 1)
@@ -36,6 +43,7 @@ void JsonReader(struct json_object *parsed_json, List **list, EList **edges, For
       Edge *ed = malloc(sizeof(Edge));
       memcpy(ed->parent, parent->title, sizeof(char)*50);
       memcpy(ed->child, node->title,sizeof(char)*50);
+      ed->CM = 0;
       if (*edges == NULL)
       {
          *edges = elist_create(ed);
@@ -62,6 +70,30 @@ void JsonReader(struct json_object *parsed_json, List **list, EList **edges, For
       }
    }
 
+   // ADD CM if present
+   if(json_object_get_int(CMcost)>0){
+      // Node
+      Node *CMnode = malloc(sizeof(Node));
+      if (CMnode == NULL){
+         printf("[Node] Malloc error\n");
+      }
+      struct json_object *CMtitle;
+      json_object_object_get_ex(parsed_json, "CMtitle", &CMtitle);
+      strcpy(CMnode->title, json_object_get_string(CMtitle));
+      strcpy(CMnode->type, "CntMs");
+      CMnode->cost = json_object_get_int(CMcost);
+      CMnode->leaf = 1;
+      CMnode->root = 0;
+      CMnode->CM = 1;
+      *list = list_add(*list, CMnode);
+      // Edge
+      Edge *CMed = malloc(sizeof(Edge));
+      memcpy(CMed->parent, parent->title, sizeof(char)*50);
+      memcpy(CMed->child, CMnode->title, sizeof(char)*50);
+      CMed->CM = 1;
+      *edges = elist_add(*edges, CMed);
+   }
+
    // LOOK FOR ITS CHILDRENS
    if (node->leaf == 0) {
       struct json_object *children;
@@ -79,9 +111,16 @@ void JsonReader(struct json_object *parsed_json, List **list, EList **edges, For
          }
          runner->next = left;
       }
+
+      int and_cost = 0;
+      int or_cost = 999999;
       
       for(int i=0; i<n_children; i++){
-         JsonReader(json_object_array_get_idx(children, i), list, edges, form, node, 0);
+         int cost = JsonReader(json_object_array_get_idx(children, i), list, edges, form, node, 0);
+         and_cost = and_cost + cost;
+         if(cost < or_cost){
+            or_cost = cost;
+         }
          if(i<n_children-1){
             Formula *t = Parenthesis(json_object_get_string(type));
             Formula *runner = *(form);
@@ -97,22 +136,29 @@ void JsonReader(struct json_object *parsed_json, List **list, EList **edges, For
       while(runner->next != NULL){
          runner = runner->next;
       }
-      runner->next = right;     
+      runner->next = right;   
+
+      if(!strcmp(json_object_get_string(type), "OR" )) {
+         node->cost = or_cost;
+      }
+      else{
+         node->cost = and_cost;
+      }
    }
+   return node->cost;
 }
 
 int main(int argc, char *argv[]) {
    
    char *path = argv[1];
-   //path = "/home/flo/Desktop/Github/AttackTree/Structure/StructureGraph.json";
    printf("Path to file is : %s \n", path);
    
-   //FILE *fp; 
+   FILE *fp; 
    char buffer[1024*2];
 
    struct json_object *parsed_json;
 
-   FILE *fp = fopen(path,"r");
+   fp = fopen(path,"r");
    fread(buffer, 1024*2, 1, fp);
    fclose(fp);
 
@@ -120,8 +166,7 @@ int main(int argc, char *argv[]) {
    EList *edges = NULL;
    List *list = NULL;
    Formula *form = NULL;
-
-   JsonReader(parsed_json, &list, &edges, &form, NULL, 1);
+   int cost = JsonReader(parsed_json, &list, &edges, &form, NULL, 1);
 
    List* runner = list;
    int count = 0;
@@ -132,6 +177,8 @@ int main(int argc, char *argv[]) {
       printf("Node type  : %s \n", runner->data->type);
       printf("Node root  : %d \n", runner->data->root);
       printf("Node leaf  : %d \n", runner->data->leaf);
+      printf("Node cost  : %d \n", runner->data->cost);
+      printf("Node CM    : %d \n", runner->data->CM);
       runner = runner->next;
    }
 
@@ -142,6 +189,7 @@ int main(int argc, char *argv[]) {
       printf("count : %d \n", count);
       printf("Edges parent : %s \n", runner2->data->parent);
       printf("Edges child  : %s \n", runner2->data->child);
+      printf("Edges CM     : %d \n", runner2->data->CM);
       runner2 = runner2->next;
    }
 
@@ -152,6 +200,8 @@ int main(int argc, char *argv[]) {
       runner3 = runner3->next;
    }
    printf("\n");
+
+   printf("Total cost is %d\n",cost);
    
 
    list_free(list);

@@ -1,0 +1,59 @@
+{
+    "Action": "A1",
+    "Type":"SAND",
+    "Child": [
+        {
+            "Action": "A",
+            "Type":"LEAF",
+            "Cost":1,
+            "CMcost":10,
+            "CMtitle":"CM1"
+        },
+        {
+            "Action": "A2",
+            "Type":"AND",
+            "CMcost":0,
+            "Child" : [
+                {
+                    "Action": "B",
+                    "Type":"LEAF",
+                    "Cost":4,
+                    "CMcost":1,
+                    "CMtitle":"CM3"
+                },
+                {
+                    "Action": "C",
+                    "Type":"LEAF",
+                    "Cost":2,
+                    "CMcost":0
+                }
+            ]
+        },
+        {
+            "Action": "A3",
+            "Type":"OR",
+            "CMcost":0,
+            "Child" : [
+                {
+                    "Action": "D",
+                    "Type":"LEAF",
+                    "Cost":3,
+                    "CMcost":1,
+                    "CMtitle":"CM2"
+                },
+                {
+                    "Action": "E",
+                    "Type":"LEAF",
+                    "Cost":2,
+                    "CMcost":0
+                }
+            ]
+        },
+        {
+            "Action": "F",
+            "Type":"LEAF",
+            "Cost":4,
+            "CMcost":0
+        }
+    ]
+}
