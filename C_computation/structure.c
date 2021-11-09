@@ -9,8 +9,10 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
    struct json_object *action;
    struct json_object *type;
    struct json_object *costleaf;
+   struct json_object *CMcost;
    json_object_object_get_ex(parsed_json, "Action", &action);
    json_object_object_get_ex(parsed_json, "Type", &type);
+   json_object_object_get_ex(parsed_json, "CMcost", &CMcost);
 
    // CREATE + FILL THE NODE
    Node *node = malloc(sizeof(Node));
@@ -20,12 +22,13 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
    strcpy(node->title, json_object_get_string(action));
    strcpy(node->type, json_object_get_string(type));
    node->root = root;
+   node->CM = 0;
    if (strcmp(json_object_get_string(type), "LEAF" ))
       node->leaf = 0;
    else {
       node->leaf = 1;
       json_object_object_get_ex(parsed_json, "Cost", &costleaf);
-      node->cost = json_object_get_int(costleaf);
+      node->cost = json_object_get_int(costleaf) + json_object_get_int(CMcost);
    }
 
    // ADD IT TO THE LIST
@@ -40,6 +43,7 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
       Edge *ed = malloc(sizeof(Edge));
       memcpy(ed->parent, parent->title, sizeof(char)*50);
       memcpy(ed->child, node->title,sizeof(char)*50);
+      ed->CM = 0;
       if (*edges == NULL)
       {
          *edges = elist_create(ed);
@@ -64,6 +68,30 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
          }
          runner->next = newVar;
       }
+   }
+
+   // ADD CM if present
+   if(json_object_get_int(CMcost)>0){
+      // Node
+      Node *CMnode = malloc(sizeof(Node));
+      if (CMnode == NULL){
+         printf("[Node] Malloc error\n");
+      }
+      struct json_object *CMtitle;
+      json_object_object_get_ex(parsed_json, "CMtitle", &CMtitle);
+      strcpy(CMnode->title, json_object_get_string(CMtitle));
+      strcpy(CMnode->type, "CntMs");
+      CMnode->cost = json_object_get_int(CMcost);
+      CMnode->leaf = 1;
+      CMnode->root = 0;
+      CMnode->CM = 1;
+      *list = list_add(*list, CMnode);
+      // Edge
+      Edge *CMed = malloc(sizeof(Edge));
+      memcpy(CMed->parent, parent->title, sizeof(char)*50);
+      memcpy(CMed->child, CMnode->title, sizeof(char)*50);
+      CMed->CM = 1;
+      *edges = elist_add(*edges, CMed);
    }
 
    // LOOK FOR ITS CHILDRENS
@@ -150,6 +178,7 @@ int main(int argc, char *argv[]) {
       printf("Node root  : %d \n", runner->data->root);
       printf("Node leaf  : %d \n", runner->data->leaf);
       printf("Node cost  : %d \n", runner->data->cost);
+      printf("Node CM    : %d \n", runner->data->CM);
       runner = runner->next;
    }
 
@@ -160,6 +189,7 @@ int main(int argc, char *argv[]) {
       printf("count : %d \n", count);
       printf("Edges parent : %s \n", runner2->data->parent);
       printf("Edges child  : %s \n", runner2->data->child);
+      printf("Edges CM     : %d \n", runner2->data->CM);
       runner2 = runner2->next;
    }
 
