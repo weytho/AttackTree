@@ -30,7 +30,6 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
    if (node == NULL){
       printf("[Node] Malloc error\n");
    }
-   printf("1\n");
    strcpy(node->title, json_object_get_string(action));
    strcpy(node->type, json_object_get_string(type));
    node->root = root;
@@ -41,7 +40,7 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
       json_object_object_get_ex(parsed_json, "Cost", &costleaf);
       node->cost = json_object_get_int(costleaf);
    }
-   printf("2\n");
+
    // ADD IT TO THE LIST
    if (node->root == 1)
       *list = list_create(node);
@@ -62,7 +61,7 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
          *edges = elist_add(*edges, ed);
       }
    }
-   printf("3\n");
+
    // ADD to formula
    if (node->leaf == 1){
       Formula *newVar = malloc(sizeof(Formula));
@@ -79,13 +78,12 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
          runner->next = newVar;
       }
    }
-   printf("4\n");
+
    // LOOK FOR ITS CHILDRENS
    if (node->leaf == 0) {
       struct json_object *children;
       size_t n_children;
       json_object_object_get_ex(parsed_json, "Child", &children);
-      //printf(" bool is : %d\n",json_object_object_get_ex(parsed_json, "Child", &children) );
       n_children = json_object_array_length(children);
       Formula *left = Parenthesis("LEFT");
       if((*form) == NULL){
@@ -117,7 +115,7 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
             runner->next = t; 
          }
       }
-      printf("5\n");
+
       Formula *right = Parenthesis("RIGHT");
       Formula *runner = *(form);
       while(runner->next != NULL){
@@ -260,37 +258,71 @@ struct custom_List {
 
 
 void printDLL_List(DLL_List * list){
-   printf("Print\n");
+   //printf("Print\n");
    DLL_List * current = list;
-
-   while (current != NULL) {
+   while (current != NULL && current->n != NULL) {
       printf("title : %s ", current->n->title);
       printf(" -- > ");
       DLL_List * new_current = current->parents;
-
-      while (new_current != NULL) { 
+      //printDLL_List(new_current);
+      while (new_current != NULL && new_current->n != NULL) { 
          printf("par : %s ", new_current->n->title);
          new_current = new_current->next;
       }
       printf(" ||| ");
-
       DLL_List * new_current2 = current->children;
-      while (new_current2 != NULL) { 
+      //printDLL_List(new_current2);
+      while (new_current2 != NULL && new_current2->n != NULL) { 
          printf("child: %s ", new_current2->n->title);
          new_current2 = new_current2->next;
       }
       printf("\n");
+      //printDLL_List(current->parents);
+      //printDLL_List(current->children);
       current = current->next;
    }
+   
+   //printf("\n");
+}
+
+void printDLL_total2(DLL_List * list){
+
+   if( list == NULL && list->n == NULL){
+      printf("end");
+      return;
+   }
+
+   DLL_List * current = list;
+   while (current != NULL && current->n != NULL) {
+      printf("title : %s ", current->n->title);
+      printf(" -- > ");
+      printDLL_total2(current->children);
+      current = current->next;
+   }
+   printf("");
+
 }
 
 void printDLL_total(DLL_List * list){
 
-   DLL_List * current = list;
-   while (current != NULL) {
-      printDLL_List(current);
-      current = current->children;
+   if( list == NULL && list->n == NULL){
+      printf("end \n");
+      return;
    }
+
+   int count = 0;
+
+   DLL_List * current = list;
+   while (current != NULL && current->n != NULL) {
+      printf("%d title : %s ", count, current->n->title);
+      printf(" -- > ");
+      printDLL_total2(current->children);
+      printf("\n");
+      current = current->next;
+      count++;
+   }
+   printf("\n");
+
 }
 
 
@@ -305,6 +337,9 @@ DLL_List * addToEndList(DLL_List *head_list, DLL_List *node){
       }
       current->next = node;
    }
+   //printf("####state###\n");
+   //printDLL_List(head_list);
+
    return head_list;
 }
 
@@ -314,6 +349,7 @@ DLL_List * extractFromList(DLL_List **head_list, char *name){
    DLL_List * tmp = NULL;
 
    while (current != NULL && current->n != NULL) {
+      printf("Name found %s, \n", current->n->title);
       if (strcmp(current->n->title, name) == 0){
          if (last == NULL){
             *head_list = current->next;
@@ -339,7 +375,7 @@ int isInList(DLL_List *head_list, char * name){
    }
 
    DLL_List * current = head_list;
-   while (current != NULL) {
+   while (current != NULL && current->n != NULL) {
       printf("Name found %s, \n", current->n->title);
       if (strcmp(current->n->title, name) == 0){
          return 1;
@@ -349,13 +385,14 @@ int isInList(DLL_List *head_list, char * name){
       }
       current = current->next;
    }
+
    return 0;
 }
 
 DLL_List * getFromList(DLL_List *head_list, char * name){
    DLL_List * current = head_list;
    DLL_List * tmp = NULL;
-   while (current != NULL) {
+   while (current != NULL && current->n != NULL) {
       if (strcmp(current->n->title, name) == 0){
          return current;
       }
@@ -370,6 +407,8 @@ DLL_List * getFromList(DLL_List *head_list, char * name){
 
 void addParents(DLL_List *node, DLL_List *parent){
 
+   //printDLL_List(node);
+   //printDLL_ist(parent);
    DLL_List * new_parent = malloc(sizeof(DLL_List));
    new_parent->n = parent->n;
    new_parent->children = parent->children;
@@ -377,7 +416,7 @@ void addParents(DLL_List *node, DLL_List *parent){
    new_parent->next = NULL;
    parent = new_parent;
 
-   if(node->parents == NULL){
+   if(node->parents->n == NULL){
       node->parents = parent;
    } else {
       DLL_List * current = node->parents;
@@ -387,37 +426,28 @@ void addParents(DLL_List *node, DLL_List *parent){
       current->next = parent;
       parent->next = NULL;
    }
+   //printDLL_List(node);
+   //printDLL_List(parent);
+   //printf("ENDNENDNENDNENDN\n");
 }
 
-void addChildren(DLL_List * node, DLL_List *child){
+void addChildren(DLL_List *node, DLL_List *child){
 
-   if(node->children == NULL){
-      // Pobleme modif all nodes les mêmes
+   if(node->children->n == NULL){
       node->children = child;
-
+      //printDLL_List(child);
    } else {
-
       DLL_List * current = node->children;
       while (current->next != NULL) {
          current = current->next;
       }
+      //printDLL_List(node);
       current->next = child;
       child->next = NULL;
-
+      //printDLL_List(node);
    }
-}
+   //printf("ENNNNND 3\n");
 
-void addChildrentoAllInstances(DLL_List * node, DLL_List *child, char * name){
-
-   DLL_List * current = node;
-   while (current != NULL) {
-      printf("Name found %s, \n", current->n->title);
-      if (strcmp(current->n->title, name) == 0){
-         addChildren(current, child);
-      }
-      addChildrentoAllInstances(current->children, child, name);
-      current = current->next;
-   }
 }
 
 DLL_List * createDLLNode(char * title, char * type){
@@ -427,14 +457,17 @@ DLL_List * createDLLNode(char * title, char * type){
    DLL_List * new_children = malloc(sizeof(DLL_List));
    Node * new_Node = malloc(sizeof(Node));
 
+   new_children->n = NULL;
+   new_parents->n = NULL;
+
    memcpy(new_Node->title, title, sizeof(new_Node->title));
    memcpy(new_Node->type, type, sizeof(new_Node->type));
 
    new_DLL->n = new_Node;
-   new_DLL->children = NULL;
-   new_DLL->parents = NULL;
+   new_DLL->children = new_children;
+   new_DLL->parents = new_parents;
    new_DLL->next = NULL;
-
+   //printDLL_List(new_DLL);
    return new_DLL;
 }
 
@@ -532,15 +565,19 @@ int parser(char * toParse) {
             DLL_List * tmp_dll;
             if( isInList(whole_list, ptr2) == 0 ){
                tmp_dll = createDLLNode(ptr2, "LEAF");
+               //whole_list = addToEndList(whole_list, tmp_dll);
             } else {
                printf("TEP 4\n");
                
                tmp_dll = getFromList(whole_list, ptr2);
+               printf("TTTTTTTTTTTTTTTTTt\n");
 
                if(tmp_dll->parents == NULL){
                   tmp_dll = extractFromList(&whole_list, ptr2);
                   // Pas suffisant
                   tmp_dll->next = NULL;
+                  printf("11111111111111111111111111111\n");
+                  
                } else {
                   DLL_List * new_tmp_dll = malloc(sizeof(DLL_List));
                   new_tmp_dll->n = tmp_dll->n;
@@ -548,31 +585,47 @@ int parser(char * toParse) {
                   new_tmp_dll->parents = tmp_dll->parents;
                   new_tmp_dll->next = NULL;
                   tmp_dll = new_tmp_dll;
-
+                  //printDLL_List(new_tmp_dll);
+                  //printDLL_List(tmp_dll);
+                  
+                  printf("22222222222222222222222222222\n");
                }
             }
 
             printf("DLLL 3\n");
+            printDLL_total(whole_list);
             printf("we have : %s with : %s\n", dll_node->n->title, tmp_dll->n->title);
             
-            // TODO REFAIRE PLUS PROPREMENT
-            addChildrentoAllInstances(whole_list, tmp_dll, dll_node->n->title);
-            
+            //printDLL_List(dll_node);
+            //printDLL_List(tmp_dll);
+            addChildren(dll_node, tmp_dll);
+            //printDLL_List(dll_node);
+            //printDLL_total(whole_list);
+            printf("PPPPPPPPPPPPPPPPPP\n");
             addParents(tmp_dll, dll_node);
+            printDLL_total(whole_list);
+
+            //printDLL_total(whole_list);
 
             ptr2 = strtok_r(NULL, delim5, &saveptr2);
+
+            //printf("BBBBBBBBBBBb\n");
          }
 
       }
       ptr = strtok_r(NULL, delim, &saveptr);
+      printf("OOOOOOOOOOOOOO\n");
 	}
 
 
    /*###########*/
    printf("ENNNNNNNND\n");
    printDLL_total(whole_list);
+
    create_Json_file(whole_list);
+
    /*###########*/
+
    printf("###############\n");
 	return 0;
 }

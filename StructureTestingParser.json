@@ -1,0 +1,24 @@
+{
+  "Action":"G",
+  "Type":"OR",
+  "Child":[
+    {
+      "Action":"A1",
+      "Type":"",
+      "Child":[
+        {
+          "Action":"OR1",
+          "Type":""
+        },
+        {
+          "Action":"A12",
+          "Type":""
+        }
+      ]
+    },
+    {
+      "Action":"A2",
+      "Type":""
+    }
+  ]
+}

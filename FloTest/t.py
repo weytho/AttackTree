@@ -234,26 +234,28 @@ class Window(QDialog):
         self.setLayout(layout)
         # TODO ENLEVER :
         #self.getfiles()
+        '''
         str = """
-        G -OR-> {A1, A2}
+            A1 -AND-> { B1, A12}
+            G -OR-> {A1, A2}
+            """
+        '''
+        str = """
         A1 -AND-> { OR1, A12}
-        OR1 -OR-> {A111, A112}
-        A112 -OR->{A1121,A1122,A1123}
-
-            D12 -AND-> {M12}
-        D1 -AND-> {M1}
-
-        D2 -AND-> {M2}
-        
+        G -OR-> {A1, A2}
+        OR1 -OR-> {A111, A112} 
+        A2 -AND-> {A112 , A12, D}
+        A112 -AND-> {D3 , D2}
         """
+        
         self.grammarText.setText(str)
         self.parser()
-
+        
 
     def get_canvas(self, ln, le):
 
         # example stackoverflow
-        
+
         g = nx.DiGraph()
 
         g.add_nodes_from(ln)
@@ -276,7 +278,7 @@ class Window(QDialog):
             if d['leaf'] == 0:
                 name = u + '_' + "LOGIC"#d['type']
                 print(name)
-                node = (name, {'type': 'logic'})
+                node = (name, {'type': 'logic', 'parent': u})
                 logic_nodes.append(node)
                 edge = (u, name)
                 labels_logic[name] = d['type']
@@ -284,6 +286,7 @@ class Window(QDialog):
 
         g.add_nodes_from(logic_nodes)
         
+        g.add_edges_from(new_le)
         for (u, v) in le:
             edge = (u + '_' + "LOGIC", v)
             new_le.append(edge)
@@ -293,9 +296,17 @@ class Window(QDialog):
 
         pos = nx.nx_agraph.graphviz_layout(g, prog='dot')
 
+        for (u, d) in g.nodes(data=True):
+            if(d['type'] == 'logic'):
+                new_pos = list(pos[u])
+                new_pos[0] = pos[d['parent']][0]
+                pos[u] = tuple(new_pos)
+
         # edges
-        nx.draw_networkx_edges(g, pos, edgelist=logic_edge, arrows=False, width=2, alpha=0.8, edge_color='black', style='solid')
-        nx.draw_networkx_edges(g, pos, edgelist=new_le, arrows=False, width=2, alpha=0.8, edge_color='black', style='solid')
+        #nx.draw_networkx_edges(g, pos, edgelist=logic_edge, arrows=False, width=2, alpha=0.8, edge_color='black', style='solid', connectionstyle='angle')
+        #n x.draw_networkx_edges(g, pos, edgelist=new_le, arrows=False, width=2, alpha=0.8, edge_color='black', style='solid'), connectionstyle='aangle3')
+        nx.draw_networkx_edges(g, pos, edgelist=logic_edge, connectionstyle='angle, angleA=0, angleB=90, rad=0.0')
+        nx.draw_networkx_edges(g, pos, edgelist=new_le, connectionstyle='arc3, rad=0.0')
         # labels
         nx.draw_networkx_labels(g, pos, labels, font_size=14, font_color='black', font_family='sans-serif', bbox=dict(facecolor="white", edgecolor='black', boxstyle='round,pad=0.8'))
         nx.draw_networkx_labels(g, pos, labels_logic, font_size=14, font_color='b', font_family='sans-serif', bbox=dict(facecolor="white", edgecolor='black', boxstyle='round,pad=0.8'))
