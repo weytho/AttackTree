@@ -1,51 +1,73 @@
 {
     "Action": "A1",
     "Type":"SAND",
+    "CM": [],
     "Child": [
         {
             "Action": "A",
             "Type":"LEAF",
             "Cost":1,
-            "CMcost":10,
-            "CMtitle":"CM1"
+            "CM": [
+                {
+                    "CMtitle":"CM1",
+                    "CMcost":5
+                },
+                {
+                    "CMtitle":"CM1.1",
+                    "CMcost":0
+                }
+            ]
         },
         {
             "Action": "A2",
             "Type":"AND",
-            "CMcost":0,
+            "CM": [],
             "Child" : [
                 {
                     "Action": "B",
                     "Type":"LEAF",
                     "Cost":4,
-                    "CMcost":1,
-                    "CMtitle":"CM3"
+                    "CM": [
+                        {
+                            "CMtitle":"CM2",
+                            "CMcost":2
+                        }
+                    ]
                 },
                 {
                     "Action": "C",
                     "Type":"LEAF",
                     "Cost":2,
-                    "CMcost":0
+                    "CM": []
                 }
             ]
         },
         {
             "Action": "A3",
             "Type":"OR",
-            "CMcost":0,
+            "CM": [
+                {
+                    "CMtitle":"CM3",
+                    "CMcost":2
+                }
+            ],
             "Child" : [
                 {
                     "Action": "D",
                     "Type":"LEAF",
                     "Cost":3,
-                    "CMcost":1,
-                    "CMtitle":"CM2"
+                    "CM": []
                 },
                 {
                     "Action": "E",
                     "Type":"LEAF",
                     "Cost":2,
-                    "CMcost":0
+                    "CM": [
+                        {
+                            "CMtitle":"CM4",
+                            "CMcost":2
+                        }
+                    ]
                 }
             ]
         },
@@ -53,7 +75,7 @@
             "Action": "F",
             "Type":"LEAF",
             "Cost":4,
-            "CMcost":0
+            "CM": []
         }
     ]
 }

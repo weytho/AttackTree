@@ -9,10 +9,51 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
    struct json_object *action;
    struct json_object *type;
    struct json_object *costleaf;
-   struct json_object *CMcost;
+   struct json_object *CM;
    json_object_object_get_ex(parsed_json, "Action", &action);
    json_object_object_get_ex(parsed_json, "Type", &type);
-   json_object_object_get_ex(parsed_json, "CMcost", &CMcost);
+   json_object_object_get_ex(parsed_json, "CM", &CM);
+
+   // Compute CM 
+   int CMlength = json_object_array_length(CM);
+   int totCMcost = 0;
+   int cnt = 0;
+   while (cnt < CMlength){
+      struct json_object *CMchild;
+      struct json_object *CMtitle;
+      struct json_object *CMcost;
+      CMchild = json_object_array_get_idx(CM, cnt);
+      json_object_object_get_ex(CMchild, "CMtitle", &CMtitle);
+      json_object_object_get_ex(CMchild, "CMcost", &CMcost);
+      totCMcost += json_object_get_int(CMcost);
+
+      // ADD CM to nodes
+      Node *CMnode = malloc(sizeof(Node));
+      if (CMnode == NULL){
+         printf("[Node] Malloc error\n");
+      }
+      strcpy(CMnode->title, json_object_get_string(CMtitle));
+      strcpy(CMnode->type, "CntMs");
+      CMnode->cost = json_object_get_int(CMcost);
+      CMnode->leaf = 1;
+      CMnode->root = 0;
+      CMnode->CM = 1;
+      if (*list == NULL)
+         *list = list_create(CMnode);
+      else 
+         *list = list_add(*list, CMnode);
+      // Edge
+      Edge *CMed = malloc(sizeof(Edge));
+      memcpy(CMed->parent, parent->title, sizeof(char)*50);
+      memcpy(CMed->child, CMnode->title, sizeof(char)*50);
+      CMed->CM = 1;
+      if (*edges == NULL)
+         *edges = elist_create(CMed);
+      else
+         *edges = elist_add(*edges, CMed);
+
+      cnt++;
+   }
 
    // CREATE + FILL THE NODE
    Node *node = malloc(sizeof(Node));
@@ -28,11 +69,11 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
    else {
       node->leaf = 1;
       json_object_object_get_ex(parsed_json, "Cost", &costleaf);
-      node->cost = json_object_get_int(costleaf) + json_object_get_int(CMcost);
+      node->cost = json_object_get_int(costleaf) + totCMcost;
    }
 
    // ADD IT TO THE LIST
-   if (node->root == 1)
+   if (*list == NULL)
       *list = list_create(node);
    else 
       *list = list_add(*list, node);
@@ -45,12 +86,9 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
       memcpy(ed->child, node->title,sizeof(char)*50);
       ed->CM = 0;
       if (*edges == NULL)
-      {
          *edges = elist_create(ed);
-      }
-      else{
+      else
          *edges = elist_add(*edges, ed);
-      }
    }
 
    // ADD to formula
@@ -68,30 +106,6 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
          }
          runner->next = newVar;
       }
-   }
-
-   // ADD CM if present
-   if(json_object_get_int(CMcost)>0){
-      // Node
-      Node *CMnode = malloc(sizeof(Node));
-      if (CMnode == NULL){
-         printf("[Node] Malloc error\n");
-      }
-      struct json_object *CMtitle;
-      json_object_object_get_ex(parsed_json, "CMtitle", &CMtitle);
-      strcpy(CMnode->title, json_object_get_string(CMtitle));
-      strcpy(CMnode->type, "CntMs");
-      CMnode->cost = json_object_get_int(CMcost);
-      CMnode->leaf = 1;
-      CMnode->root = 0;
-      CMnode->CM = 1;
-      *list = list_add(*list, CMnode);
-      // Edge
-      Edge *CMed = malloc(sizeof(Edge));
-      memcpy(CMed->parent, parent->title, sizeof(char)*50);
-      memcpy(CMed->child, CMnode->title, sizeof(char)*50);
-      CMed->CM = 1;
-      *edges = elist_add(*edges, CMed);
    }
 
    // LOOK FOR ITS CHILDRENS
@@ -139,10 +153,10 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
       runner->next = right;   
 
       if(!strcmp(json_object_get_string(type), "OR" )) {
-         node->cost = or_cost;
+         node->cost = or_cost + totCMcost;
       }
       else{
-         node->cost = and_cost;
+         node->cost = and_cost + totCMcost;
       }
    }
    return node->cost;
@@ -159,7 +173,7 @@ int main(int argc, char *argv[]) {
    struct json_object *parsed_json;
 
    fp = fopen(path,"r");
-   fread(buffer, 1024*2, 1, fp);
+   fread(buffer, 1024*4, 1, fp);
    fclose(fp);
 
    parsed_json = json_tokener_parse(buffer);
