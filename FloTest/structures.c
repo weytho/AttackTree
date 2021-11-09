@@ -1,4 +1,4 @@
-#include<stdio.h>
+
 // -------- NODES
 
 typedef struct s_Node Node;
@@ -8,6 +8,7 @@ struct s_Node {
    int   root;
    int   leaf;
    int   cost;
+   int     CM;
 }; 
 
 typedef struct s_List List;
@@ -58,6 +59,7 @@ typedef struct s_Edge Edge;
 struct s_Edge {
    char  parent[50];
    char  child[50];
+   int   CM;
 }; 
 
 

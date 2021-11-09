@@ -22,28 +22,69 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
    struct json_object *action;
    struct json_object *type;
    struct json_object *costleaf;
+   struct json_object *CM;
    json_object_object_get_ex(parsed_json, "Action", &action);
    json_object_object_get_ex(parsed_json, "Type", &type);
+   json_object_object_get_ex(parsed_json, "CM", &CM);
+   // Compute CM 
+   int CMlength = json_object_array_length(CM);
+   int totCMcost = 0;
+   int cnt = 0;
+   while (cnt < CMlength){
+      struct json_object *CMchild;
+      struct json_object *CMtitle;
+      struct json_object *CMcost;
+      CMchild = json_object_array_get_idx(CM, cnt);
+      json_object_object_get_ex(CMchild, "CMtitle", &CMtitle);
+      json_object_object_get_ex(CMchild, "CMcost", &CMcost);
+      totCMcost += json_object_get_int(CMcost);
+
+      // ADD CM to nodes
+      Node *CMnode = malloc(sizeof(Node));
+      if (CMnode == NULL){
+         printf("[Node] Malloc error\n");
+      }
+      strcpy(CMnode->title, json_object_get_string(CMtitle));
+      strcpy(CMnode->type, "CntMs");
+      CMnode->cost = json_object_get_int(CMcost);
+      CMnode->leaf = 1;
+      CMnode->root = 0;
+      CMnode->CM = 1;
+      if (*list == NULL)
+         *list = list_create(CMnode);
+      else 
+         *list = list_add(*list, CMnode);
+      // Edge
+      Edge *CMed = malloc(sizeof(Edge));
+      memcpy(CMed->parent, json_object_get_string(action), sizeof(char)*50);
+      memcpy(CMed->child, CMnode->title, sizeof(char)*50);
+      CMed->CM = 1;
+      if (*edges == NULL)
+         *edges = elist_create(CMed);
+      else
+         *edges = elist_add(*edges, CMed);
+      cnt++;
+   }
 
    // CREATE + FILL THE NODE
    Node *node = malloc(sizeof(Node));
    if (node == NULL){
       printf("[Node] Malloc error\n");
    }
-   printf("1\n");
    strcpy(node->title, json_object_get_string(action));
    strcpy(node->type, json_object_get_string(type));
    node->root = root;
+   node->CM = 0;
    if (strcmp(json_object_get_string(type), "LEAF" ))
       node->leaf = 0;
    else {
       node->leaf = 1;
       json_object_object_get_ex(parsed_json, "Cost", &costleaf);
-      node->cost = json_object_get_int(costleaf);
+      node->cost = json_object_get_int(costleaf) + totCMcost;
    }
-   printf("2\n");
+
    // ADD IT TO THE LIST
-   if (node->root == 1)
+   if (*list == NULL)
       *list = list_create(node);
    else 
       *list = list_add(*list, node);
@@ -54,15 +95,13 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
       Edge *ed = malloc(sizeof(Edge));
       memcpy(ed->parent, parent->title, sizeof(char)*50);
       memcpy(ed->child, node->title,sizeof(char)*50);
+      ed->CM = 0;
       if (*edges == NULL)
-      {
          *edges = elist_create(ed);
-      }
-      else{
+      else
          *edges = elist_add(*edges, ed);
-      }
    }
-   printf("3\n");
+
    // ADD to formula
    if (node->leaf == 1){
       Formula *newVar = malloc(sizeof(Formula));
@@ -79,13 +118,12 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
          runner->next = newVar;
       }
    }
-   printf("4\n");
+
    // LOOK FOR ITS CHILDRENS
    if (node->leaf == 0) {
       struct json_object *children;
       size_t n_children;
       json_object_object_get_ex(parsed_json, "Child", &children);
-      //printf(" bool is : %d\n",json_object_object_get_ex(parsed_json, "Child", &children) );
       n_children = json_object_array_length(children);
       Formula *left = Parenthesis("LEFT");
       if((*form) == NULL){
@@ -117,7 +155,7 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
             runner->next = t; 
          }
       }
-      printf("5\n");
+
       Formula *right = Parenthesis("RIGHT");
       Formula *runner = *(form);
       while(runner->next != NULL){
@@ -126,10 +164,10 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
       runner->next = right;   
 
       if(!strcmp(json_object_get_string(type), "OR" )) {
-         node->cost = or_cost;
+         node->cost = or_cost + totCMcost;
       }
       else{
-         node->cost = and_cost;
+         node->cost = and_cost + totCMcost;
       }
    }
    return node->cost;

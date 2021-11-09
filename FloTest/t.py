@@ -32,7 +32,8 @@ class CustomNode(ctypes.Structure):
         ('type', ctypes.c_char * 5),
         ('root', ctypes.c_int),
         ('leaf', ctypes.c_int),
-        ('cost', ctypes.c_int)]
+        ('cost', ctypes.c_int),
+        ('CM', ctypes.c_int),]
 
 class EdgeNode(ctypes.Structure):
     _fields_ = [('parent', ctypes.c_char * 50),
@@ -261,6 +262,7 @@ class Window(QDialog):
         g.add_nodes_from(ln)
         labels = {n: n for n in g}
         #g.add_edges_from(le)
+        
 
         types = [(u, d['type']) for (u, d) in g.nodes(data=True)]
         types_dict= {}
@@ -285,6 +287,9 @@ class Window(QDialog):
                 logic_edge.append(edge)
 
         g.add_nodes_from(logic_nodes)
+
+        for (u, d) in g.nodes(data=True):
+            print(u, d)
         
         g.add_edges_from(new_le)
         for (u, v) in le:
@@ -296,12 +301,21 @@ class Window(QDialog):
 
         pos = nx.nx_agraph.graphviz_layout(g, prog='dot')
 
+        '''
         for (u, d) in g.nodes(data=True):
             if(d['type'] == 'logic'):
                 new_pos = list(pos[u])
                 new_pos[0] = pos[d['parent']][0]
                 pos[u] = tuple(new_pos)
+        '''
+        print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
+        for (u, v, d) in g.edges(data=True):
+            print(u, v, d)
 
+        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+
+        print(le)
+        
         # edges
         #nx.draw_networkx_edges(g, pos, edgelist=logic_edge, arrows=False, width=2, alpha=0.8, edge_color='black', style='solid', connectionstyle='angle')
         #n x.draw_networkx_edges(g, pos, edgelist=new_le, arrows=False, width=2, alpha=0.8, edge_color='black', style='solid'), connectionstyle='aangle3')
