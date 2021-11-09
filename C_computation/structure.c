@@ -13,7 +13,6 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
    json_object_object_get_ex(parsed_json, "Action", &action);
    json_object_object_get_ex(parsed_json, "Type", &type);
    json_object_object_get_ex(parsed_json, "CM", &CM);
-
    // Compute CM 
    int CMlength = json_object_array_length(CM);
    int totCMcost = 0;
@@ -44,14 +43,13 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
          *list = list_add(*list, CMnode);
       // Edge
       Edge *CMed = malloc(sizeof(Edge));
-      memcpy(CMed->parent, parent->title, sizeof(char)*50);
+      memcpy(CMed->parent, json_object_get_string(action), sizeof(char)*50);
       memcpy(CMed->child, CMnode->title, sizeof(char)*50);
       CMed->CM = 1;
       if (*edges == NULL)
          *edges = elist_create(CMed);
       else
          *edges = elist_add(*edges, CMed);
-
       cnt++;
    }
 

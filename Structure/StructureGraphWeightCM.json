@@ -1,7 +1,12 @@
 {
     "Action": "A1",
     "Type":"SAND",
-    "CM": [],
+    "CM": [
+        {
+            "CMtitle":"CM0",
+            "CMcost":2
+        }
+    ],
     "Child": [
         {
             "Action": "A",
