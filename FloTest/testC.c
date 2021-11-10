@@ -23,13 +23,18 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
    struct json_object *type;
    struct json_object *costleaf;
    struct json_object *CM;
+   printf("AAAAAAAZZZZZZZZZAAAAAAAAAAAAAAAAZZZZZZZZZZ\n");
    json_object_object_get_ex(parsed_json, "Action", &action);
+   printf("AAAAAAAZZZZZZZZZAAAAAAAAAAAAAAAAZZZZZZZZZZ\n");
    json_object_object_get_ex(parsed_json, "Type", &type);
+   printf("AAAAAAAZZZZZZZZZAAAAAAAAAAAAAAAAZZZZZZZZZZ\n");
    json_object_object_get_ex(parsed_json, "CM", &CM);
+   printf("AAAAAAAZZZZZZZZZAAAAAAAAAAAAAAAAZZZZZZZZZZ\n");
    // Compute CM 
    int CMlength = json_object_array_length(CM);
    int totCMcost = 0;
    int cnt = 0;
+   printf("Y55555555555555555555O\n");
    while (cnt < CMlength){
       struct json_object *CMchild;
       struct json_object *CMtitle;
@@ -65,7 +70,7 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
          *edges = elist_add(*edges, CMed);
       cnt++;
    }
-
+   printf("YOOIIOIOIOIOIOIOIOIOI\n");
    // CREATE + FILL THE NODE
    Node *node = malloc(sizeof(Node));
    if (node == NULL){
@@ -82,7 +87,7 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
       json_object_object_get_ex(parsed_json, "Cost", &costleaf);
       node->cost = json_object_get_int(costleaf) + totCMcost;
    }
-
+   printf("YOOOOOOOoooooooo\n");
    // ADD IT TO THE LIST
    if (*list == NULL)
       *list = list_create(node);
@@ -101,7 +106,7 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
       else
          *edges = elist_add(*edges, ed);
    }
-
+   printf("YYYYYYYYYYYYYYYYYYYYYYYY\n");
    // ADD to formula
    if (node->leaf == 1){
       Formula *newVar = malloc(sizeof(Formula));
@@ -118,13 +123,15 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
          runner->next = newVar;
       }
    }
-
+   printf("GGGGGGGGGGGGGGGGGG\n");
    // LOOK FOR ITS CHILDRENS
    if (node->leaf == 0) {
       struct json_object *children;
       size_t n_children;
       json_object_object_get_ex(parsed_json, "Child", &children);
+      printf("YO\n");
       n_children = json_object_array_length(children);
+      printf("Y1111\n");
       Formula *left = Parenthesis("LEFT");
       if((*form) == NULL){
          (*form) = left;
@@ -427,34 +434,29 @@ void addParents(DLL_List *node, DLL_List *parent){
    }
 }
 
-void addChildren(DLL_List * node, DLL_List *child){
+void addChildrentoAllInstances(DLL_List * whole, DLL_List *child, DLL_List *node){
+   DLL_List * current = whole;
+   while (current != NULL) {
+      if (strcmp(current->n->title, node->n->title) == 0){
+         current->children = child;
+      }
+      addChildrentoAllInstances(current->children, child, node);
+      current = current->next;
+   }
+}
+
+void addChildren(DLL_List * node, DLL_List *child, DLL_List * whole){
 
    if(node->children == NULL){
       // Pobleme modif all nodes les mêmes
-      node->children = child;
-
+      addChildrentoAllInstances(whole, child, node);
    } else {
-
       DLL_List * current = node->children;
       while (current->next != NULL) {
          current = current->next;
       }
       current->next = child;
       child->next = NULL;
-
-   }
-}
-
-void addChildrentoAllInstances(DLL_List * node, DLL_List *child, char * name){
-
-   DLL_List * current = node;
-   while (current != NULL) {
-      printf("Name found %s, \n", current->n->title);
-      if (strcmp(current->n->title, name) == 0){
-         addChildren(current, child);
-      }
-      addChildrentoAllInstances(current->children, child, name);
-      current = current->next;
    }
 }
 
@@ -467,6 +469,7 @@ DLL_List * createDLLNode(char * title, char * type){
 
    memcpy(new_Node->title, title, sizeof(new_Node->title));
    memcpy(new_Node->type, type, sizeof(new_Node->type));
+   //new_Node->CM = 0;
 
    new_DLL->n = new_Node;
    new_DLL->children = NULL;
@@ -480,7 +483,18 @@ json_object * build_json(json_object * parent , DLL_List * tree){
 
    json_object_object_add(parent, "Action", json_object_new_string(tree->n->title));
    json_object_object_add(parent, "Type", json_object_new_string(tree->n->type));
+   json_object_object_add(parent, "CM", json_object_new_int(tree->n->CM));
 
+   /*DLL_List * new_children = tree->children;
+   if( new_tree != NULL ){
+      json_object *counter = json_object_new_array();
+      json_object_object_add(parent, "CM", counter);
+      while (new_tree != NULL) {
+         json_object *tmp_root = json_object_new_object();
+         json_object_array_add(children, build_json(tmp_root, new_tree));
+         new_tree = new_tree->next;
+      }
+   }*/
 
    DLL_List * new_tree = tree->children;
    if( new_tree != NULL ){
@@ -594,7 +608,7 @@ int parser(char * toParse) {
             printf("we have : %s with : %s\n", dll_node->n->title, tmp_dll->n->title);
             
             // TODO REFAIRE PLUS PROPREMENT
-            addChildrentoAllInstances(whole_list, tmp_dll, dll_node->n->title);
+            addChildren(dll_node, tmp_dll, whole_list);
             
             addParents(tmp_dll, dll_node);
 
