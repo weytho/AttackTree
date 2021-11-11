@@ -123,7 +123,7 @@ void form_free(Formula *form){
    }
 }
 
-Formula * Parenthesis(char* type){
+Formula * Parenthesis(const char* type){
    Formula* new = malloc(sizeof(Formula));
    new->next = NULL;
    if(!strncmp("LEFT",type,5)){

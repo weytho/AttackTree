@@ -31,44 +31,46 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
    json_object_object_get_ex(parsed_json, "CM", &CM);
    printf("AAAAAAAZZZZZZZZZAAAAAAAAAAAAAAAAZZZZZZZZZZ\n");
    // Compute CM 
-   int CMlength = json_object_array_length(CM);
    int totCMcost = 0;
    int cnt = 0;
-   printf("Y55555555555555555555O\n");
-   while (cnt < CMlength){
-      struct json_object *CMchild;
-      struct json_object *CMtitle;
-      struct json_object *CMcost;
-      CMchild = json_object_array_get_idx(CM, cnt);
-      json_object_object_get_ex(CMchild, "CMtitle", &CMtitle);
-      json_object_object_get_ex(CMchild, "CMcost", &CMcost);
-      totCMcost += json_object_get_int(CMcost);
+   if (CM != NULL){
+      int CMlength = json_object_array_length(CM);
+      printf("Y55555555555555555555O\n");
+      while (cnt < CMlength){
+         struct json_object *CMchild;
+         struct json_object *CMtitle;
+         struct json_object *CMcost;
+         CMchild = json_object_array_get_idx(CM, cnt);
+         json_object_object_get_ex(CMchild, "CMtitle", &CMtitle);
+         json_object_object_get_ex(CMchild, "CMcost", &CMcost);
+         totCMcost += json_object_get_int(CMcost);
 
-      // ADD CM to nodes
-      Node *CMnode = malloc(sizeof(Node));
-      if (CMnode == NULL){
-         printf("[Node] Malloc error\n");
+         // ADD CM to nodes
+         Node *CMnode = malloc(sizeof(Node));
+         if (CMnode == NULL){
+            printf("[Node] Malloc error\n");
+         }
+         strcpy(CMnode->title, json_object_get_string(CMtitle));
+         strcpy(CMnode->type, "CntMs");
+         CMnode->cost = json_object_get_int(CMcost);
+         CMnode->leaf = 1;
+         CMnode->root = 0;
+         CMnode->CM = 1;
+         if (*list == NULL)
+            *list = list_create(CMnode);
+         else 
+            *list = list_add(*list, CMnode);
+         // Edge
+         Edge *CMed = malloc(sizeof(Edge));
+         memcpy(CMed->parent, json_object_get_string(action), sizeof(char)*50);
+         memcpy(CMed->child, CMnode->title, sizeof(char)*50);
+         CMed->CM = 1;
+         if (*edges == NULL)
+            *edges = elist_create(CMed);
+         else
+            *edges = elist_add(*edges, CMed);
+         cnt++;
       }
-      strcpy(CMnode->title, json_object_get_string(CMtitle));
-      strcpy(CMnode->type, "CntMs");
-      CMnode->cost = json_object_get_int(CMcost);
-      CMnode->leaf = 1;
-      CMnode->root = 0;
-      CMnode->CM = 1;
-      if (*list == NULL)
-         *list = list_create(CMnode);
-      else 
-         *list = list_add(*list, CMnode);
-      // Edge
-      Edge *CMed = malloc(sizeof(Edge));
-      memcpy(CMed->parent, json_object_get_string(action), sizeof(char)*50);
-      memcpy(CMed->child, CMnode->title, sizeof(char)*50);
-      CMed->CM = 1;
-      if (*edges == NULL)
-         *edges = elist_create(CMed);
-      else
-         *edges = elist_add(*edges, CMed);
-      cnt++;
    }
    printf("YOOIIOIOIOIOIOIOIOIOI\n");
    // CREATE + FILL THE NODE
@@ -481,18 +483,21 @@ DLL_List * createDLLNode(char * title, char * type){
 
 json_object * build_json(json_object * parent , DLL_List * tree){
 
+   printf("GGGGGGGGGGGGGGGGGGGGGG\n");
+   printDLL_total(tree);
+
    json_object_object_add(parent, "Action", json_object_new_string(tree->n->title));
    json_object_object_add(parent, "Type", json_object_new_string(tree->n->type));
-   json_object_object_add(parent, "CM", json_object_new_int(tree->n->CM));
+   //json_object_object_add(parent, "CM", json_object_new_array());
 
-   /*DLL_List * new_children = tree->children;
-   if( new_tree != NULL ){
+   /*DLL_List * CM_list = tree->n->CM;
+   if( CM_list != NULL ){
       json_object *counter = json_object_new_array();
       json_object_object_add(parent, "CM", counter);
-      while (new_tree != NULL) {
+      while (CM_list != NULL) {
          json_object *tmp_root = json_object_new_object();
-         json_object_array_add(children, build_json(tmp_root, new_tree));
-         new_tree = new_tree->next;
+         json_object_array_add(counter, build_json(tmp_root, CM_list));
+         CM_list = CM_list->next;
       }
    }*/
 
