@@ -8,6 +8,7 @@ struct s_Node {
    int   root;
    int   leaf;
    int   cost;
+   double   prob;
    int     CM;
 }; 
 
@@ -143,3 +144,11 @@ Formula * Parenthesis(char* type){
    }
    return new;
 }
+
+// -------- Return
+
+typedef struct CostProbability CostProb;
+struct CostProbability {
+   int    cost;
+   double prob;
+};

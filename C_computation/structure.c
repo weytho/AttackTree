@@ -3,12 +3,13 @@
 #include<json-c/json.h>
 #include"structures.c"
 
-int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Formula **form, Node *parent, int root){
+CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edges, Formula **form, Node *parent, int root){
 
    // READ THE JSON //
    struct json_object *action;
    struct json_object *type;
    struct json_object *costleaf;
+   struct json_object *probleaf;
    struct json_object *CM;
    json_object_object_get_ex(parsed_json, "Action", &action);
    json_object_object_get_ex(parsed_json, "Type", &type);
@@ -37,6 +38,7 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
       CMnode->leaf = 1;
       CMnode->root = 0;
       CMnode->CM = 1;
+      CMnode->prob = 1;
       if (*list == NULL)
          *list = list_create(CMnode);
       else 
@@ -62,12 +64,16 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
    strcpy(node->type, json_object_get_string(type));
    node->root = root;
    node->CM = 0;
-   if (strcmp(json_object_get_string(type), "LEAF" ))
+   if (strcmp(json_object_get_string(type), "LEAF" )){
       node->leaf = 0;
+      node->prob = 1;
+   }
    else {
       node->leaf = 1;
       json_object_object_get_ex(parsed_json, "Cost", &costleaf);
       node->cost = json_object_get_int(costleaf) + totCMcost;
+      json_object_object_get_ex(parsed_json, "Prob", &probleaf);
+      node->prob = json_object_get_double(probleaf);
    }
 
    // ADD IT TO THE LIST
@@ -77,8 +83,7 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
       *list = list_add(*list, node);
 
    // ADD THE EDGE
-   if (node->root == 1){}
-   else{
+   if (node->root != 1){
       Edge *ed = malloc(sizeof(Edge));
       memcpy(ed->parent, parent->title, sizeof(char)*50);
       memcpy(ed->child, node->title,sizeof(char)*50);
@@ -126,12 +131,18 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
 
       int and_cost = 0;
       int or_cost = 999999;
+      double and_prob = 1;
+      double or_prob  = 0;
       
       for(int i=0; i<n_children; i++){
-         int cost = JsonReader(json_object_array_get_idx(children, i), list, edges, form, node, 0);
+         CostProb *ret = JsonReader(json_object_array_get_idx(children, i), list, edges, form, node, 0);
+         int cost = ret->cost;
+         double prob =ret->prob;
          and_cost = and_cost + cost;
+         and_prob = and_prob * prob;
          if(cost < or_cost){
             or_cost = cost;
+            or_prob = prob;
          }
          if(i<n_children-1){
             Formula *t = Parenthesis(json_object_get_string(type));
@@ -141,6 +152,7 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
             }
             runner->next = t; 
          }
+         free(ret);
       }
 
       Formula *right = Parenthesis("RIGHT");
@@ -152,12 +164,18 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
 
       if(!strcmp(json_object_get_string(type), "OR" )) {
          node->cost = or_cost + totCMcost;
+         node->prob = or_prob;
       }
       else{
          node->cost = and_cost + totCMcost;
+         node->prob = and_prob;
       }
    }
-   return node->cost;
+   CostProb *retval = malloc(sizeof(CostProb));
+   retval->cost = node->cost;
+   retval->prob = node->prob;
+
+   return retval;
 }
 
 int main(int argc, char *argv[]) {
@@ -166,7 +184,7 @@ int main(int argc, char *argv[]) {
    printf("Path to file is : %s \n", path);
    
    FILE *fp; 
-   char buffer[1024*2];
+   char buffer[1024*4];
 
    struct json_object *parsed_json;
 
@@ -178,7 +196,7 @@ int main(int argc, char *argv[]) {
    EList *edges = NULL;
    List *list = NULL;
    Formula *form = NULL;
-   int cost = JsonReader(parsed_json, &list, &edges, &form, NULL, 1);
+   CostProb *ret = JsonReader(parsed_json, &list, &edges, &form, NULL, 1);
 
    List* runner = list;
    int count = 0;
@@ -190,6 +208,7 @@ int main(int argc, char *argv[]) {
       printf("Node root  : %d \n", runner->data->root);
       printf("Node leaf  : %d \n", runner->data->leaf);
       printf("Node cost  : %d \n", runner->data->cost);
+      printf("Node prob  : %f \n", runner->data->prob);
       printf("Node CM    : %d \n", runner->data->CM);
       runner = runner->next;
    }
@@ -213,7 +232,8 @@ int main(int argc, char *argv[]) {
    }
    printf("\n");
 
-   printf("Total cost is %d\n",cost);
+   printf("Total cost is %d\n",ret->cost);
+   printf("Proba  is %f\n",ret->prob);
    
 
    list_free(list);
