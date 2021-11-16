@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<string.h>
 #include<json-c/json.h>
+#include <math.h>
 #include"structures.c"
 
 CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edges, Formula **form, Node *parent, int root){
@@ -14,6 +15,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
    json_object_object_get_ex(parsed_json, "Action", &action);
    json_object_object_get_ex(parsed_json, "Type", &type);
    json_object_object_get_ex(parsed_json, "CM", &CM);
+   
    // Compute CM 
    int CMlength = json_object_array_length(CM);
    int totCMcost = 0;
@@ -130,9 +132,10 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
       }
 
       int and_cost = 0;
-      int or_cost = 999999;
+      int or_cost = 0;
       double and_prob = 1;
       double or_prob  = 0;
+      double esp = 999999.9;
       
       for(int i=0; i<n_children; i++){
          CostProb *ret = JsonReader(json_object_array_get_idx(children, i), list, edges, form, node, 0);
@@ -140,9 +143,10 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
          double prob =ret->prob;
          and_cost = and_cost + cost;
          and_prob = and_prob * prob;
-         if(cost < or_cost){
+         if(ret->esp < esp){
             or_cost = cost;
             or_prob = prob;
+            esp = ret->esp;
          }
          if(i<n_children-1){
             Formula *t = Parenthesis(json_object_get_string(type));
@@ -171,9 +175,11 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
          node->prob = and_prob;
       }
    }
+   printf("[Node] Title : %s\n",node->title);
    CostProb *retval = malloc(sizeof(CostProb));
    retval->cost = node->cost;
    retval->prob = node->prob;
+   retval->esp = esp(node->cost, node->prob);
 
    return retval;
 }
@@ -234,6 +240,7 @@ int main(int argc, char *argv[]) {
 
    printf("Total cost is %d\n",ret->cost);
    printf("Proba  is %f\n",ret->prob);
+   printf("Esp  is %f\n",ret->esp);
    
 
    list_free(list);

@@ -151,4 +151,20 @@ typedef struct CostProbability CostProb;
 struct CostProbability {
    int    cost;
    double prob;
+   double esp;
 };
+
+// -------- Esperance (empirical)
+
+double esp(int cost, double prob)
+{
+   double esp = cost;
+   double last = cost;
+   for (int i = 0; i < 10; i++)
+   {
+      last = last * (1-prob);
+      esp = esp + last; 
+   }
+   printf("[ESP] Cost : %d | Prob : %f | Esp : %f \n", cost, prob, esp);
+   return esp;
+}

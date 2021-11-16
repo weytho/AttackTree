@@ -4,7 +4,7 @@
     "CM": [
         {
             "CMtitle":"CM0",
-            "CMcost":2
+            "CMcost":0
         }
     ],
     "Child": [
@@ -16,7 +16,7 @@
             "CM": [
                 {
                     "CMtitle":"CM1",
-                    "CMcost":5
+                    "CMcost":0
                 },
                 {
                     "CMtitle":"CM1.1",
@@ -37,7 +37,7 @@
                     "CM": [
                         {
                             "CMtitle":"CM2",
-                            "CMcost":2
+                            "CMcost":0
                         }
                     ]
                 },
@@ -56,7 +56,7 @@
             "CM": [
                 {
                     "CMtitle":"CM3",
-                    "CMcost":2
+                    "CMcost":0
                 }
             ],
             "Child" : [
@@ -71,11 +71,11 @@
                     "Action": "E",
                     "Type":"LEAF",
                     "Cost":2,
-                    "Prob":1.0,
+                    "Prob":0.65,
                     "CM": [
                         {
                             "CMtitle":"CM4",
-                            "CMcost":2
+                            "CMcost":0
                         }
                     ]
                 }
