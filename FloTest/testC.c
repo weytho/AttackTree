@@ -2,7 +2,8 @@
 #include<json-c/json.h>
 #include <string.h>
 #include <stdlib.h>
-#include "structures.c"
+//#include "structures.c"
+#include "grammar.c"
 #include <ctype.h>
 // sudo apt install libjson-c-dev
 // gcc -shared -Wl,-soname,testlib -o testlib.so -fPIC testC.c -ljson-c
@@ -27,43 +28,46 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
    json_object_object_get_ex(parsed_json, "Type", &type);
    json_object_object_get_ex(parsed_json, "CM", &CM);
    // Compute CM 
-   int CMlength = json_object_array_length(CM);
    int totCMcost = 0;
    int cnt = 0;
-   while (cnt < CMlength){
-      struct json_object *CMchild;
-      struct json_object *CMtitle;
-      struct json_object *CMcost;
-      CMchild = json_object_array_get_idx(CM, cnt);
-      json_object_object_get_ex(CMchild, "CMtitle", &CMtitle);
-      json_object_object_get_ex(CMchild, "CMcost", &CMcost);
-      totCMcost += json_object_get_int(CMcost);
+   if (CM != NULL){
+      int CMlength = json_object_array_length(CM);
 
-      // ADD CM to nodes
-      Node *CMnode = malloc(sizeof(Node));
-      if (CMnode == NULL){
-         printf("[Node] Malloc error\n");
+      while (cnt < CMlength){
+         struct json_object *CMchild;
+         struct json_object *CMtitle;
+         struct json_object *CMcost;
+         CMchild = json_object_array_get_idx(CM, cnt);
+         json_object_object_get_ex(CMchild, "CMtitle", &CMtitle);
+         json_object_object_get_ex(CMchild, "CMcost", &CMcost);
+         totCMcost += json_object_get_int(CMcost);
+
+         // ADD CM to nodes
+         Node *CMnode = malloc(sizeof(Node));
+         if (CMnode == NULL){
+            printf("[Node] Malloc error\n");
+         }
+         strcpy(CMnode->title, json_object_get_string(CMtitle));
+         strcpy(CMnode->type, "CntMs");
+         CMnode->cost = json_object_get_int(CMcost);
+         CMnode->leaf = 1;
+         CMnode->root = 0;
+         CMnode->CM = 1;
+         if (*list == NULL)
+            *list = list_create(CMnode);
+         else 
+            *list = list_add(*list, CMnode);
+         // Edge
+         Edge *CMed = malloc(sizeof(Edge));
+         memcpy(CMed->parent, json_object_get_string(action), sizeof(char)*50);
+         memcpy(CMed->child, CMnode->title, sizeof(char)*50);
+         CMed->CM = 1;
+         if (*edges == NULL)
+            *edges = elist_create(CMed);
+         else
+            *edges = elist_add(*edges, CMed);
+         cnt++;
       }
-      strcpy(CMnode->title, json_object_get_string(CMtitle));
-      strcpy(CMnode->type, "CntMs");
-      CMnode->cost = json_object_get_int(CMcost);
-      CMnode->leaf = 1;
-      CMnode->root = 0;
-      CMnode->CM = 1;
-      if (*list == NULL)
-         *list = list_create(CMnode);
-      else 
-         *list = list_add(*list, CMnode);
-      // Edge
-      Edge *CMed = malloc(sizeof(Edge));
-      memcpy(CMed->parent, json_object_get_string(action), sizeof(char)*50);
-      memcpy(CMed->child, CMnode->title, sizeof(char)*50);
-      CMed->CM = 1;
-      if (*edges == NULL)
-         *edges = elist_create(CMed);
-      else
-         *edges = elist_add(*edges, CMed);
-      cnt++;
    }
 
    // CREATE + FILL THE NODE
@@ -177,26 +181,24 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
 FList * mainfct(char * path) {
 	//path = "/home/flo/Desktop/Github/AttackTree/FloTest/StructureGraph.json";
 	printf("Path to file is : %s \n", path);
-   printf("FLO\n");
+
 	FILE *fp; 
-   printf("FLO\n");
-	char buffer[1024*2000];
-   printf("FLO\n");
 	struct json_object *parsed_json;
-   printf("FLO00000000000000000\n");
 	fp = fopen(path,"r");
-   printf("FLO00000\n");
-	fread(buffer, 1024*2000, 1, fp);
+
+   fseek(fp, 0, SEEK_END);
+   long size = ftell(fp);
+   fseek(fp, 0, SEEK_SET);
+   char buffer[size];
+	fread(buffer, size, 1, fp);
 	fclose(fp);
-   printf("FLO2\n");
 	parsed_json = json_tokener_parse(buffer);
 	EList *edges = NULL;
 	List *list = NULL;
    Formula *form = NULL;
-   printf("FLO233333\n");
-   printf("############### %d \n", json_object_get_type(parsed_json));
+
 	int cost = JsonReader(parsed_json, &list, &edges, &form, NULL, 1);
-   printf("FLO22222\n");
+
 	if(edges == NULL)
 	{
 		printf("Ceci est un crash \n");
@@ -265,13 +267,11 @@ void freeForm(Formula *l) {
 
 int main (int argc, char * argv[]) { 
 	printf("STARTING \n");
-
-	char *path = "/home/flo/Desktop/Github/AttackTree/Structure/StructureGraph.json";
-	mainfct(path);
-
+	//char *path = "/home/flo/Desktop/Github/AttackTree/Structure/StructureGraph.json";
+	//mainfct(path);
 	//CustomList * l = getList();
 	//CustomNode * n = getNode();
-	printf("START");
+	//printf("START");
 	//printf("l pointer : %p", (void *) l);
 	//printf("HHHHHHHHHHHHHH %s, ",l->data->name);
 	//freeNode(n);
@@ -288,199 +288,24 @@ int is_empty(char *s) {
   return 1;
 }
 
-typedef struct custom_List DLL_List;
-struct custom_List {
-      Node* n;
-      DLL_List *next;
-      DLL_List* parents;
-      DLL_List* children;
-};
-
-
-void printDLL_List(DLL_List * list){
-   printf("Print\n");
-   DLL_List * current = list;
-
-   while (current != NULL) {
-      printf("title : %s ", current->n->title);
-      printf(" -- > ");
-      DLL_List * new_current = current->parents;
-
-      while (new_current != NULL) { 
-         printf("par : %s ", new_current->n->title);
-         new_current = new_current->next;
-      }
-      printf(" ||| ");
-
-      DLL_List * new_current2 = current->children;
-      while (new_current2 != NULL) { 
-         printf("child: %s ", new_current2->n->title);
-         new_current2 = new_current2->next;
-      }
-      printf("\n");
-      current = current->next;
-   }
-}
-
-void printDLL_total(DLL_List * list){
-
-   DLL_List * current = list;
-   while (current != NULL) {
-      printDLL_List(current);
-      current = current->children;
-   }
-}
-
-
-DLL_List * addToEndList(DLL_List *head_list, DLL_List *node){
-   
-   if( head_list == NULL ){
-      head_list = node;
-   } else {
-      DLL_List * current = head_list;
-      while (current->next != NULL) {
-         current = current->next;
-      }
-      current->next = node;
-   }
-   return head_list;
-}
-
-DLL_List * extractFromList(DLL_List **head_list, char *name){
-   DLL_List * current = *head_list;
-   DLL_List * last = NULL;
-   DLL_List * tmp = NULL;
-
-   while (current != NULL && current->n != NULL) {
-      if (strcmp(current->n->title, name) == 0){
-         if (last == NULL){
-            *head_list = current->next;
-            return current;
-         }
-         last->next = current->next;
-         return current;
-      }
-      tmp = extractFromList(&(current->children), name);
-      if (tmp != NULL){
-         return tmp;
-      }
-      last = current;
-      current = current->next;
-   }
-   return NULL;
-}
-
-int isInList(DLL_List *head_list, char * name){
-   printf("Name is %s, \n", name);
-   if( head_list == NULL ){
-      return 0;
-   }
-
-   DLL_List * current = head_list;
-   while (current != NULL) {
-      printf("Name found %s, \n", current->n->title);
-      if (strcmp(current->n->title, name) == 0){
-         return 1;
-      }
-      if (isInList(current->children, name) == 1){
-         return 1;
-      }
-      current = current->next;
-   }
-   return 0;
-}
-
-DLL_List * getFromList(DLL_List *head_list, char * name){
-   DLL_List * current = head_list;
-   DLL_List * tmp = NULL;
-   while (current != NULL) {
-      if (strcmp(current->n->title, name) == 0){
-         return current;
-      }
-      tmp = getFromList(current->children, name);
-      if (tmp != NULL){
-         return tmp;
-      }
-      current = current->next;
-   }
-   return NULL;
-}
-
-void addParents(DLL_List *node, DLL_List *parent){
-
-   DLL_List * new_parent = malloc(sizeof(DLL_List));
-   new_parent->n = parent->n;
-   new_parent->children = parent->children;
-   new_parent->parents = parent->parents;
-   new_parent->next = NULL;
-   parent = new_parent;
-
-   if(node->parents == NULL){
-      node->parents = parent;
-   } else {
-      DLL_List * current = node->parents;
-      while (current->next != NULL) {
-         current = current->next;
-      }
-      current->next = parent;
-      parent->next = NULL;
-   }
-}
-
-void addChildren(DLL_List * node, DLL_List *child){
-
-   if(node->children == NULL){
-      // Pobleme modif all nodes les mêmes
-      node->children = child;
-
-   } else {
-
-      DLL_List * current = node->children;
-      while (current->next != NULL) {
-         current = current->next;
-      }
-      current->next = child;
-      child->next = NULL;
-
-   }
-}
-
-void addChildrentoAllInstances(DLL_List * node, DLL_List *child, char * name){
-
-   DLL_List * current = node;
-   while (current != NULL) {
-      printf("Name found %s, \n", current->n->title);
-      if (strcmp(current->n->title, name) == 0){
-         addChildren(current, child);
-      }
-      addChildrentoAllInstances(current->children, child, name);
-      current = current->next;
-   }
-}
-
-DLL_List * createDLLNode(char * title, char * type){
-
-   DLL_List * new_DLL = malloc(sizeof(DLL_List));
-   DLL_List * new_parents = malloc(sizeof(DLL_List));
-   DLL_List * new_children = malloc(sizeof(DLL_List));
-   Node * new_Node = malloc(sizeof(Node));
-
-   memcpy(new_Node->title, title, sizeof(new_Node->title));
-   memcpy(new_Node->type, type, sizeof(new_Node->type));
-
-   new_DLL->n = new_Node;
-   new_DLL->children = NULL;
-   new_DLL->parents = NULL;
-   new_DLL->next = NULL;
-
-   return new_DLL;
-}
-
 json_object * build_json(json_object * parent , DLL_List * tree){
+
+   printDLL_total(tree);
 
    json_object_object_add(parent, "Action", json_object_new_string(tree->n->title));
    json_object_object_add(parent, "Type", json_object_new_string(tree->n->type));
+   //json_object_object_add(parent, "CM", json_object_new_array());
 
+   /*DLL_List * CM_list = tree->n->CM;
+   if( CM_list != NULL ){
+      json_object *counter = json_object_new_array();
+      json_object_object_add(parent, "CM", counter);
+      while (CM_list != NULL) {
+         json_object *tmp_root = json_object_new_object();
+         json_object_array_add(counter, build_json(tmp_root, CM_list));
+         CM_list = CM_list->next;
+      }
+   }*/
 
    DLL_List * new_tree = tree->children;
    if( new_tree != NULL ){
@@ -537,7 +362,6 @@ int parser(char * toParse) {
 	char *ptr = strtok_r(RawText, delim, &saveptr);
 
    DLL_List * whole_list = NULL;
-   printf("!!!!!!!\n");
 
 	while (ptr != NULL && !is_empty(ptr))	{
       
@@ -581,7 +405,7 @@ int parser(char * toParse) {
                   tmp_dll->next = NULL;
                } else {
                   DLL_List * new_tmp_dll = malloc(sizeof(DLL_List));
-                  new_tmp_dll->n = tmp_dll->n;
+                  new_tmp_dll->n = tmp_dll->n; //copy_node(tmp_dll->n); //tmp_dll->n;
                   new_tmp_dll->children = tmp_dll->children;
                   new_tmp_dll->parents = tmp_dll->parents;
                   new_tmp_dll->next = NULL;
@@ -594,7 +418,7 @@ int parser(char * toParse) {
             printf("we have : %s with : %s\n", dll_node->n->title, tmp_dll->n->title);
             
             // TODO REFAIRE PLUS PROPREMENT
-            addChildrentoAllInstances(whole_list, tmp_dll, dll_node->n->title);
+            addChildren(dll_node, tmp_dll, whole_list);
             
             addParents(tmp_dll, dll_node);
 
@@ -603,13 +427,18 @@ int parser(char * toParse) {
 
       }
       ptr = strtok_r(NULL, delim, &saveptr);
+      free(ptr_copy);
 	}
+
+   free(RawText);
 
 
    /*###########*/
    printf("ENNNNNNNND\n");
    printDLL_total(whole_list);
    create_Json_file(whole_list);
+
+   DLL_free_from_top(whole_list);
    /*###########*/
    printf("###############\n");
 	return 0;

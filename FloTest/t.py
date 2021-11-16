@@ -257,57 +257,101 @@ class Window(QDialog):
 
         # example stackoverflow
 
+        print("###########################################")
+
         g = nx.DiGraph()
 
-        g.add_nodes_from(ln)
-        labels = {n: n for n in g}
-        #g.add_edges_from(le)
         
+        g.add_nodes_from(ln)
+        print(ln)
+        print(le)
+        labels = {n: n for n in g}
+        #g.add_edges_from(le)  
 
         types = [(u, d['type']) for (u, d) in g.nodes(data=True)]
+        counter_list = [u for (u, d) in g.nodes(data=True) if d['type'] == 'CntMs']
+        labels_counter = {u: u for (u, d) in g.nodes(data=True) if d['type'] == 'CntMs'}
+       
         types_dict= {}
 
         for i in range(len(types)):
             types_dict[types[i][0]] = types[i][1]
 
         logic_nodes = []
+        nodes_not_leaf = []
         new_le = []
         labels_logic = {}
         labels_cost = {}
         logic_edge = []
         for (u, d) in g.nodes(data=True):
             labels_cost[u] = d['cost']
+            print("HEHEHEHEHEHEHEHEEH")
             if d['leaf'] == 0:
+                nodes_not_leaf.append(u)
                 name = u + '_' + "LOGIC"#d['type']
                 print(name)
                 node = (name, {'type': 'logic', 'parent': u})
                 logic_nodes.append(node)
+                # if has no CM
                 edge = (u, name)
                 labels_logic[name] = d['type']
                 logic_edge.append(edge)
 
-        g.add_nodes_from(logic_nodes)
 
+                # else...
+
+            #if d['type'] == 'CntMs':
+                #name = u + '_' + "LOGIC"#d['type']
+                #print("e")
+                #node = (name, {'type': 'logic', 'parent': u})
+                #logic_nodes.append(node)
+                #edge = (u, name)
+                #labels_logic[name] = d['type']
+                #logic_edge.append(edge)
+                
+
+        print("COPYPYPYPYP")
+        print(logic_nodes)
+        g.add_nodes_from(logic_nodes)
         for (u, d) in g.nodes(data=True):
             print(u, d)
+        print("COPYPYPYPYP")
+        #for (u, d) in g.nodes(data=True):
+        #    print(u, d)
         
-        g.add_edges_from(new_le)
+        #g.add_edges_from(new_le)
+
+        # attention aux CM !!
         for (u, v) in le:
-            edge = (u + '_' + "LOGIC", v)
-            new_le.append(edge)
+            # if type != cntms
+            if v not in counter_list:
+                edge = (u + '_' + "LOGIC", v)
+                print(edge)
+                new_le.append(edge)
+            else:
+                if u in nodes_not_leaf:
+                    edge = (u + '_' + "LOGIC", v)
+                    print(edge)
+                    new_le.append(edge)
+                else:
+                    new_le.append((u, v))
 
         g.add_edges_from(logic_edge)
         g.add_edges_from(new_le)
 
         pos = nx.nx_agraph.graphviz_layout(g, prog='dot')
 
-        '''
+        # CM entre noeud et noeud logic
+
         for (u, d) in g.nodes(data=True):
+            print(u, d)
+            
             if(d['type'] == 'logic'):
                 new_pos = list(pos[u])
                 new_pos[0] = pos[d['parent']][0]
                 pos[u] = tuple(new_pos)
-        '''
+    
+
         print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
         for (u, v, d) in g.edges(data=True):
             print(u, v, d)
@@ -319,11 +363,12 @@ class Window(QDialog):
         # edges
         #nx.draw_networkx_edges(g, pos, edgelist=logic_edge, arrows=False, width=2, alpha=0.8, edge_color='black', style='solid', connectionstyle='angle')
         #n x.draw_networkx_edges(g, pos, edgelist=new_le, arrows=False, width=2, alpha=0.8, edge_color='black', style='solid'), connectionstyle='aangle3')
-        nx.draw_networkx_edges(g, pos, edgelist=logic_edge, connectionstyle='angle, angleA=0, angleB=90, rad=0.0')
+        nx.draw_networkx_edges(g, pos, edgelist=logic_edge, connectionstyle='arc3, rad=0.0')#angleA=0, angleB=90, rad=0.0')
         nx.draw_networkx_edges(g, pos, edgelist=new_le, connectionstyle='arc3, rad=0.0')
         # labels
         nx.draw_networkx_labels(g, pos, labels, font_size=14, font_color='black', font_family='sans-serif', bbox=dict(facecolor="white", edgecolor='black', boxstyle='round,pad=0.8'))
         nx.draw_networkx_labels(g, pos, labels_logic, font_size=14, font_color='b', font_family='sans-serif', bbox=dict(facecolor="white", edgecolor='black', boxstyle='round,pad=0.8'))
+        nx.draw_networkx_labels(g, pos, labels_counter, font_size=14, font_color='g', font_family='sans-serif', bbox=dict(facecolor="white", edgecolor='black', boxstyle='round,pad=0.8'))
 
         pos_higher = {}
         y_off = -20  # offset on the y axis
