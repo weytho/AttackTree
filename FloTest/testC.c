@@ -17,57 +17,57 @@ struct full_List {
    Formula *fo;
 };
 
-int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Formula **form, Node *parent, int root){
+CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edges, Formula **form, Node *parent, int root){
 
    // READ THE JSON //
    struct json_object *action;
    struct json_object *type;
    struct json_object *costleaf;
+   struct json_object *probleaf;
    struct json_object *CM;
    json_object_object_get_ex(parsed_json, "Action", &action);
    json_object_object_get_ex(parsed_json, "Type", &type);
    json_object_object_get_ex(parsed_json, "CM", &CM);
+   
    // Compute CM 
+   int CMlength = json_object_array_length(CM);
    int totCMcost = 0;
    int cnt = 0;
-   if (CM != NULL){
-      int CMlength = json_object_array_length(CM);
+   while (cnt < CMlength){
+      struct json_object *CMchild;
+      struct json_object *CMtitle;
+      struct json_object *CMcost;
+      CMchild = json_object_array_get_idx(CM, cnt);
+      json_object_object_get_ex(CMchild, "CMtitle", &CMtitle);
+      json_object_object_get_ex(CMchild, "CMcost", &CMcost);
+      totCMcost += json_object_get_int(CMcost);
 
-      while (cnt < CMlength){
-         struct json_object *CMchild;
-         struct json_object *CMtitle;
-         struct json_object *CMcost;
-         CMchild = json_object_array_get_idx(CM, cnt);
-         json_object_object_get_ex(CMchild, "CMtitle", &CMtitle);
-         json_object_object_get_ex(CMchild, "CMcost", &CMcost);
-         totCMcost += json_object_get_int(CMcost);
-
-         // ADD CM to nodes
-         Node *CMnode = malloc(sizeof(Node));
-         if (CMnode == NULL){
-            printf("[Node] Malloc error\n");
-         }
-         strcpy(CMnode->title, json_object_get_string(CMtitle));
-         strcpy(CMnode->type, "CntMs");
-         CMnode->cost = json_object_get_int(CMcost);
-         CMnode->leaf = 1;
-         CMnode->root = 0;
-         CMnode->CM = 1;
-         if (*list == NULL)
-            *list = list_create(CMnode);
-         else 
-            *list = list_add(*list, CMnode);
-         // Edge
-         Edge *CMed = malloc(sizeof(Edge));
-         memcpy(CMed->parent, json_object_get_string(action), sizeof(char)*50);
-         memcpy(CMed->child, CMnode->title, sizeof(char)*50);
-         CMed->CM = 1;
-         if (*edges == NULL)
-            *edges = elist_create(CMed);
-         else
-            *edges = elist_add(*edges, CMed);
-         cnt++;
+      // ADD CM to nodes
+      Node *CMnode = malloc(sizeof(Node));
+      if (CMnode == NULL){
+         printf("[Node] Malloc error\n");
       }
+      strcpy(CMnode->title, json_object_get_string(CMtitle));
+      strcpy(CMnode->type, "CntMs");
+      CMnode->cost = json_object_get_int(CMcost);
+      CMnode->leaf = 1;
+      CMnode->root = 0;
+      CMnode->CM = 1;
+      CMnode->prob = 1;
+      if (*list == NULL)
+         *list = list_create(CMnode);
+      else 
+         *list = list_add(*list, CMnode);
+      // Edge
+      Edge *CMed = malloc(sizeof(Edge));
+      memcpy(CMed->parent, json_object_get_string(action), sizeof(char)*50);
+      memcpy(CMed->child, CMnode->title, sizeof(char)*50);
+      CMed->CM = 1;
+      if (*edges == NULL)
+         *edges = elist_create(CMed);
+      else
+         *edges = elist_add(*edges, CMed);
+      cnt++;
    }
 
    // CREATE + FILL THE NODE
@@ -79,12 +79,16 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
    strcpy(node->type, json_object_get_string(type));
    node->root = root;
    node->CM = 0;
-   if (strcmp(json_object_get_string(type), "LEAF" ))
+   if (strcmp(json_object_get_string(type), "LEAF" )){
       node->leaf = 0;
+      node->prob = 1;
+   }
    else {
       node->leaf = 1;
       json_object_object_get_ex(parsed_json, "Cost", &costleaf);
       node->cost = json_object_get_int(costleaf) + totCMcost;
+      json_object_object_get_ex(parsed_json, "Prob", &probleaf);
+      node->prob = json_object_get_double(probleaf);
    }
 
    // ADD IT TO THE LIST
@@ -94,8 +98,7 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
       *list = list_add(*list, node);
 
    // ADD THE EDGE
-   if (node->root == 1){}
-   else{
+   if (node->root != 1){
       Edge *ed = malloc(sizeof(Edge));
       memcpy(ed->parent, parent->title, sizeof(char)*50);
       memcpy(ed->child, node->title,sizeof(char)*50);
@@ -142,13 +145,21 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
       }
 
       int and_cost = 0;
-      int or_cost = 999999;
+      int or_cost = 0;
+      double and_prob = 1;
+      double or_prob  = 0;
+      double esp = 999999.9;
       
       for(int i=0; i<n_children; i++){
-         int cost = JsonReader(json_object_array_get_idx(children, i), list, edges, form, node, 0);
+         CostProb *ret = JsonReader(json_object_array_get_idx(children, i), list, edges, form, node, 0);
+         int cost = ret->cost;
+         double prob =ret->prob;
          and_cost = and_cost + cost;
-         if(cost < or_cost){
+         and_prob = and_prob * prob;
+         if(ret->esp < esp){
             or_cost = cost;
+            or_prob = prob;
+            esp = ret->esp;
          }
          if(i<n_children-1){
             Formula *t = Parenthesis(json_object_get_string(type));
@@ -158,6 +169,7 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
             }
             runner->next = t; 
          }
+         free(ret);
       }
 
       Formula *right = Parenthesis("RIGHT");
@@ -169,12 +181,20 @@ int JsonReader(struct json_object *parsed_json, List **list, EList **edges, Form
 
       if(!strcmp(json_object_get_string(type), "OR" )) {
          node->cost = or_cost + totCMcost;
+         node->prob = or_prob;
       }
       else{
          node->cost = and_cost + totCMcost;
+         node->prob = and_prob;
       }
    }
-   return node->cost;
+   printf("[Node] Title : %s\n",node->title);
+   CostProb *retval = malloc(sizeof(CostProb));
+   retval->cost = node->cost;
+   retval->prob = node->prob;
+   retval->esp = esp(node->cost, node->prob);
+
+   return retval;
 }
 
 
@@ -197,7 +217,7 @@ FList * mainfct(char * path) {
 	List *list = NULL;
    Formula *form = NULL;
 
-	int cost = JsonReader(parsed_json, &list, &edges, &form, NULL, 1);
+	CostProb *ret = JsonReader(parsed_json, &list, &edges, &form, NULL, 1);
 
 	if(edges == NULL)
 	{
@@ -249,6 +269,10 @@ FList * mainfct(char * path) {
       printf("[Node] Malloc  fl error\n");
    }
    *fl = init;
+
+   printf("Total cost is %d\n",ret->cost);
+   printf("Proba  is %f\n",ret->prob);
+   printf("Esp  is %f\n",ret->esp);
 
    return fl;
 }
