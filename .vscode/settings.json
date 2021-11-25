@@ -2,6 +2,8 @@
     "files.associations": {
         "string.h": "c",
         "json.h": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "stdlib.h": "c",
+        "stdio.h": "c"
     }
 }

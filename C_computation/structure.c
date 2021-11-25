@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include<string.h>
 #include<json-c/json.h>
-#include <math.h>
+#include<math.h>
 #include"structures.c"
 
 CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edges, Formula **form, Node *parent, int root){
