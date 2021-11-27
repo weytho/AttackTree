@@ -2,14 +2,15 @@ import math
 import sys
 import random
 
-def nodeGeneration(txt, costs, node, depth, maxdepth, branching_factor):
+def nodeGeneration(txt, costs, node, depth, maxdepth, branching_factor, first):
 
     rng = random.randint(0,maxdepth)
     # this is a leaf
     if rng < depth:
-        costs += "\n"
+        if first !=0:
+            costs += "\n"
         costs += node+":"+str(random.randint(1,10))
-        return txt,costs
+        return txt,costs,1
     if depth!=0:
         txt += "\n"
     # leaf logic
@@ -33,13 +34,15 @@ def nodeGeneration(txt, costs, node, depth, maxdepth, branching_factor):
     # Next child
     if depth == maxdepth:
         for i in range(0,rngchild):
-            costs += "\n"
+            if first !=0:
+                costs += "\n"
+            first = 1
             costs += child[i]+":"+str(random.randint(1,10))
-        return txt,costs
+        return txt,costs,1
     else:
         for i in range(0,rngchild):
-            txt,costs = nodeGeneration(txt,costs,child[i],depth+1,maxdepth,branching_factor)
-    return txt,costs
+            txt,costs,first = nodeGeneration(txt,costs,child[i],depth+1,maxdepth,branching_factor,first)
+    return txt,costs,first
 
 # Initialization
 maxdepth = 3
@@ -51,6 +54,6 @@ maxdepth = max(1,maxdepth)
 branching_factor = max(2,branching_factor)
 ret = """"""
 costs = """"""
-string,costs = nodeGeneration(ret,costs,"node",0,maxdepth, branching_factor)
+string,costs,first = nodeGeneration(ret,costs,"node",0,maxdepth, branching_factor,0)
 print(string)
 print(costs)
