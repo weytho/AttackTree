@@ -44,16 +44,24 @@ def nodeGeneration(txt, costs, node, depth, maxdepth, branching_factor, first):
             txt,costs,first = nodeGeneration(txt,costs,child[i],depth+1,maxdepth,branching_factor,first)
     return txt,costs,first
 
-# Initialization
+def TreeGen(maxdepth, branching_factor):
+    maxdepth = max(1,maxdepth)
+    branching_factor = max(2,branching_factor)
+    ret = """"""
+    costs = """"""
+    string,costs,first = nodeGeneration(ret,costs,"node",0,maxdepth, branching_factor,0)
+    return string,costs
+
 maxdepth = 3
 branching_factor = 2
 if len(sys.argv)>=3:
-    maxdepth = int(sys.argv[1])
-    branching_factor = int(sys.argv[2])
+        maxdepth = int(sys.argv[1])
+        branching_factor = int(sys.argv[2])
 maxdepth = max(1,maxdepth)
-branching_factor = max(2,branching_factor)
+branching_factor = max(2,branching_factor)   
 ret = """"""
 costs = """"""
 string,costs,first = nodeGeneration(ret,costs,"node",0,maxdepth, branching_factor,0)
+
 print(string)
 print(costs)
