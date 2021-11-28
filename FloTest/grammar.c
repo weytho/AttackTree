@@ -20,10 +20,9 @@ Node * copy_node(Node *old){
 }
 
 void printDLL_List(DLL_List * list){
-   printf("Print\n");
    DLL_List * current = list;
 
-   while (current != NULL) {
+   //while (current != NULL) {
       printf("title : %s ", current->n->title);
       printf(" -- > ");
       DLL_List * new_current = current->parents;
@@ -40,15 +39,20 @@ void printDLL_List(DLL_List * list){
          new_current2 = new_current2->next;
       }
       printf("\n");
-      current = current->next;
-   }
+      //current = current->next;
+   //}
 }
 
 void printDLL_total(DLL_List * list){
+   printf("Print\n");
    DLL_List * current = list;
-   while (current != NULL) {
+   if(current != NULL){
       printDLL_List(current);
       current = current->children;
+      while (current != NULL) {
+         printDLL_total(current);
+         current = current->next;
+      }
    }
 }
 
@@ -98,7 +102,9 @@ int isInList(DLL_List *head_list, char * name){
    DLL_List * current = head_list;
    while (current != NULL) {
       //printf("Name found %s, \n", current->n->title);
+      //printf("COMP %s, and %s\n", current->n->title, name);
       if (strcmp(current->n->title, name) == 0){
+         printf("GOOD !\n");
          return 1;
       }
       if (isInList(current->children, name) == 1){
@@ -142,7 +148,7 @@ void addParents(DLL_List *node, DLL_List *parent){
          current = current->next;
       }
       current->next = new_parent;
-      parent->next = NULL;
+      //parent->next = NULL;
    }
 }
 
