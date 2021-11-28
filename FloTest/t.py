@@ -1,3 +1,4 @@
+from random import random
 import sys
 from PyQt5 import QtCore, QtGui
 from PyQt5 import QtWidgets
@@ -19,6 +20,7 @@ import ctypes
 import os
 import itertools
 import PIL
+import randomTree
 
 from PyQt5.QtWidgets import (
     QApplication, QDialog, QHBoxLayout, QPushButton, QVBoxLayout
@@ -242,12 +244,14 @@ class Window(QDialog):
             """
         '''
         str = """
-        D3 -OR-> {F3, R, S}
+        D3-OR-> {F3, R, S}
         F3 -AND-> {F12}
         R -AND-> {F12}
         S -OR-> {F12}
         R -OR-> {F13}
         """
+
+        str,cost = randomTree.TreeGen(5, 3)
         
         self.grammarText.setText(str)
         self.parser()

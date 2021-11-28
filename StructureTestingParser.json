@@ -1,29 +1,75 @@
 {
-  "Action":"G",
+  "Action":"N",
   "Type":"OR",
   "Child":[
     {
-      "Action":"A1",
-      "Type":"AND",
+      "Action":"node1",
+      "Type":"OR",
       "Child":[
         {
-          "Action":"OR1",
+          "Action":"node11",
           "Type":"OR",
           "Child":[
             {
-              "Action":"A111",
+              "Action":"node111",
               "Type":"LEAF"
             },
             {
-              "Action":"A112",
-              "Type":"AND",
+              "Action":"node112",
+              "Type":"LEAF"
+            },
+            {
+              "Action":"node113",
+              "Type":"LEAF"
+            }
+          ]
+        },
+        {
+          "Action":"node12",
+          "Type":"LEAF"
+        },
+        {
+          "Action":"node13",
+          "Type":"LEAF"
+        }
+      ]
+    },
+    {
+      "Action":"node2",
+      "Type":"AND",
+      "Child":[
+        {
+          "Action":"node21",
+          "Type":"LEAF"
+        },
+        {
+          "Action":"node22",
+          "Type":"AND",
+          "Child":[
+            {
+              "Action":"node221",
+              "Type":"SAND",
               "Child":[
                 {
-                  "Action":"D3",
+                  "Action":"node2211",
                   "Type":"LEAF"
                 },
                 {
-                  "Action":"D2",
+                  "Action":"node2212",
+                  "Type":"LEAF"
+                }
+              ]
+            },
+            {
+              "Action":"node222",
+              "Type":"OR",
+              "Child":[
+                {
+                  "Action":"node2221",
+                  "Type":"LEAF"
+                },
+                {
+                  "Action":"node2222",
                   "Type":"LEAF"
                 }
               ]
@@ -31,35 +77,7 @@
           ]
         },
         {
-          "Action":"A12",
-          "Type":"LEAF"
-        }
-      ]
-    },
-    {
-      "Action":"A2",
-      "Type":"AND",
-      "Child":[
-        {
-          "Action":"A112",
-          "Type":"AND",
-          "Child":[
-            {
-              "Action":"D3",
-              "Type":"LEAF"
-            },
-            {
-              "Action":"D2",
-              "Type":"LEAF"
-            }
-          ]
-        },
-        {
-          "Action":"A12",
-          "Type":"LEAF"
-        },
-        {
-          "Action":"D",
+          "Action":"node23",
           "Type":"LEAF"
         }
       ]

@@ -30,9 +30,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
    json_object_object_get_ex(parsed_json, "CM", &CM);
    
    // Compute CM 
-   printf("sjekfslefkj\n");
-   
-   printf("sjekfslefkj4444444\n");
+
    int totCMcost = 0;
    int cnt = 0;
    if(CM != NULL){
@@ -382,10 +380,10 @@ int parser(char * toParse) {
    printf("###\n");
    printf("TEXT IS HERE '%s'\n", RawText);
    char delim[] = "\n\v";
-   char delim2[] = " \t";
-   char delim3[] = " \t-";
+   char delim2[] = " \t-";
+   char delim3[] = " \t->";
    char delim4[] = " \t->{},";
-   char delim5[] = " \t,} ";
+   char delim5[] = " \t,}";
 
    char *saveptr;
    char *saveptr2;
