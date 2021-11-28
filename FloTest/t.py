@@ -242,11 +242,11 @@ class Window(QDialog):
             """
         '''
         str = """
-        A1 -AND-> { OR1, A12}
-        G -OR-> {A1, A2}
-        OR1 -OR-> {A111, A112} 
-        A2 -AND-> {A112 , A12, D}
-        A112 -AND-> {D3 , D2}
+        D3 -OR-> {F3, R, S}
+        F3 -AND-> {F12}
+        R -AND-> {F12}
+        S -OR-> {F12}
+        R -OR-> {F13}
         """
         
         self.grammarText.setText(str)

@@ -18,7 +18,7 @@ struct full_List {
 };
 
 CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edges, Formula **form, Node *parent, int root){
-
+   printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
    // READ THE JSON //
    struct json_object *action;
    struct json_object *type;
@@ -30,46 +30,51 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
    json_object_object_get_ex(parsed_json, "CM", &CM);
    
    // Compute CM 
-   int CMlength = json_object_array_length(CM);
+   printf("sjekfslefkj\n");
+   
+   printf("sjekfslefkj4444444\n");
    int totCMcost = 0;
    int cnt = 0;
-   while (cnt < CMlength){
-      struct json_object *CMchild;
-      struct json_object *CMtitle;
-      struct json_object *CMcost;
-      CMchild = json_object_array_get_idx(CM, cnt);
-      json_object_object_get_ex(CMchild, "CMtitle", &CMtitle);
-      json_object_object_get_ex(CMchild, "CMcost", &CMcost);
-      totCMcost += json_object_get_int(CMcost);
+   if(CM != NULL){
+      int CMlength = json_object_array_length(CM);
+      while (cnt < CMlength){
+         struct json_object *CMchild;
+         struct json_object *CMtitle;
+         struct json_object *CMcost;
+         CMchild = json_object_array_get_idx(CM, cnt);
+         json_object_object_get_ex(CMchild, "CMtitle", &CMtitle);
+         json_object_object_get_ex(CMchild, "CMcost", &CMcost);
+         totCMcost += json_object_get_int(CMcost);
 
-      // ADD CM to nodes
-      Node *CMnode = malloc(sizeof(Node));
-      if (CMnode == NULL){
-         printf("[Node] Malloc error\n");
+         // ADD CM to nodes
+         Node *CMnode = malloc(sizeof(Node));
+         if (CMnode == NULL){
+            printf("[Node] Malloc error\n");
+         }
+         strcpy(CMnode->title, json_object_get_string(CMtitle));
+         strcpy(CMnode->type, "CntMs");
+         CMnode->cost = json_object_get_int(CMcost);
+         CMnode->leaf = 1;
+         CMnode->root = 0;
+         CMnode->CM = 1;
+         CMnode->prob = 1;
+         if (*list == NULL)
+            *list = list_create(CMnode);
+         else 
+            *list = list_add(*list, CMnode);
+         // Edge
+         Edge *CMed = malloc(sizeof(Edge));
+         memcpy(CMed->parent, json_object_get_string(action), sizeof(char)*50);
+         memcpy(CMed->child, CMnode->title, sizeof(char)*50);
+         CMed->CM = 1;
+         if (*edges == NULL)
+            *edges = elist_create(CMed);
+         else
+            *edges = elist_add(*edges, CMed);
+         cnt++;
       }
-      strcpy(CMnode->title, json_object_get_string(CMtitle));
-      strcpy(CMnode->type, "CntMs");
-      CMnode->cost = json_object_get_int(CMcost);
-      CMnode->leaf = 1;
-      CMnode->root = 0;
-      CMnode->CM = 1;
-      CMnode->prob = 1;
-      if (*list == NULL)
-         *list = list_create(CMnode);
-      else 
-         *list = list_add(*list, CMnode);
-      // Edge
-      Edge *CMed = malloc(sizeof(Edge));
-      memcpy(CMed->parent, json_object_get_string(action), sizeof(char)*50);
-      memcpy(CMed->child, CMnode->title, sizeof(char)*50);
-      CMed->CM = 1;
-      if (*edges == NULL)
-         *edges = elist_create(CMed);
-      else
-         *edges = elist_add(*edges, CMed);
-      cnt++;
    }
-
+   
    // CREATE + FILL THE NODE
    Node *node = malloc(sizeof(Node));
    if (node == NULL){
@@ -204,8 +209,9 @@ FList * mainfct(char * path) {
 
 	FILE *fp; 
 	struct json_object *parsed_json;
-	fp = fopen(path,"r");
+	fp = fopen(path,"r");  
 
+   printf("Path to file is : %s \n", path);
    fseek(fp, 0, SEEK_END);
    long size = ftell(fp);
    fseek(fp, 0, SEEK_SET);
@@ -213,11 +219,12 @@ FList * mainfct(char * path) {
 	fread(buffer, size, 1, fp);
 	fclose(fp);
 	parsed_json = json_tokener_parse(buffer);
+   printf("Path to file is : %s \n", path);
 	EList *edges = NULL;
 	List *list = NULL;
    Formula *form = NULL;
 
-	CostProb *ret = JsonReader(parsed_json, &list, &edges, &form, NULL, 1);
+   CostProb *ret = JsonReader(parsed_json, &list, &edges, &form, NULL, 1);
 
 	if(edges == NULL)
 	{
@@ -400,7 +407,7 @@ int parser(char * toParse) {
 
          DLL_List * dll_node;
          if( isInList(whole_list, ptr2) == 0){
-            //printf("TEP \n");
+            printf("TEP \n");
             dll_node = createDLLNode(ptr2, ptr3);
             whole_list = addToEndList(whole_list, dll_node);
             //printDLL_List(whole_list);
@@ -414,7 +421,7 @@ int parser(char * toParse) {
 
          while (ptr2 != NULL && !is_empty(ptr2))   {
             
-            printf("INTEP 3\n");
+            //printf("INTEP 3\n");
             DLL_List * tmp_dll;
             if( isInList(whole_list, ptr2) == 0 ){
                tmp_dll = createDLLNode(ptr2, "LEAF");
@@ -428,6 +435,7 @@ int parser(char * toParse) {
                   // Pas suffisant
                   tmp_dll->next = NULL;
                } else {
+                  printf("TEP 8\n");
                   DLL_List * new_tmp_dll = malloc(sizeof(DLL_List));
                   new_tmp_dll->n = tmp_dll->n; //copy_node(tmp_dll->n); //tmp_dll->n;
                   new_tmp_dll->children = tmp_dll->children;
@@ -438,13 +446,21 @@ int parser(char * toParse) {
                }
             }
 
-            printf("DLLL 3\n");
+            //printf("DLLL 3\n");
             printf("we have : %s with : %s\n", dll_node->n->title, tmp_dll->n->title);
             
             // TODO REFAIRE PLUS PROPREMENT
+            //printf("ADD CHILDREN\n");
+
             addChildren(dll_node, tmp_dll, whole_list);
+
+            //printDLL_total(whole_list);
+
+            //printf("ADD PARENTS\n");
             
             addParents(tmp_dll, dll_node);
+
+            //printDLL_total(whole_list);
 
             ptr2 = strtok_r(NULL, delim5, &saveptr2);
          }
