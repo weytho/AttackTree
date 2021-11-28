@@ -17,11 +17,11 @@ def nodeGeneration(txt, costs, node, depth, maxdepth, branching_factor, first):
     rnglogic = random.randint(1,3)
     txt += node
     if rnglogic == 1:
-        txt += "-OR->"
+        txt += " -OR-> "
     elif rnglogic == 2:
-        txt += "-AND->"
+        txt += " -AND-> "
     else:
-        txt += "-SAND->"
+        txt += " -SAND-> "
     # leaf child
     rngchild = random.randint(2,branching_factor)
     txt += "{"
