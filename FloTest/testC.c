@@ -374,6 +374,9 @@ void create_Json_file(DLL_List * wholeTree){
 
 ///////////////////////
 int parser(char * toParse) {
+   if(toParse == NULL || is_empty(toParse)){
+      return 0;
+   }
    size_t size = strlen(toParse) + 1;
    char * RawText = malloc(size * sizeof(char));
    memcpy(RawText, toParse, size);

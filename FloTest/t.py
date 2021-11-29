@@ -21,6 +21,10 @@ import os
 import itertools
 import PIL
 import randomTree
+from pysat.solvers import Glucose3
+import plotly
+import re
+
 
 from PyQt5.QtWidgets import (
     QApplication, QDialog, QHBoxLayout, QPushButton, QVBoxLayout
@@ -65,14 +69,13 @@ class Worker(QObject):
         dirname = os.path.dirname(__file__)
         so_file = os.path.join(dirname, 'testlib.so')
         my_function = ctypes.CDLL(so_file)
-        print("YOOOOO")
+
         s = ctypes.create_string_buffer(self.pathFile.encode('utf-8'))
-        print("KEN")
+     
         my_function.mainfct.restype = ctypes.c_void_p
         my_function.mainfct.argtypes = [ctypes.c_char_p]
-        print("2")
+ 
         fulllist = FullList.from_address(my_function.mainfct(s))
-        print("2")
         newlist = CustomList.from_address(fulllist.nl)
 
         # .decode('utf-8') better way ?
@@ -113,9 +116,6 @@ class Worker(QObject):
                 newdata = newFormula.data.decode('utf-8')
                 self.formula.append(newdata)
 
-        print("SELF FORMULA ONE")
-        print(self.formula)
-
         good_formula = []
         str_formula = ""
         for e in self.formula:
@@ -154,7 +154,18 @@ class ParserWorker(QObject):
         my_function = ctypes.CDLL(so_file)
 
         s = ctypes.create_string_buffer(self.fullText.encode('utf-8'))
+        strTest = "AAA g hdjd kjdqlkqdj BBBB djqjzdhkqzdjhm mdm CCCC 1234"
+        print(strTest)
+        new_s = strTest.split("AAA")
+        print(new_s)
+        new_s2 = new_s[1].split("BBBB")
+        print(new_s2)
+        new_s3 = new_s2[1].split("CCCC")
+        print(new_s3)
 
+        print(re.split(" AAA BBBB CCCC", strTest))
+
+        '''
         my_function.parser.restype = ctypes.c_int
         my_function.parser.argtypes = [ctypes.c_char_p]
         ret = FullList.from_address(my_function.parser(s))
@@ -165,6 +176,7 @@ class ParserWorker(QObject):
         if ret != None :
             print("NICE WE GOT HERE")
             pass
+        '''
 
 
 def brute_force(cnf):
@@ -188,6 +200,7 @@ class Window(QDialog):
     def __init__(self, parent=None):
         super().__init__()
         # a figure instance to plot on
+        #self.figure = plt.figure(figsize=(20,20))
         self.figure = plt.figure()
         self.width = 1000
         self.height = 800
@@ -196,6 +209,7 @@ class Window(QDialog):
         # displays the 'figure'it takes the
         # 'figure' instance as a parameter to __init__
         self.canvas = FigureCanvas(self.figure)
+        self.canvas.setParent(self)
         # this is the Navigation widget
         # it takes the Canvas widget and a parent
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
@@ -252,7 +266,14 @@ class Window(QDialog):
         """
 
         str,cost = randomTree.TreeGen(5, 3)
-        
+
+        g = Glucose3()
+        g.add_clause([-1, 2])
+        g.add_clause([-2, 3])
+        print(g.solve())
+        print(g.get_model())
+
+        # TODO
         self.grammarText.setText(str)
         self.parser()
         
@@ -263,14 +284,16 @@ class Window(QDialog):
 
         print("###########################################")
 
+        # TODO CA AVANCE
+        self.figure.set_size_inches(20,12, forward=True)
+        self.figure.set_dpi(50)
+        
         g = nx.DiGraph()
-
         
         g.add_nodes_from(ln)
         print(ln)
         print(le)
         labels = {n: n for n in g}
-        #g.add_edges_from(le)  
 
         types = [(u, d['type']) for (u, d) in g.nodes(data=True)]
         counter_list = [u for (u, d) in g.nodes(data=True) if d['type'] == 'CntMs']
@@ -289,53 +312,29 @@ class Window(QDialog):
         logic_edge = []
         for (u, d) in g.nodes(data=True):
             labels_cost[u] = d['cost']
-            print("HEHEHEHEHEHEHEHEEH")
             if d['leaf'] == 0:
                 nodes_not_leaf.append(u)
                 name = u + '_' + "LOGIC"#d['type']
-                print(name)
                 node = (name, {'type': 'logic', 'parent': u})
                 logic_nodes.append(node)
                 # if has no CM
                 edge = (u, name)
                 labels_logic[name] = d['type']
                 logic_edge.append(edge)
-
-
-                # else...
-
-            #if d['type'] == 'CntMs':
-                #name = u + '_' + "LOGIC"#d['type']
-                #print("e")
-                #node = (name, {'type': 'logic', 'parent': u})
-                #logic_nodes.append(node)
-                #edge = (u, name)
-                #labels_logic[name] = d['type']
-                #logic_edge.append(edge)
                 
-
-        print("COPYPYPYPYP")
-        print(logic_nodes)
         g.add_nodes_from(logic_nodes)
         for (u, d) in g.nodes(data=True):
             print(u, d)
-        print("COPYPYPYPYP")
-        #for (u, d) in g.nodes(data=True):
-        #    print(u, d)
-        
-        #g.add_edges_from(new_le)
 
         # attention aux CM !!
         for (u, v) in le:
             # if type != cntms
             if v not in counter_list:
                 edge = (u + '_' + "LOGIC", v)
-                print(edge)
                 new_le.append(edge)
             else:
                 if u in nodes_not_leaf:
                     edge = (u + '_' + "LOGIC", v)
-                    print(edge)
                     new_le.append(edge)
                 else:
                     new_le.append((u, v))
@@ -356,18 +355,15 @@ class Window(QDialog):
                 pos[u] = tuple(new_pos)
     
 
-        print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
+        print("@@@@@@@@@@@@@ NODES @@@@@@@@@@@@@")
         for (u, v, d) in g.edges(data=True):
             print(u, v, d)
 
-        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-
+        print("######### EDGES #############")
         print(le)
         
         # edges
-        #nx.draw_networkx_edges(g, pos, edgelist=logic_edge, arrows=False, width=2, alpha=0.8, edge_color='black', style='solid', connectionstyle='angle')
-        #n x.draw_networkx_edges(g, pos, edgelist=new_le, arrows=False, width=2, alpha=0.8, edge_color='black', style='solid'), connectionstyle='aangle3')
-        nx.draw_networkx_edges(g, pos, edgelist=logic_edge, connectionstyle='arc3, rad=0.0')#angleA=0, angleB=90, rad=0.0')
+        nx.draw_networkx_edges(g, pos, edgelist=logic_edge, connectionstyle='arc3, rad=0.0')
         nx.draw_networkx_edges(g, pos, edgelist=new_le, connectionstyle='arc3, rad=0.0')
         # labels
         nx.draw_networkx_labels(g, pos, labels, font_size=14, font_color='black', font_family='sans-serif', bbox=dict(facecolor="white", edgecolor='black', boxstyle='round,pad=0.8'))
@@ -383,8 +379,11 @@ class Window(QDialog):
         nx.draw_networkx_labels(g, pos_higher, labels_cost,  font_size=10, font_color='b', font_family='sans-serif', bbox=dict(facecolor="white", edgecolor='black', boxstyle='round,pad=0.2'))
 
         plt.axis('off')
+        
         plt.subplots_adjust(left=0.00, right=1.0, bottom=0.00, top=1.0, hspace = 0, wspace=0)
-        self.figure = plt.gcf()
+        #self.figure = plt.gcf()
+        
+        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
     # action called by the import button
     def plot(self, node_list, edge_list):
@@ -410,7 +409,6 @@ class Window(QDialog):
         self.thread.started.connect(self.worker.run)
         #self.worker.finished.connect(lambda: print(self.worker.finished))
         self.worker.finished.connect(self.thread.quit)
-        # A REMETTRE
         self.worker.finished.connect(self.cleaning)
         self.thread.finished.connect(self.thread.deleteLater)
         # Step 6: Start the thread
@@ -423,8 +421,6 @@ class Window(QDialog):
         )
 
     def cleaning(self):
-        #print("INSIDE")
-        #print(self.worker.node_list)
         new_nl = self.worker.node_list
         new_el = self.worker.edge_list
         self.tracesFound.setText(self.worker.str_formula)

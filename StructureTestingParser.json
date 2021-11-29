@@ -1,42 +1,132 @@
 {
-  "Action":"N",
+  "Action":"node",
   "Type":"OR",
   "Child":[
     {
       "Action":"node1",
-      "Type":"OR",
+      "Type":"SAND",
       "Child":[
         {
           "Action":"node11",
-          "Type":"OR",
+          "Type":"LEAF"
+        },
+        {
+          "Action":"node12",
+          "Type":"AND",
           "Child":[
             {
-              "Action":"node111",
+              "Action":"node121",
+              "Type":"SAND",
+              "Child":[
+                {
+                  "Action":"node1211",
+                  "Type":"LEAF"
+                },
+                {
+                  "Action":"node1212",
+                  "Type":"LEAF"
+                },
+                {
+                  "Action":"node1213",
+                  "Type":"SAND",
+                  "Child":[
+                    {
+                      "Action":"node12131",
+                      "Type":"LEAF"
+                    },
+                    {
+                      "Action":"node12132",
+                      "Type":"LEAF"
+                    },
+                    {
+                      "Action":"node12133",
+                      "Type":"LEAF"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Action":"node122",
               "Type":"LEAF"
             },
             {
-              "Action":"node112",
-              "Type":"LEAF"
-            },
-            {
-              "Action":"node113",
-              "Type":"LEAF"
+              "Action":"node123",
+              "Type":"OR",
+              "Child":[
+                {
+                  "Action":"node1231",
+                  "Type":"LEAF"
+                },
+                {
+                  "Action":"node1232",
+                  "Type":"LEAF"
+                },
+                {
+                  "Action":"node1233",
+                  "Type":"LEAF"
+                }
+              ]
             }
           ]
         },
         {
-          "Action":"node12",
-          "Type":"LEAF"
-        },
-        {
           "Action":"node13",
-          "Type":"LEAF"
+          "Type":"AND",
+          "Child":[
+            {
+              "Action":"node131",
+              "Type":"LEAF"
+            },
+            {
+              "Action":"node132",
+              "Type":"SAND",
+              "Child":[
+                {
+                  "Action":"node1321",
+                  "Type":"LEAF"
+                },
+                {
+                  "Action":"node1322",
+                  "Type":"LEAF"
+                },
+                {
+                  "Action":"node1323",
+                  "Type":"OR",
+                  "Child":[
+                    {
+                      "Action":"node13231",
+                      "Type":"SAND",
+                      "Child":[
+                        {
+                          "Action":"node132311",
+                          "Type":"LEAF"
+                        },
+                        {
+                          "Action":"node132312",
+                          "Type":"LEAF"
+                        }
+                      ]
+                    },
+                    {
+                      "Action":"node13232",
+                      "Type":"LEAF"
+                    },
+                    {
+                      "Action":"node13233",
+                      "Type":"LEAF"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
       ]
     },
     {
       "Action":"node2",
-      "Type":"AND",
+      "Type":"SAND",
       "Child":[
         {
           "Action":"node21",
@@ -48,37 +138,51 @@
           "Child":[
             {
               "Action":"node221",
-              "Type":"SAND",
-              "Child":[
-                {
-                  "Action":"node2211",
-                  "Type":"LEAF"
-                },
-                {
-                  "Action":"node2212",
-                  "Type":"LEAF"
-                }
-              ]
+              "Type":"LEAF"
             },
             {
               "Action":"node222",
-              "Type":"OR",
-              "Child":[
-                {
-                  "Action":"node2221",
-                  "Type":"LEAF"
-                },
-                {
-                  "Action":"node2222",
-                  "Type":"LEAF"
-                }
-              ]
+              "Type":"LEAF"
             }
           ]
         },
         {
           "Action":"node23",
-          "Type":"LEAF"
+          "Type":"SAND",
+          "Child":[
+            {
+              "Action":"node231",
+              "Type":"LEAF"
+            },
+            {
+              "Action":"node232",
+              "Type":"LEAF"
+            },
+            {
+              "Action":"node233",
+              "Type":"OR",
+              "Child":[
+                {
+                  "Action":"node2331",
+                  "Type":"AND",
+                  "Child":[
+                    {
+                      "Action":"node23311",
+                      "Type":"LEAF"
+                    },
+                    {
+                      "Action":"node23312",
+                      "Type":"LEAF"
+                    }
+                  ]
+                },
+                {
+                  "Action":"node2332",
+                  "Type":"LEAF"
+                }
+              ]
+            }
+          ]
         }
       ]
     }
