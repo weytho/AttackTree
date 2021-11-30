@@ -135,7 +135,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
       size_t n_children;
       json_object_object_get_ex(parsed_json, "Child", &children);
       n_children = json_object_array_length(children);
-      Formula *left = Parenthesis("LEFT");
+      Formula *left = formula("LEFT");
       if((*form) == NULL){
          (*form) = left;
       }
@@ -165,7 +165,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
             esp = ret->esp;
          }
          if(i<n_children-1){
-            Formula *t = Parenthesis(json_object_get_string(type));
+            Formula *t = formula(json_object_get_string(type));
             Formula *runner = *(form);
             while(runner->next != NULL){
                runner = runner->next;
@@ -175,7 +175,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
          free(ret);
       }
 
-      Formula *right = Parenthesis("RIGHT");
+      Formula *right = formula("RIGHT");
       Formula *runner = *(form);
       while(runner->next != NULL){
          runner = runner->next;

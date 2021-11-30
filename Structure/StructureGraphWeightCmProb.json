@@ -9,7 +9,7 @@
     ],
     "Child": [
         {
-            "Action": "A",
+            "Action": "a",
             "Type":"LEAF",
             "Cost":1,
             "Prob":1.0,
@@ -30,7 +30,7 @@
             "CM": [],
             "Child" : [
                 {
-                    "Action": "B",
+                    "Action": "b",
                     "Type":"LEAF",
                     "Cost":4,
                     "Prob":0.8,
@@ -42,7 +42,7 @@
                     ]
                 },
                 {
-                    "Action": "C",
+                    "Action": "c",
                     "Type":"LEAF",
                     "Cost":2,
                     "Prob":1.0,
@@ -61,14 +61,14 @@
             ],
             "Child" : [
                 {
-                    "Action": "D",
+                    "Action": "d",
                     "Type":"LEAF",
                     "Cost":3,
                     "Prob":1.0,
                     "CM": []
                 },
                 {
-                    "Action": "E",
+                    "Action": "e",
                     "Type":"LEAF",
                     "Cost":2,
                     "Prob":0.65,
@@ -82,7 +82,7 @@
             ]
         },
         {
-            "Action": "F",
+            "Action": "f",
             "Type":"LEAF",
             "Cost":4,
             "Prob":0.8,
