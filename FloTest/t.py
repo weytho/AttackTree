@@ -24,6 +24,10 @@ import randomTree
 from pysat.solvers import Glucose3
 import plotly
 import re
+from math import inf
+from collections import Counter
+import matplotlib.image as mpimg
+from PIL import Image
 
 
 from PyQt5.QtWidgets import (
@@ -65,6 +69,7 @@ class Worker(QObject):
         print("WORKER")
         self.node_list= []
         self.edge_list = []
+        self.leaf_cnt = 0
         self.formula = []
         dirname = os.path.dirname(__file__)
         so_file = os.path.join(dirname, 'testlib.so')
@@ -82,6 +87,8 @@ class Worker(QObject):
         if newlist != None :
             tmp_node = CustomNode.from_address(newlist.data)
             newdict = {'type': tmp_node.type.decode('utf-8'),'leaf': tmp_node.leaf, 'root': tmp_node.root, 'cost': tmp_node.cost}
+            if( newdict['leaf'] == 1 ):
+                self.leaf_cnt = self.leaf_cnt + 1
             newtuple = (tmp_node.title.decode('utf-8'), newdict)
             self.node_list.append(newtuple)
 
@@ -89,6 +96,8 @@ class Worker(QObject):
                 newlist = CustomList.from_address(newlist.next)
                 tmp_node = CustomNode.from_address(newlist.data)
                 newdict = {'type': tmp_node.type.decode('utf-8'),'leaf': tmp_node.leaf, 'root': tmp_node.root, 'cost': tmp_node.cost}
+                if( newdict['leaf'] == 1 ):
+                    self.leaf_cnt = self.leaf_cnt + 1
                 newtuple = (tmp_node.title.decode('utf-8'), newdict)
                 self.node_list.append(newtuple)
 
@@ -165,7 +174,6 @@ class ParserWorker(QObject):
 
         print(re.split(" AAA BBBB CCCC", strTest))
 
-        '''
         my_function.parser.restype = ctypes.c_int
         my_function.parser.argtypes = [ctypes.c_char_p]
         ret = FullList.from_address(my_function.parser(s))
@@ -176,7 +184,6 @@ class ParserWorker(QObject):
         if ret != None :
             print("NICE WE GOT HERE")
             pass
-        '''
 
 
 def brute_force(cnf):
@@ -265,7 +272,7 @@ class Window(QDialog):
         R -OR-> {F13}
         """
 
-        str,cost = randomTree.TreeGen(5, 3)
+        str,cost = randomTree.TreeGen(7, 5)
 
         g = Glucose3()
         g.add_clause([-1, 2])
@@ -278,16 +285,13 @@ class Window(QDialog):
         self.parser()
         
 
-    def get_canvas(self, ln, le):
+    def get_canvas(self, ln, le, leaf_cnt):
 
         # example stackoverflow
 
-        print("###########################################")
+        print("###########################################")     
+        #self.figure.set_size_inches(10*3, 6*3, forward=True)
 
-        # TODO CA AVANCE
-        self.figure.set_size_inches(20,12, forward=True)
-        self.figure.set_dpi(50)
-        
         g = nx.DiGraph()
         
         g.add_nodes_from(ln)
@@ -344,6 +348,42 @@ class Window(QDialog):
 
         pos = nx.nx_agraph.graphviz_layout(g, prog='dot')
 
+        print(pos)
+        # RESIZE figure
+        list_width = []
+        for k, v in pos.items():
+            list_width.append(v[1])
+        # TODO CA AVANCE
+        # 10 * 6 inches
+        # 100 dpi
+        # For 5 leaves ?
+        # 1000 * 600 pixels
+        current_size_x = 10
+        current_size_y = 6
+        current_dpi = 100
+        list_level = Counter(list_width).most_common()
+        biggest_level = list_level[0][1]
+        biggest_trace = len(list_level)
+        print("HERE IS THE BIGGEST")
+        print(list_level)
+        print(biggest_level)
+        print(biggest_trace)
+        if( biggest_level > 7 or biggest_trace > 9):
+            # TODO FIXE THIS NBR
+            max_number_on_line = 7
+            coeff1 = (biggest_level + 1) / max_number_on_line
+            max_number_on_trace = 7
+            coeff2 = (biggest_trace + 1) / max_number_on_trace
+            coeff = max(coeff1, coeff2)
+            self.figure.set_size_inches(current_size_x*coeff, current_size_y*coeff, forward=True)
+            self.figure.set_dpi(current_dpi/coeff)
+        else:
+            self.figure.set_size_inches(current_size_x, current_size_y, forward=True)
+            self.figure.set_dpi(current_dpi)
+            #pass
+
+        #self.figure.set_size_inches(current_size_x, current_size_y, forward=True)
+
         # CM entre noeud et noeud logic
 
         for (u, d) in g.nodes(data=True):
@@ -382,14 +422,17 @@ class Window(QDialog):
         
         plt.subplots_adjust(left=0.00, right=1.0, bottom=0.00, top=1.0, hspace = 0, wspace=0)
         #self.figure = plt.gcf()
+
+        plt.savefig('testingImage.png')
         
         print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
     # action called by the import button
-    def plot(self, node_list, edge_list):
+    def plot(self, node_list, edge_list, leaf_cnt):
         # clearing old figure
         self.figure.clear()
-        self.get_canvas(node_list, edge_list)
+        self.get_canvas(node_list, edge_list, leaf_cnt)    
+
         self.canvas.draw()
         print("pressed")
 
@@ -423,9 +466,10 @@ class Window(QDialog):
     def cleaning(self):
         new_nl = self.worker.node_list
         new_el = self.worker.edge_list
+        leaf_cnt = self.worker.leaf_cnt
         self.tracesFound.setText(self.worker.str_formula)
         self.worker.deleteLater
-        self.plot(new_nl, new_el)
+        self.plot(new_nl, new_el, leaf_cnt)
         print(new_nl)
 
     def parser(self):
