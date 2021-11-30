@@ -165,7 +165,7 @@ class ParserWorker(QObject):
 
         print(re.split(" AAA BBBB CCCC", strTest))
 
-        '''
+        
         my_function.parser.restype = ctypes.c_int
         my_function.parser.argtypes = [ctypes.c_char_p]
         ret = FullList.from_address(my_function.parser(s))
@@ -176,7 +176,7 @@ class ParserWorker(QObject):
         if ret != None :
             print("NICE WE GOT HERE")
             pass
-        '''
+        
 
 
 def brute_force(cnf):

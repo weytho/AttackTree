@@ -1,6 +1,6 @@
 {
   "Action":"node",
-  "Type":"SAND",
+  "Type":"OR",
   "Child":[
     {
       "Action":"node1",
@@ -8,77 +8,11 @@
       "Child":[
         {
           "Action":"node11",
-          "Type":"OR",
-          "Child":[
-            {
-              "Action":"node111",
-              "Type":"LEAF"
-            },
-            {
-              "Action":"node112",
-              "Type":"LEAF"
-            },
-            {
-              "Action":"node113",
-              "Type":"OR",
-              "Child":[
-                {
-                  "Action":"node1131",
-                  "Type":"LEAF"
-                },
-                {
-                  "Action":"node1132",
-                  "Type":"SAND",
-                  "Child":[
-                    {
-                      "Action":"node11321",
-                      "Type":"OR",
-                      "Child":[
-                        {
-                          "Action":"node113211",
-                          "Type":"LEAF"
-                        },
-                        {
-                          "Action":"node113212",
-                          "Type":"LEAF"
-                        },
-                        {
-                          "Action":"node113213",
-                          "Type":"LEAF"
-                        }
-                      ]
-                    },
-                    {
-                      "Action":"node11322",
-                      "Type":"LEAF"
-                    },
-                    {
-                      "Action":"node11323",
-                      "Type":"LEAF"
-                    }
-                  ]
-                },
-                {
-                  "Action":"node1133",
-                  "Type":"LEAF"
-                }
-              ]
-            }
-          ]
+          "Type":"LEAF"
         },
         {
           "Action":"node12",
-          "Type":"AND",
-          "Child":[
-            {
-              "Action":"node121",
-              "Type":"LEAF"
-            },
-            {
-              "Action":"node122",
-              "Type":"LEAF"
-            }
-          ]
+          "Type":"LEAF"
         },
         {
           "Action":"node13",
@@ -88,69 +22,11 @@
     },
     {
       "Action":"node2",
-      "Type":"OR",
-      "Child":[
-        {
-          "Action":"node21",
-          "Type":"LEAF"
-        },
-        {
-          "Action":"node22",
-          "Type":"OR",
-          "Child":[
-            {
-              "Action":"node221",
-              "Type":"OR",
-              "Child":[
-                {
-                  "Action":"node2211",
-                  "Type":"LEAF"
-                },
-                {
-                  "Action":"node2212",
-                  "Type":"LEAF"
-                },
-                {
-                  "Action":"node2213",
-                  "Type":"SAND",
-                  "Child":[
-                    {
-                      "Action":"node22131",
-                      "Type":"LEAF"
-                    },
-                    {
-                      "Action":"node22132",
-                      "Type":"LEAF"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "Action":"node222",
-              "Type":"AND",
-              "Child":[
-                {
-                  "Action":"node2221",
-                  "Type":"LEAF"
-                },
-                {
-                  "Action":"node2222",
-                  "Type":"LEAF"
-                },
-                {
-                  "Action":"node2223",
-                  "Type":"LEAF"
-                }
-              ]
-            },
-            {
-              "Action":"node223",
-              "Type":"LEAF"
-            }
-          ]
-        }
-      ]
+      "Type":"LEAF"
+    },
+    {
+      "Action":"node3",
+      "Type":"LEAF"
     }
   ]
 }
