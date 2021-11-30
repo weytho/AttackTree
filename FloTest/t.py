@@ -2,6 +2,7 @@ from random import random
 import sys
 from PyQt5 import QtCore, QtGui
 from PyQt5 import QtWidgets
+from PyQt5.QtWebEngineWidgets import QWebEngineView
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 # gcc -shared -Wl,-soname,testlib -o testlib.so -fPIC testlib.c
 # pyuic5 -o main_window_ui.py ui/main_window.ui
@@ -11,15 +12,17 @@ from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 # https://stackoverflow.com/questions/38661635/ctypes-struct-returned-from-library
 import matplotlib.pyplot as plt
 from networkx.algorithms.traversal.edgebfs import edge_bfs
+from networkx.drawing.nx_agraph import graphviz_layout, pygraphviz_layout
 import numpy as np
 import networkx as nx
 import graphviz
 import time
-from PyQt5.QtCore import QObject, QThread, pyqtSignal
+from PyQt5.QtCore import QObject, QThread, QUrl, pyqtSignal
 import ctypes
 import os
 import itertools
 import PIL
+from pyvis.network import Network
 import randomTree
 from pysat.solvers import Glucose3
 import plotly
@@ -215,11 +218,13 @@ class Window(QDialog):
         # this is the Canvas Widget that 
         # displays the 'figure'it takes the
         # 'figure' instance as a parameter to __init__
-        self.canvas = FigureCanvas(self.figure)
-        self.canvas.setParent(self)
+        # TODO
+        #self.canvas = FigureCanvas(self.figure)
+        #self.canvas.setParent(self)
+        self.canvas = QWebEngineView()
         # this is the Navigation widget
         # it takes the Canvas widget and a parent
-        self.toolbar = NavigationToolbar2QT(self.canvas, self)
+        #self.toolbar = NavigationToolbar2QT(self.canvas, self)
         # Just some button connected to 'plot' method
         self.button = QPushButton('Import')
         self.buttonParse = QPushButton('Create JSON')
@@ -240,7 +245,7 @@ class Window(QDialog):
         layout.addLayout(Vlayout_left)
         layout.addLayout(Vlayout_right)
         # adding tool bar to the layout
-        Vlayout_left.addWidget(self.toolbar)         
+        #Vlayout_left.addWidget(self.toolbar)         
         # adding canvas to the layout
         Vlayout_left.addWidget(self.canvas)    
         # adding push button to the layout
@@ -272,7 +277,7 @@ class Window(QDialog):
         R -OR-> {F13}
         """
 
-        str,cost = randomTree.TreeGen(7, 5)
+        str,cost = randomTree.TreeGen(5, 3)
 
         g = Glucose3()
         g.add_clause([-1, 2])
@@ -346,9 +351,24 @@ class Window(QDialog):
         g.add_edges_from(logic_edge)
         g.add_edges_from(new_le)
 
-        pos = nx.nx_agraph.graphviz_layout(g, prog='dot')
-
+        #ng = nx.nx_agraph.to_agraph(g)
+        #ng.graph_attr.update(size="100,100")
+        
+        #ng.layout(prog="dot")
+        #print(ng)
+        #g = nx.nx_agraph.from_agraph(ng)
+        pos = nx.nx_agraph.graphviz_layout(g, prog='dot')#, args='-Gsize=20,12\! -Gdpi=100')
+        print("HHHHHH")
+        
+        '''ng.layout(prog="dot")
+        list = ng.nodes()
+        print(list)
+        for element in list:
+            print(element)
+        #print(ng.nodes)
+        '''
         print(pos)
+
         # RESIZE figure
         list_width = []
         for k, v in pos.items():
@@ -424,6 +444,27 @@ class Window(QDialog):
         #self.figure = plt.gcf()
 
         plt.savefig('testingImage.png')
+        nt = Network(height="100%", width="100%")#'600px', '1000px')
+
+        nt.toggle_physics(False)
+
+        for (n, d) in ln:
+            nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n)
+
+        for (n, d) in logic_nodes:
+            nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n)
+
+        for (n, d) in new_le:
+            nt.add_edge(n, d)
+
+        for (n, d) in logic_edge:
+            nt.add_edge(n, d)
+
+        #nt.from_nx(g)
+        #print(nt)
+        #print(nx)
+
+        nt.save_graph('nx.html')
         
         print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
@@ -433,7 +474,9 @@ class Window(QDialog):
         self.figure.clear()
         self.get_canvas(node_list, edge_list, leaf_cnt)    
 
-        self.canvas.draw()
+        local_url = QUrl.fromLocalFile('/home/flo/Desktop/Github/AttackTree/nx.html')
+        self.canvas.load(local_url)
+        #self.canvas.draw()
         print("pressed")
 
     # file explorer
