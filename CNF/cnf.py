@@ -41,6 +41,6 @@ def tran(lst_symbol,lst_char,s,min,max):
 def cnf2(str):
     print(to_cnf(str))
 
-#e = symbols('e')
+# pas E I N O Q en première lettre ! 
 print(to_cnf("(a & flo) | (z & a)"))
-print(to_cnf("( a & ( b & c ) & ( d | e ) & f )"))
+print(to_cnf("(B & O) | (M & a)"))

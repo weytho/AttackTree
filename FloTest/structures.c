@@ -145,6 +145,28 @@ Formula * Parenthesis(const char* type){
    return new;
 }
 
+Formula * formula(char* type){
+   Formula* new = malloc(sizeof(Formula));
+   new->next = NULL;
+   if(!strncmp("LEFT",type,5)){
+      new->data = "( ";
+   }
+   else if(!strncmp("RIGHT",type,6)){
+      new->data = " )";
+   }
+   else if(!strncmp("AND",type,4)){
+      new->data = " & ";
+   }
+   else if(!strncmp("OR",type,3)){
+      new->data = " | ";
+   }
+   else{
+      new->data = " & ";
+   }
+   return new;
+}
+
+
 // -------- Return
 
 typedef struct CostProbability CostProb;
