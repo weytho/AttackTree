@@ -1,11 +1,12 @@
+from PyQt5.QtCore import QUrl
 import matplotlib.pyplot as plt
 import networkx as nx
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 from networkx.drawing import layout
 from pyvis.network import Network
 import plotly.graph_objects as go
-#from PyQt5.QtWebEngineWidgets import QWebEngineView
-import PyQtWebEngine
+from PyQt5.QtWebEngineWidgets import QWebEngineView
+#import PyQtWebEngine
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from plotly.graph_objects import Figure, Scatter
 import plotly
@@ -25,7 +26,10 @@ class MainWindow(QMainWindow):
 
         # we create an instance of QWebEngineView and set the html code
         plot_widget = QWebEngineView()
-        plot_widget.setHtml('nx.html')
+
+        local_url = QUrl.fromLocalFile('/home/flo/Desktop/Github/AttackTree/nx.html')
+
+        plot_widget.load(local_url)
 
         # set the QWebEngineView instance as main widget
         self.setCentralWidget(plot_widget)
