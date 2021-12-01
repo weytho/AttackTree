@@ -42,5 +42,6 @@ def cnf2(str):
     print(to_cnf(str))
 
 # pas E I N O Q en première lettre ! 
-print(to_cnf("(a & flo) | (z & a)"))
-print(to_cnf("(B & O) | (M & a)"))
+print(to_cnf("(a & flo) | (thomas & a)"))
+
+print(to_cnf("(B & s) | (M & a) | (g & i)"))

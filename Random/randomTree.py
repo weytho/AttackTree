@@ -2,8 +2,6 @@ import math
 import sys
 import random
 
-Alphabet = "abcdefghijklmnopqrstuvwxyz"
-
 def nodeGeneration(txt, costs, node, depth, maxdepth, branching_factor, first):
 
     rng = random.randint(0,maxdepth)
@@ -27,7 +25,7 @@ def nodeGeneration(txt, costs, node, depth, maxdepth, branching_factor, first):
     # leaf child
     rngchild = random.randint(2,branching_factor)
     txt += "{"
-    child = [node+Alphabet[i] for i in range(0,rngchild)]
+    child = [node+str(i) for i in range(0,rngchild)]
     for i in range(0,rngchild):
         txt += child[i]
         if i!=rngchild-1:
