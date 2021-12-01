@@ -1,0 +1,108 @@
+<html>
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.css" type="text/css" />
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis-network.min.js"> </script>
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+
+<style type="text/css">
+
+        #mynetwork {
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+            border: 1px solid lightgray;
+            position: relative;
+            float: left;
+        }
+
+        
+
+        
+
+        
+</style>
+
+</head>
+
+<body>
+<div id = "mynetwork"></div>
+
+
+<script type="text/javascript">
+
+    // initialize global variables.
+    var edges;
+    var nodes;
+    var network; 
+    var container;
+    var options, data;
+
+    
+    // This method is responsible for drawing the graph, returns the drawn network
+    function drawGraph() {
+        var container = document.getElementById('mynetwork');
+        
+        
+
+        // parsing and collecting nodes and edges from the python
+        nodes = new vis.DataSet([{"id": "node", "label": "node", "shape": "dot", "x": 1029.4, "y": -4410.0}, {"id": "node0", "label": "node0", "shape": "dot", "x": 873.39, "y": -3690.0}, {"id": "node00", "label": "node00", "shape": "dot", "x": 409.39, "y": -2970.0}, {"id": "node000", "label": "node000", "shape": "dot", "x": 184.39, "y": -2250.0}, {"id": "node001", "label": "node001", "shape": "dot", "x": 303.39, "y": -2250.0}, {"id": "node0010", "label": "node0010", "shape": "dot", "x": 95.394, "y": -1530.0}, {"id": "node0011", "label": "node0011", "shape": "dot", "x": 226.39, "y": -1530.0}, {"id": "node00110", "label": "node00110", "shape": "dot", "x": 62.394, "y": -810.0}, {"id": "node00111", "label": "node00111", "shape": "dot", "x": 205.39, "y": -810.0}, {"id": "node01", "label": "node01", "shape": "dot", "x": 700.39, "y": -2970.0}, {"id": "node010", "label": "node010", "shape": "dot", "x": 540.39, "y": -2250.0}, {"id": "node0100", "label": "node0100", "shape": "dot", "x": 369.39, "y": -1530.0}, {"id": "node0101", "label": "node0101", "shape": "dot", "x": 500.39, "y": -1530.0}, {"id": "node01010", "label": "node01010", "shape": "dot", "x": 348.39, "y": -810.0}, {"id": "node01011", "label": "node01011", "shape": "dot", "x": 491.39, "y": -810.0}, {"id": "node010110", "label": "node010110", "shape": "dot", "x": 414.39, "y": -90.0}, {"id": "node010111", "label": "node010111", "shape": "dot", "x": 568.39, "y": -90.0}, {"id": "node01012", "label": "node01012", "shape": "dot", "x": 634.39, "y": -810.0}, {"id": "node011", "label": "node011", "shape": "dot", "x": 700.39, "y": -2250.0}, {"id": "node0110", "label": "node0110", "shape": "dot", "x": 634.39, "y": -1530.0}, {"id": "node0111", "label": "node0111", "shape": "dot", "x": 765.39, "y": -1530.0}, {"id": "node01110", "label": "node01110", "shape": "dot", "x": 777.39, "y": -810.0}, {"id": "node01111", "label": "node01111", "shape": "dot", "x": 920.39, "y": -810.0}, {"id": "node012", "label": "node012", "shape": "dot", "x": 877.39, "y": -2250.0}, {"id": "node0120", "label": "node0120", "shape": "dot", "x": 896.39, "y": -1530.0}, {"id": "node01200", "label": "node01200", "shape": "dot", "x": 1063.4, "y": -810.0}, {"id": "node01201", "label": "node01201", "shape": "dot", "x": 1206.4, "y": -810.0}, {"id": "node0121", "label": "node0121", "shape": "dot", "x": 1027.4, "y": -1530.0}, {"id": "node02", "label": "node02", "shape": "dot", "x": 808.39, "y": -2970.0}, {"id": "node1", "label": "node1", "shape": "dot", "x": 1029.4, "y": -3690.0}, {"id": "node10", "label": "node10", "shape": "dot", "x": 921.39, "y": -2970.0}, {"id": "node11", "label": "node11", "shape": "dot", "x": 1029.4, "y": -2970.0}, {"id": "node12", "label": "node12", "shape": "dot", "x": 1137.4, "y": -2970.0}, {"id": "node120", "label": "node120", "shape": "dot", "x": 1036.4, "y": -2250.0}, {"id": "node1200", "label": "node1200", "shape": "dot", "x": 1158.4, "y": -1530.0}, {"id": "node1201", "label": "node1201", "shape": "dot", "x": 1289.4, "y": -1530.0}, {"id": "node1202", "label": "node1202", "shape": "dot", "x": 1420.4, "y": -1530.0}, {"id": "node12020", "label": "node12020", "shape": "dot", "x": 1385.4, "y": -810.0}, {"id": "node12021", "label": "node12021", "shape": "dot", "x": 1528.4, "y": -810.0}, {"id": "node121", "label": "node121", "shape": "dot", "x": 1155.4, "y": -2250.0}, {"id": "node2", "label": "node2", "shape": "dot", "x": 1220.4, "y": -3690.0}, {"id": "node20", "label": "node20", "shape": "dot", "x": 1363.4, "y": -2970.0}, {"id": "node200", "label": "node200", "shape": "dot", "x": 1274.4, "y": -2250.0}, {"id": "node201", "label": "node201", "shape": "dot", "x": 1393.4, "y": -2250.0}, {"id": "node21", "label": "node21", "shape": "dot", "x": 1506.4, "y": -2970.0}, {"id": "node210", "label": "node210", "shape": "dot", "x": 1512.4, "y": -2250.0}, {"id": "node211", "label": "node211", "shape": "dot", "x": 1631.4, "y": -2250.0}, {"id": "node212", "label": "node212", "shape": "dot", "x": 1750.4, "y": -2250.0}, {"id": "node_LOGIC", "label": "node_LOGIC", "shape": "dot", "x": 1029.4, "y": -4050.0}, {"id": "node0_LOGIC", "label": "node0_LOGIC", "shape": "dot", "x": 873.39, "y": -3330.0}, {"id": "node00_LOGIC", "label": "node00_LOGIC", "shape": "dot", "x": 409.39, "y": -2610.0}, {"id": "node001_LOGIC", "label": "node001_LOGIC", "shape": "dot", "x": 303.39, "y": -1890.0}, {"id": "node0011_LOGIC", "label": "node0011_LOGIC", "shape": "dot", "x": 226.39, "y": -1170.0}, {"id": "node01_LOGIC", "label": "node01_LOGIC", "shape": "dot", "x": 700.39, "y": -2610.0}, {"id": "node010_LOGIC", "label": "node010_LOGIC", "shape": "dot", "x": 540.39, "y": -1890.0}, {"id": "node0101_LOGIC", "label": "node0101_LOGIC", "shape": "dot", "x": 500.39, "y": -1170.0}, {"id": "node01011_LOGIC", "label": "node01011_LOGIC", "shape": "dot", "x": 491.39, "y": -450.0}, {"id": "node011_LOGIC", "label": "node011_LOGIC", "shape": "dot", "x": 700.39, "y": -1890.0}, {"id": "node0111_LOGIC", "label": "node0111_LOGIC", "shape": "dot", "x": 765.39, "y": -1170.0}, {"id": "node012_LOGIC", "label": "node012_LOGIC", "shape": "dot", "x": 877.39, "y": -1890.0}, {"id": "node0120_LOGIC", "label": "node0120_LOGIC", "shape": "dot", "x": 896.39, "y": -1170.0}, {"id": "node1_LOGIC", "label": "node1_LOGIC", "shape": "dot", "x": 1029.4, "y": -3330.0}, {"id": "node12_LOGIC", "label": "node12_LOGIC", "shape": "dot", "x": 1137.4, "y": -2610.0}, {"id": "node120_LOGIC", "label": "node120_LOGIC", "shape": "dot", "x": 1036.4, "y": -1890.0}, {"id": "node1202_LOGIC", "label": "node1202_LOGIC", "shape": "dot", "x": 1420.4, "y": -1170.0}, {"id": "node2_LOGIC", "label": "node2_LOGIC", "shape": "dot", "x": 1220.4, "y": -3330.0}, {"id": "node20_LOGIC", "label": "node20_LOGIC", "shape": "dot", "x": 1363.4, "y": -2610.0}, {"id": "node21_LOGIC", "label": "node21_LOGIC", "shape": "dot", "x": 1506.4, "y": -2610.0}]);
+        edges = new vis.DataSet([{"from": "node_LOGIC", "to": "node0"}, {"from": "node0_LOGIC", "to": "node00"}, {"from": "node00_LOGIC", "to": "node000"}, {"from": "node00_LOGIC", "to": "node001"}, {"from": "node001_LOGIC", "to": "node0010"}, {"from": "node001_LOGIC", "to": "node0011"}, {"from": "node0011_LOGIC", "to": "node00110"}, {"from": "node0011_LOGIC", "to": "node00111"}, {"from": "node0_LOGIC", "to": "node01"}, {"from": "node01_LOGIC", "to": "node010"}, {"from": "node010_LOGIC", "to": "node0100"}, {"from": "node010_LOGIC", "to": "node0101"}, {"from": "node0101_LOGIC", "to": "node01010"}, {"from": "node0101_LOGIC", "to": "node01011"}, {"from": "node01011_LOGIC", "to": "node010110"}, {"from": "node01011_LOGIC", "to": "node010111"}, {"from": "node0101_LOGIC", "to": "node01012"}, {"from": "node01_LOGIC", "to": "node011"}, {"from": "node011_LOGIC", "to": "node0110"}, {"from": "node011_LOGIC", "to": "node0111"}, {"from": "node0111_LOGIC", "to": "node01110"}, {"from": "node0111_LOGIC", "to": "node01111"}, {"from": "node01_LOGIC", "to": "node012"}, {"from": "node012_LOGIC", "to": "node0120"}, {"from": "node0120_LOGIC", "to": "node01200"}, {"from": "node0120_LOGIC", "to": "node01201"}, {"from": "node012_LOGIC", "to": "node0121"}, {"from": "node0_LOGIC", "to": "node02"}, {"from": "node_LOGIC", "to": "node1"}, {"from": "node1_LOGIC", "to": "node10"}, {"from": "node1_LOGIC", "to": "node11"}, {"from": "node1_LOGIC", "to": "node12"}, {"from": "node12_LOGIC", "to": "node120"}, {"from": "node120_LOGIC", "to": "node1200"}, {"from": "node120_LOGIC", "to": "node1201"}, {"from": "node120_LOGIC", "to": "node1202"}, {"from": "node1202_LOGIC", "to": "node12020"}, {"from": "node1202_LOGIC", "to": "node12021"}, {"from": "node12_LOGIC", "to": "node121"}, {"from": "node_LOGIC", "to": "node2"}, {"from": "node2_LOGIC", "to": "node20"}, {"from": "node20_LOGIC", "to": "node200"}, {"from": "node20_LOGIC", "to": "node201"}, {"from": "node2_LOGIC", "to": "node21"}, {"from": "node21_LOGIC", "to": "node210"}, {"from": "node21_LOGIC", "to": "node211"}, {"from": "node21_LOGIC", "to": "node212"}, {"from": "node", "to": "node_LOGIC"}, {"from": "node0", "to": "node0_LOGIC"}, {"from": "node00", "to": "node00_LOGIC"}, {"from": "node001", "to": "node001_LOGIC"}, {"from": "node0011", "to": "node0011_LOGIC"}, {"from": "node01", "to": "node01_LOGIC"}, {"from": "node010", "to": "node010_LOGIC"}, {"from": "node0101", "to": "node0101_LOGIC"}, {"from": "node01011", "to": "node01011_LOGIC"}, {"from": "node011", "to": "node011_LOGIC"}, {"from": "node0111", "to": "node0111_LOGIC"}, {"from": "node012", "to": "node012_LOGIC"}, {"from": "node0120", "to": "node0120_LOGIC"}, {"from": "node1", "to": "node1_LOGIC"}, {"from": "node12", "to": "node12_LOGIC"}, {"from": "node120", "to": "node120_LOGIC"}, {"from": "node1202", "to": "node1202_LOGIC"}, {"from": "node2", "to": "node2_LOGIC"}, {"from": "node20", "to": "node20_LOGIC"}, {"from": "node21", "to": "node21_LOGIC"}]);
+
+        // adding nodes and edges to the graph
+        data = {nodes: nodes, edges: edges};
+
+        var options = {
+    "configure": {
+        "enabled": false
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": false,
+            "type": "continuous"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+        
+        
+
+        
+
+        network = new vis.Network(container, data, options);
+	 
+        
+
+
+        
+
+        return network;
+
+    }
+
+    drawGraph();
+
+</script>
+</body>
+</html>

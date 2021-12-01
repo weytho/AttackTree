@@ -31,6 +31,8 @@ from math import inf
 from collections import Counter
 import matplotlib.image as mpimg
 from PIL import Image
+from sympy import *
+from sympy.parsing.sympy_parser import parse_expr
 
 
 from PyQt5.QtWidgets import (
@@ -144,7 +146,12 @@ class Worker(QObject):
         print(good_formula)
         print(str_formula)
         self.str_formula = str_formula
-        #brute_force(good_formula)
+
+        print(type(str_formula))
+        print(to_cnf(parse_expr(str_formula)))
+
+        # STR TO CNF SYMPY
+        self.str_formula = str(to_cnf(parse_expr(str_formula)))
 
         my_function.freeList(newlist)
         #my_function.freeEList(newEdgeList)
@@ -175,7 +182,7 @@ class ParserWorker(QObject):
         new_s3 = new_s2[1].split("CCCC")
         print(new_s3)
 
-        print(re.split(" AAA BBBB CCCC", strTest))
+        #print(re.split(" AAA BBBB CCCC", strTest))
 
         my_function.parser.restype = ctypes.c_int
         my_function.parser.argtypes = [ctypes.c_char_p]
@@ -187,23 +194,6 @@ class ParserWorker(QObject):
         if ret != None :
             print("NICE WE GOT HERE")
             pass
-
-
-def brute_force(cnf):
-    literals = set()
-    for conj in cnf:
-        for disj in conj:
-            literals.add(disj[0])
-
-    literals = list(literals)
-    n = len(literals)
-    
-    for seq in itertools.product([True,False], repeat=n):
-        a = set(zip(literals, seq))
-
-        if all([bool(disj.intersection(a)) for disj in cnf]):
-            print(True)
-            print(a)
 
 
 class Window(QDialog):
@@ -358,6 +348,14 @@ class Window(QDialog):
         #print(ng)
         #g = nx.nx_agraph.from_agraph(ng)
         pos = nx.nx_agraph.graphviz_layout(g, prog='dot')#, args='-Gsize=20,12\! -Gdpi=100')
+
+        for k, v in pos.items():
+            #pos[k][0] = pos[k][0] *1.5
+
+            new_pos = list(pos[k])
+            new_pos[1] = pos[k][1] * 5
+            pos[k] = tuple(new_pos)
+        
         print("HHHHHH")
         
         '''ng.layout(prog="dot")
@@ -446,7 +444,7 @@ class Window(QDialog):
         plt.savefig('testingImage.png')
         nt = Network(height="100%", width="100%")#'600px', '1000px')
 
-        nt.toggle_physics(False)
+        nt.toggle_physics(True)
 
         for (n, d) in ln:
             nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n)
@@ -463,6 +461,9 @@ class Window(QDialog):
         #nt.from_nx(g)
         #print(nt)
         #print(nx)
+        # https://networkx.org/documentation/stable/_modules/networkx/drawing/nx_agraph.html#pygraphviz_layout
+
+        #nt.show_buttons()
 
         nt.save_graph('nx.html')
         
@@ -474,7 +475,7 @@ class Window(QDialog):
         self.figure.clear()
         self.get_canvas(node_list, edge_list, leaf_cnt)    
 
-        local_url = QUrl.fromLocalFile('/home/flo/Desktop/Github/AttackTree/nx.html')
+        local_url = QUrl.fromLocalFile('/home/flo/Desktop/Github/AttackTree/FloTest/nx.html')
         self.canvas.load(local_url)
         #self.canvas.draw()
         print("pressed")
