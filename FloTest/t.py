@@ -484,7 +484,7 @@ class Window(QDialog):
         # https://networkx.org/documentation/stable/_modules/networkx/drawing/nx_agraph.html#pygraphviz_layout
         #nt.show_buttons()
   
-        with open("/home/flo/Desktop/Github/AttackTree/FloTest/pyvis_param.json", 'r') as file:
+        with open("/home/thomas/UCL/AttackTree/FloTest/pyvis_param.json", 'r') as file:
             data_options = json.load(file)
         nt.set_options("var options = " + json.dumps(data_options))
         nt.save_graph('nx.html') 
@@ -497,7 +497,7 @@ class Window(QDialog):
         self.figure.clear()
         self.get_canvas(node_list, edge_list, leaf_cnt)    
         #self.canvas.setContextMenuPolicy(Qt.NoContextMenu)
-        local_url = QUrl.fromLocalFile('/home/flo/Desktop/Github/AttackTree/FloTest/nx.html')
+        local_url = QUrl.fromLocalFile('/home/thomas/UCL/AttackTree/FloTest/nx.html')
         self.canvas.load(local_url)
         #self.canvas.draw()
         print("pressed")
