@@ -405,11 +405,14 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
             // TODO CHECK FOR REWRITE
             if(dll_node->children != NULL){
                free(RawText);
+               free(ptr_copy);
                // FREE PARENTS ?
                DLL_free_from_top(whole_list);
+               printf("2\n");
                return 2;
             }
-            memcpy(dll_node->n->type, ptr3, sizeof(dll_node->n->type));
+            //memcpy(dll_node->n->type, ptr3, sizeof(dll_node->n->type));
+            snprintf(dll_node->n->type, sizeof(dll_node->n->type), "%s", ptr3);
          }
 
          ptr2 = strtok_r(NULL, delim4, &saveptr2);
@@ -424,6 +427,17 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
                printf("TEP 4\n");
                
                tmp_dll = getFromList(whole_list, ptr2);
+
+               if(parent_is_in == 1 && tmp_dll->children != NULL){
+                  int r = cycle_check(dll_node, tmp_dll->n->title);
+                  if(r != 0){
+                     free(RawText);
+                     free(ptr_copy);
+                     DLL_free_from_top(whole_list);
+                     printf("3\n");
+                     return 3;
+                  }
+               }
 
                if(tmp_dll->parents == NULL){
                   tmp_dll = extractFromList(&whole_list, ptr2);
@@ -440,14 +454,6 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
 
                }
                
-               if(parent_is_in == 1 && tmp_dll->children != NULL){
-                  int r = cycle_check(dll_node, tmp_dll->n->title);
-                  if(r != 0){
-                     free(RawText);
-                     DLL_free_from_top(whole_list);
-                     return 3;
-                  }
-               }
             }
 
             //printf("DLLL 3\n");
@@ -464,7 +470,7 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
             addParents(tmp_dll, dll_node);
             
             parent_is_in = 0;
-            //printDLL_total(whole_list);
+            
             ptr2 = strtok_r(NULL, delim4, &saveptr2);
          }
 
@@ -485,7 +491,7 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
 
 
 
-   create_Json_file(whole_list);
+   //create_Json_file(whole_list);
 
    DLL_free_from_top(whole_list);
 
@@ -505,7 +511,7 @@ int main (int argc, char * argv[]) {
 	//freeNode(n);
 	//freeList(l);
 
-   char a[]= " D3 -OR-> {F3, R, S} F3 -AND-> {F12} R -AND-> {F12} S -OR-> {F12} R -OR-> {F13}";
+   char a[]= " D3 -OR-> {F3, R, S} F3 -AND-> {F12} R -AND-> {F13} S -OR-> {F12, F13}";
    char b[]= "blahblahblah";
    char c[]= "blahblahblah";
 

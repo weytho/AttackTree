@@ -24,13 +24,7 @@
     },
     {
       "Action":"S",
-      "Type":"OR",
-      "Child":[
-        {
-          "Action":"~F12",
-          "Type":"LEAF"
-        }
-      ]
+      "Type":"LEAF"
     }
   ]
 }
