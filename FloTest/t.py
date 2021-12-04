@@ -1,9 +1,8 @@
 from random import random
 import sys
-from PyQt5 import QtCore, QtGui
-from PyQt5 import QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtWebEngineWidgets import QWebEngineView
-from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 # gcc -shared -Wl,-soname,testlib -o testlib.so -fPIC testlib.c
 # pyuic5 -o main_window_ui.py ui/main_window.ui
 # https://stackoverflow.com/questions/44726280/include-matplotlib-in-pyqt5-with-hover-labels
@@ -20,20 +19,17 @@ import time
 from PyQt5.QtCore import QObject, QThread, QUrl, pyqtSignal, Qt
 import ctypes
 import os
-import itertools
-import PIL
 from pyvis.network import Network
 import randomTree
 from pysat.solvers import Glucose3
-import plotly
 import re
 from math import inf
 from collections import Counter
-import matplotlib.image as mpimg
-from PIL import Image
 from sympy import *
 from sympy.parsing.sympy_parser import parse_expr
 import json
+
+dirname = os.path.dirname(__file__)
 
 
 from PyQt5.QtWidgets import (
@@ -77,7 +73,6 @@ class Worker(QObject):
         self.edge_list = []
         self.leaf_cnt = 0
         self.formula = []
-        dirname = os.path.dirname(__file__)
         so_file = os.path.join(dirname, 'testlib.so')
         my_function = ctypes.CDLL(so_file)
 
@@ -163,7 +158,7 @@ class Worker(QObject):
         #self.plot
 
 class ParserWorker(QObject):
-    finished = pyqtSignal()
+    finished = pyqtSignal(int)
 
     def run(self):
 
@@ -193,43 +188,31 @@ class ParserWorker(QObject):
         ret = my_function.parser(s, s2, s3)
 
         time.sleep(2)
-        self.finished.emit()
+        self.finished.emit(ret)
 
         if ret == 0 :
             print("NICE WE GOT HERE")
-            pass
         else:
             print("ERROR IN PARSER")
-            print("Code : " + str(ret))
-            pass
 
 
 class Window(QDialog):
     def __init__(self, parent=None):
         super().__init__()
-        # a figure instance to plot on
-        #self.figure = plt.figure(figsize=(20,20))
+
         self.figure = plt.figure()
         self.width = 1000
         self.height = 800
         self.setGeometry(0, 0, self.width, self.height)
-        # this is the Canvas Widget that 
-        # displays the 'figure'it takes the
-        # 'figure' instance as a parameter to __init__
+
         # TODO
-        #self.canvas = FigureCanvas(self.figure)
-        #self.canvas.setParent(self)
+
         self.canvas = QWebEngineView()
-        # this is the Navigation widget
-        # it takes the Canvas widget and a parent
-        #self.toolbar = NavigationToolbar2QT(self.canvas, self)
-        # Just some button connected to 'plot' method
         self.button = QPushButton('Import')
         self.buttonParse = QPushButton('Create JSON')
-        # adding action to the button
         self.button.clicked.connect(self.getfiles)
         self.buttonParse.clicked.connect(self.parser)
-        # print file path
+
         self.pathFile = QtWidgets.QTextEdit(self)
         self.pathFile.setFixedSize(self.width, 30)
 
@@ -237,16 +220,11 @@ class Window(QDialog):
         self.tracesFound.setFixedSize(self.width, 60)
 
         layout = QHBoxLayout()
-        # creating a Vertical Box layout
         Vlayout_left = QVBoxLayout()
         Vlayout_right= QVBoxLayout()
         layout.addLayout(Vlayout_left)
         layout.addLayout(Vlayout_right)
-        # adding tool bar to the layout
-        #Vlayout_left.addWidget(self.toolbar)         
-        # adding canvas to the layout
-        Vlayout_left.addWidget(self.canvas)    
-        # adding push button to the layout
+        Vlayout_left.addWidget(self.canvas)
         Vlayout_left.addWidget(self.button)   
 
         Vlayout_left.addWidget(self.pathFile)  
@@ -261,20 +239,13 @@ class Window(QDialog):
         self.setLayout(layout)
         # TODO ENLEVER :
         #self.getfiles()
-        '''
-        str = """
-            A1 -AND-> { B1, A12}
-            G -OR-> {A1, A2}
-            """
-        '''
 
         str = """
         RELATIONS
             D3-OR-> {F3, R, S}
             F3 -AND-> {F12}
             R -AND-> {F12}
-            S -OR-> {F12}
-            R -OR-> {F13}
+            S -OR-> {~F12}
         PROPERTIES
             F13 : cost = 10, proba = 1.0
         COUNTERMEASURES
@@ -300,8 +271,7 @@ class Window(QDialog):
 
         # example stackoverflow
 
-        print("###########################################")     
-        #self.figure.set_size_inches(10*3, 6*3, forward=True)
+        print("###########################################")
 
         g = nx.DiGraph()
         
@@ -357,32 +327,7 @@ class Window(QDialog):
         g.add_edges_from(logic_edge)
         g.add_edges_from(new_le)
 
-        #ng = nx.nx_agraph.to_agraph(g)
-        #ng.graph_attr.update(size="100,100")
-        
-        #ng.layout(prog="dot")
-        #print(ng)
-        #g = nx.nx_agraph.from_agraph(ng)
-        pos = nx.nx_agraph.graphviz_layout(g, prog='dot', args='-Gnodesep=0.2 -Gsize=10,6\! -Gdpi=100 -Gratio=fill')
-
-        '''
-        for k, v in pos.items():
-            #pos[k][0] = pos[k][0] *1.5
-
-            new_pos = list(pos[k])
-            new_pos[1] = pos[k][1]# * 5
-            pos[k] = tuple(new_pos)
-        '''
-        
-        print("HHHHHH")
-        
-        '''ng.layout(prog="dot")
-        list = ng.nodes()
-        print(list)
-        for element in list:
-            print(element)
-        #print(ng.nodes)
-        '''
+        pos = nx.nx_agraph.graphviz_layout(g, prog='dot', args='-Gnodesep=0.2 -Gsize=10,6\! -Gdpi=100 -Gratio=fill')        
         print(pos)
 
         # RESIZE figure
@@ -417,8 +362,6 @@ class Window(QDialog):
             self.figure.set_size_inches(current_size_x, current_size_y, forward=True)
             self.figure.set_dpi(current_dpi)
             #pass
-
-        #self.figure.set_size_inches(current_size_x, current_size_y, forward=True)
 
         # CM entre noeud et noeud logic
 
@@ -483,8 +426,8 @@ class Window(QDialog):
         #nt.from_nx(g)
         # https://networkx.org/documentation/stable/_modules/networkx/drawing/nx_agraph.html#pygraphviz_layout
         #nt.show_buttons()
-  
-        with open("/home/flo/Desktop/Github/AttackTree/FloTest/pyvis_param.json", 'r') as file:
+        settings_file = os.path.join(dirname, 'pyvis_param.json')
+        with open(settings_file, 'r') as file:
             data_options = json.load(file)
         nt.set_options("var options = " + json.dumps(data_options))
         nt.save_graph('nx.html') 
@@ -497,30 +440,24 @@ class Window(QDialog):
         self.figure.clear()
         self.get_canvas(node_list, edge_list, leaf_cnt)    
         #self.canvas.setContextMenuPolicy(Qt.NoContextMenu)
-        local_url = QUrl.fromLocalFile('/home/flo/Desktop/Github/AttackTree/FloTest/nx.html')
+        html_file = os.path.join(dirname, 'nx.html')
+        local_url = QUrl.fromLocalFile(html_file)
         self.canvas.load(local_url)
-        #self.canvas.draw()
         print("pressed")
 
     # file explorer
     def getfiles(self):
         fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Single File', QtCore.QDir.currentPath() , '*.json')
         self.pathFile.setText(fileName)
-        # Step 2: Create a QThread object
-        self.thread = QThread()
-        # Step 3: Create a worker object
-        self.worker = Worker()
 
+        self.thread = QThread()
+        self.worker = Worker()
         self.worker.pathFile = fileName
-        # Step 4: Move worker to the thread
         self.worker.moveToThread(self.thread)
-        # Step 5: Connect signals and slots
         self.thread.started.connect(self.worker.run)
-        #self.worker.finished.connect(lambda: print(self.worker.finished))
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.cleaning)
         self.thread.finished.connect(self.thread.deleteLater)
-        # Step 6: Start the thread
         self.thread.start()
 
         # Final resets
@@ -545,6 +482,7 @@ class Window(QDialog):
         self.parser_worker.moveToThread(self.parser_thread)
         self.parser_thread.started.connect(self.parser_worker.run)
         self.parser_worker.finished.connect(self.parser_thread.quit)
+        self.parser_worker.finished.connect(self.show_popup)
         self.parser_worker.finished.connect(self.parser_worker.deleteLater)
         self.parser_thread.finished.connect(self.parser_thread.deleteLater)
         self.parser_thread.start()
@@ -553,6 +491,22 @@ class Window(QDialog):
         self.parser_thread.finished.connect(
             lambda: self.buttonParse.setEnabled(True)
         )
+
+    def show_popup(self, error_id):
+        if( error_id == 0):
+            return
+        msg = QMessageBox()
+        msg.setWindowTitle("Error in Grammar during Tree generation")
+        if(error_id == 1):
+            msg.setText("Empty !")
+        elif(error_id == 2):
+            msg.setText("Redefinition of relation !")
+        elif(error_id == 3):
+            msg.setText("Loop detected in tree !")
+        else:
+            msg.setText("This is the main text!")
+        msg.setIcon(QMessageBox.Critical)
+        x = msg.exec_()
         
 
 # driver code
