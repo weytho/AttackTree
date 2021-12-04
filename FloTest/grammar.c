@@ -27,7 +27,7 @@ void printDLL_List(DLL_List * list){
       printf(" -- > ");
       DLL_List * new_current = current->parents;
 
-      while (new_current != NULL) { 
+      while (new_current != NULL) {
          printf("par : %s ", new_current->n->title);
          new_current = new_current->next;
       }
@@ -243,7 +243,7 @@ BasicList * flatten_tree_uniq(DLL_List *list, BasicList *baseList){
          BasicList * tmp = createNode_flatList(current);
          baseList = push_flatlist(baseList, tmp);
       }
-
+      // Free parents !
       baseList = flatten_tree_uniq(current->children, baseList);
       current = current->next;
    }
@@ -287,3 +287,19 @@ void DLL_free_from_top(DLL_List *list){
    init_flatten(list);
 }
 
+int cycle_check(DLL_List *parent, char * child_name){
+
+   DLL_List * current = parent;
+   if (strcmp(current->n->title, child_name) == 0){
+      return 1;
+   }
+   current = current->parents;
+   while (current != NULL) {
+      if (cycle_check(current, child_name) == 1){
+         return 1;
+      }
+      current = current->next;
+   }
+   return 0;
+
+}

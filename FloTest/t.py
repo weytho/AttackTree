@@ -17,7 +17,7 @@ import numpy as np
 import networkx as nx
 import graphviz
 import time
-from PyQt5.QtCore import QObject, QThread, QUrl, pyqtSignal
+from PyQt5.QtCore import QObject, QThread, QUrl, pyqtSignal, Qt
 import ctypes
 import os
 import itertools
@@ -33,6 +33,7 @@ import matplotlib.image as mpimg
 from PIL import Image
 from sympy import *
 from sympy.parsing.sympy_parser import parse_expr
+import json
 
 
 from PyQt5.QtWidgets import (
@@ -143,12 +144,12 @@ class Worker(QObject):
             ))
             good_formula.append(d)
 
-        print(good_formula)
-        print(str_formula)
-        self.str_formula = str_formula
+        #print(good_formula)
+        #print(str_formula)
+        #self.str_formula = str_formula
 
-        print(type(str_formula))
-        print(to_cnf(parse_expr(str_formula)))
+        #print(type(str_formula))
+        #print(to_cnf(parse_expr(str_formula)))
 
         # STR TO CNF SYMPY
         self.str_formula = str(to_cnf(parse_expr(str_formula)))
@@ -172,27 +173,34 @@ class ParserWorker(QObject):
         so_file = os.path.join(dirname, 'testlib.so')
         my_function = ctypes.CDLL(so_file)
 
-        s = ctypes.create_string_buffer(self.fullText.encode('utf-8'))
-        strTest = "AAA g hdjd kjdqlkqdj BBBB djqjzdhkqzdjhm mdm CCCC 1234"
-        print(strTest)
-        new_s = strTest.split("AAA")
-        print(new_s)
-        new_s2 = new_s[1].split("BBBB")
-        print(new_s2)
-        new_s3 = new_s2[1].split("CCCC")
-        print(new_s3)
+        strTest = self.fullText
+        new_s = strTest.split("RELATIONS")
+        new_s2 = new_s[1].split("PROPERTIES")
+        new_s3 = new_s2[1].split("COUNTERMEASURES")
 
-        #print(re.split(" AAA BBBB CCCC", strTest))
+        print(new_s2[0])
+        print(new_s3[0])
+        print(new_s3[1])
+
+        # sanitize and check input
+
+        s = ctypes.create_string_buffer(new_s2[0].encode('utf-8'))
+        s2 = ctypes.create_string_buffer(new_s3[0].encode('utf-8'))
+        s3 = ctypes.create_string_buffer(new_s2[1].encode('utf-8'))
 
         my_function.parser.restype = ctypes.c_int
         my_function.parser.argtypes = [ctypes.c_char_p]
-        ret = FullList.from_address(my_function.parser(s))
+        ret = my_function.parser(s, s2, s3)
 
         time.sleep(2)
-        self.finished.emit()
 
-        if ret != None :
+        if ret == 0 :
             print("NICE WE GOT HERE")
+            self.finished.emit()
+            pass
+        else:
+            print("ERROR IN PARSER")
+            print("Code : " + str(ret))
             pass
 
 
@@ -259,15 +267,23 @@ class Window(QDialog):
             G -OR-> {A1, A2}
             """
         '''
-        str = """
-        D3-OR-> {F3, R, S}
-        F3 -AND-> {F12}
-        R -AND-> {F12}
-        S -OR-> {F12}
-        R -OR-> {F13}
-        """
 
-        str,cost = randomTree.TreeGen(5, 3)
+        str = """
+        RELATIONS
+            D3-OR-> {F3, R, S}
+            F3 -AND-> {F12}
+            R -AND-> {F12}
+            S -OR-> {F12}
+            R -OR-> {F13}
+        PROPERTIES
+            F13 : cost = 10, proba = 1.0
+        COUNTERMEASURES
+            CM1 {F13, F12} : cost = 2
+        """
+        
+
+        # TODO
+        #str,cost = randomTree.TreeGen(5, 3)
 
         g = Glucose3()
         g.add_clause([-1, 2])
@@ -347,14 +363,16 @@ class Window(QDialog):
         #ng.layout(prog="dot")
         #print(ng)
         #g = nx.nx_agraph.from_agraph(ng)
-        pos = nx.nx_agraph.graphviz_layout(g, prog='dot')#, args='-Gsize=20,12\! -Gdpi=100')
+        pos = nx.nx_agraph.graphviz_layout(g, prog='dot', args='-Gnodesep=0.2 -Gsize=10,6\! -Gdpi=100 -Gratio=fill')
 
+        '''
         for k, v in pos.items():
             #pos[k][0] = pos[k][0] *1.5
 
             new_pos = list(pos[k])
-            new_pos[1] = pos[k][1] * 5
+            new_pos[1] = pos[k][1]# * 5
             pos[k] = tuple(new_pos)
+        '''
         
         print("HHHHHH")
         
@@ -442,15 +460,19 @@ class Window(QDialog):
         #self.figure = plt.gcf()
 
         plt.savefig('testingImage.png')
-        nt = Network(height="100%", width="100%")#'600px', '1000px')
-
-        nt.toggle_physics(True)
+        nt = Network(height="100%", width="100%")#('600px', '1000px') 
+        
+        # Title can be html
 
         for (n, d) in ln:
-            nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n)
+            if (d['leaf'] == 1):
+                nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=n, group="leaf")
+                # htmlTitle("Go wild <'span style='display: inline-block; animation: be-tacky 5s ease-in-out alternate infinite; margin: 5px;'>!<'/span>")
+            else:
+                nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=n)
 
         for (n, d) in logic_nodes:
-            nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n)
+            nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=labels_logic[n], shape='box', group="logic")
 
         for (n, d) in new_le:
             nt.add_edge(n, d)
@@ -459,13 +481,13 @@ class Window(QDialog):
             nt.add_edge(n, d)
 
         #nt.from_nx(g)
-        #print(nt)
-        #print(nx)
         # https://networkx.org/documentation/stable/_modules/networkx/drawing/nx_agraph.html#pygraphviz_layout
-
         #nt.show_buttons()
-
-        nt.save_graph('nx.html')
+  
+        with open("/home/flo/Desktop/Github/AttackTree/FloTest/pyvis_param.json", 'r') as file:
+            data_options = json.load(file)
+        nt.set_options("var options = " + json.dumps(data_options))
+        nt.save_graph('nx.html') 
         
         print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
@@ -474,7 +496,7 @@ class Window(QDialog):
         # clearing old figure
         self.figure.clear()
         self.get_canvas(node_list, edge_list, leaf_cnt)    
-
+        #self.canvas.setContextMenuPolicy(Qt.NoContextMenu)
         local_url = QUrl.fromLocalFile('/home/flo/Desktop/Github/AttackTree/FloTest/nx.html')
         self.canvas.load(local_url)
         #self.canvas.draw()

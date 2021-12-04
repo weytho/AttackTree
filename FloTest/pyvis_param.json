@@ -1,0 +1,54 @@
+{
+    "configure": {
+        "enabled": false
+    },
+    "nodes": {
+        "font": {
+            "size": 24,
+            "bold" : true,
+            "color": "#000000"
+        },
+        "color": {
+            "border": "#000000",
+            "background": "#FFFFFF"
+        }
+    },
+    "edges": {
+        "width": 2,
+        "color": {
+            "inherit": false,
+            "color" : "#000000"
+        },
+        "smooth": {
+            "enabled": false,
+            "type": "continuous"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": false,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    },
+    "groups": {
+        "leaves": {
+            "color":{
+                "background": "#9999FF"
+            }
+        },
+        "logic": {
+            "font": {
+                "color": "#0000FF"
+            }
+        }
+    }
+}

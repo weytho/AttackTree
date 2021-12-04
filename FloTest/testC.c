@@ -373,9 +373,9 @@ void create_Json_file(DLL_List * wholeTree){
 }
 
 ///////////////////////
-int parser(char * toParse) {
+int parser(char * toParse, char * prop_text, char * counter_text) {
    if(toParse == NULL || is_empty(toParse)){
-      return 0;
+      return 1;
    }
    size_t size = strlen(toParse) + 1;
    char * RawText = malloc(size * sizeof(char));
@@ -394,6 +394,7 @@ int parser(char * toParse) {
 	char *ptr = strtok_r(RawText, delim, &saveptr);
 
    DLL_List * whole_list = NULL;
+   int parent_is_in = 0;
 
 	while (ptr != NULL && !is_empty(ptr))	{
       
@@ -414,7 +415,16 @@ int parser(char * toParse) {
             //printDLL_List(whole_list);
          } else {
             printf("TEP2 \n");
+            parent_is_in = 1;
             dll_node = getFromList(whole_list, ptr2);
+            // TODO CHECK FOR REWRITE
+            if(dll_node->children != NULL){
+               printf("HELLO CHILDREN %s\n", dll_node->children->n->title);
+               free(RawText);
+               // FREE PARENTS ?
+               DLL_free_from_top(whole_list);
+               return 2;
+            }
             memcpy(dll_node->n->type, ptr3, sizeof(dll_node->n->type));
          }
 
@@ -445,6 +455,15 @@ int parser(char * toParse) {
                   tmp_dll = new_tmp_dll;
 
                }
+               
+               if(parent_is_in == 1 && tmp_dll->children != NULL){
+                  int r = cycle_check(dll_node, tmp_dll->n->title);
+                  if(r != 0){
+                     free(RawText);
+                     DLL_free_from_top(whole_list);
+                     return 3;
+                  }
+               }
             }
 
             //printf("DLLL 3\n");
@@ -460,9 +479,9 @@ int parser(char * toParse) {
             //printf("ADD PARENTS\n");
             
             addParents(tmp_dll, dll_node);
-
+            
+            parent_is_in = 0;
             //printDLL_total(whole_list);
-
             ptr2 = strtok_r(NULL, delim5, &saveptr2);
          }
 
@@ -473,14 +492,11 @@ int parser(char * toParse) {
 
    free(RawText);
 
-
-   /*###########*/
    printf("ENNNNNNNND\n");
    printDLL_total(whole_list);
    create_Json_file(whole_list);
 
    DLL_free_from_top(whole_list);
-   /*###########*/
-   printf("###############\n");
+
 	return 0;
 }
