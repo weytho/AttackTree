@@ -193,10 +193,10 @@ class ParserWorker(QObject):
         ret = my_function.parser(s, s2, s3)
 
         time.sleep(2)
+        self.finished.emit()
 
         if ret == 0 :
             print("NICE WE GOT HERE")
-            self.finished.emit()
             pass
         else:
             print("ERROR IN PARSER")
