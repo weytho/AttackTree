@@ -78,22 +78,25 @@ int NodeIndex(HashTable *h, NodeP *n) {
    return -1;        
 }
 
-HashTable * resize(HashTable *h){
-   HashTable * newH = newHastable(h->size*2);
-   for(int i=0; i<h->size; i++){
-      if(h->hashArray[i] >= 0){
-         insertH(newH, &(h->NodeArray[i]));
+NodeP * getH(HashTable *h, int index){
+   return &(h->NodeArray[index]);
+}
+
+void resize(HashTable **h){
+   HashTable * newH = newHastable((*h)->size*2);
+   for(int i=0; i<(*h)->size; i++){
+      if((*h)->hashArray[i] >= 0){
+         insertH(newH, &(*h)->NodeArray[i]);
       }
    }
-   return newH;
+   freeH(*h);
+   *h = newH;
 }
 
 void insertH(HashTable *h, NodeP *n) {
-   
    if(h->numberElem+1 > h->size/2){
-      *h = *resize(h);
+      resize(&h);
    }
-
    //get the hash 
    int key = NodePKey(n);
    if(key<0){
@@ -101,7 +104,6 @@ void insertH(HashTable *h, NodeP *n) {
       return;
    }
    int hashIndex = hashCodeH(h,key);  
-
    //move in array until an empty or deleted cell
    while(h->hashArray[hashIndex] >= 0) {
       //go to next cell
@@ -110,7 +112,6 @@ void insertH(HashTable *h, NodeP *n) {
       //wrap around the table
       hashIndex %= h->size;
    }
-   
    h->hashArray[hashIndex] = key;
    h->NodeArray[hashIndex] = *n;
    h->numberElem +=1;
@@ -143,7 +144,6 @@ int deleteH(HashTable *h, NodeP *n) {
       //wrap around the table
       hashIndex %= h->size;
    }      
-   
    return -1;        
 }
 
@@ -159,6 +159,12 @@ void displayN(HashTable *h) {
    for(int i = 0; i<h->size; i++) {
       printf(" %s\n",h->NodeArray[i].Name);
    }
+}
+
+void freeH(HashTable **h){
+   free((*h)->NodeArray);
+   free((*h)->hashArray);
+   free(*h);
 }
 
 int main() {
@@ -195,11 +201,16 @@ int main() {
    insertH(h,n5);
    displayH(h);
 
+   int index = NodeIndex(h,n);
+
    printf("Index : %d\n",NodeIndex(h,n));
    printf("Index : %d\n",NodeIndex(h,n2));
    printf("Index : %d\n",NodeIndex(h,n3));
    printf("Index : %d\n",NodeIndex(h,n4));
    printf("Index : %d\n",NodeIndex(h,n5));
+
+   NodeP * Nn = getH(h,index);
+   printf("Got node : %s",Nn->Name);
 
    deleteH(h,n);
    deleteH(h,n5);
@@ -210,25 +221,13 @@ int main() {
 
    printf("Index : %d\n",NodeIndex(h,n5));
 
+
+   freeH(&h);
+   free(n);
+   free(n2);
+   free(n3);
+   free(n4);
+   free(n5);
    printf("Done\n");
 
-
-   //insert(1, 20);
-   //display();
-   //item = search(37);
-   /*
-   if(item != NULL) {
-      printf("Element found: %d\n", item->data);
-   } else {
-      printf("Element not found\n");
-   }
-
-   delete(item);
-   item = search(37);
-
-   if(item != NULL) {
-      printf("Element found: %d\n", item->data);
-   } else {
-      printf("Element not found\n");
-   }*/
 }

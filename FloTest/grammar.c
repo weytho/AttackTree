@@ -22,7 +22,6 @@ Node * copy_node(Node *old){
 void printDLL_List(DLL_List * list){
    DLL_List * current = list;
 
-   //while (current != NULL) {
       printf("title : %s ", current->n->title);
       printf(" -- > ");
       DLL_List * new_current = current->parents;
@@ -39,8 +38,6 @@ void printDLL_List(DLL_List * list){
          new_current2 = new_current2->next;
       }
       printf("\n");
-      //current = current->next;
-   //}
 }
 
 void printDLL_total(DLL_List * list){
@@ -94,15 +91,12 @@ DLL_List * extractFromList(DLL_List **head_list, char *name){
 }
 
 int isInList(DLL_List *head_list, char * name){
-   //printf("Name is %s, \n", name);
    if( head_list == NULL ){
       return 0;
    }
 
    DLL_List * current = head_list;
    while (current != NULL) {
-      //printf("Name found %s, \n", current->n->title);
-      //printf("COMP %s, and %s\n", current->n->title, name);
       if (strcmp(current->n->title, name) == 0){
          printf("GOOD !\n");
          return 1;
@@ -185,8 +179,10 @@ DLL_List * createDLLNode(char * title, char * type){
    DLL_List * new_DLL = malloc(sizeof(DLL_List));
    Node * new_Node = malloc(sizeof(Node));
 
-   memcpy(new_Node->title, title, sizeof(new_Node->title));
-   memcpy(new_Node->type, type, sizeof(new_Node->type));
+   //memcpy(new_Node->title, title, sizeof(new_Node->title));
+   //memcpy(new_Node->type, type, sizeof(new_Node->type));
+   snprintf(new_Node->title, sizeof(new_Node->title), "%s", title);
+   snprintf(new_Node->type, sizeof(new_Node->type), "%s", type);
 
    new_DLL->n = new_Node;
    new_DLL->children = NULL;
@@ -243,7 +239,6 @@ BasicList * flatten_tree_uniq(DLL_List *list, BasicList *baseList){
          BasicList * tmp = createNode_flatList(current);
          baseList = push_flatlist(baseList, tmp);
       }
-      // Free parents !
       baseList = flatten_tree_uniq(current->children, baseList);
       current = current->next;
    }
@@ -257,11 +252,22 @@ void free_flat_list(BasicList *list)
    }
    BasicList * runner = list;
    BasicList * current = NULL;
+   DLL_List * parent = NULL;
+   DLL_List * tmp = NULL;
    while (runner != NULL) {
       current = runner;
       runner = current->next;
       free(current->data->n);
       current->data->n = NULL;
+
+      parent = current->data->parents;
+      while (parent != NULL){
+         tmp = parent->next;
+         free(parent);
+         parent = tmp;
+      }
+      current->data->parents = NULL;
+
       free(current->data);
       current->data = NULL;
       free(current);

@@ -294,20 +294,6 @@ void freeForm(Formula *l) {
 	form_free(l);
 }
 
-int main (int argc, char * argv[]) { 
-	printf("STARTING \n");
-	//char *path = "/home/flo/Desktop/Github/AttackTree/Structure/StructureGraph.json";
-	//mainfct(path);
-	//CustomList * l = getList();
-	//CustomNode * n = getNode();
-	//printf("START");
-	//printf("l pointer : %p", (void *) l);
-	//printf("HHHHHHHHHHHHHH %s, ",l->data->name);
-	//freeNode(n);
-	//freeList(l);
-	return 0;
-}
-
 int is_empty(char *s) {
   while (*s != '\0') {
     if (!isspace((unsigned char)*s))
@@ -382,16 +368,15 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
    memcpy(RawText, toParse, size);
    printf("###\n");
    printf("TEXT IS HERE '%s'\n", RawText);
-   char delim[] = "\n\v";
-   char delim2[] = " \t-";
-   char delim3[] = " \t->";
-   char delim4[] = " \t->{},";
-   char delim5[] = " \t,}";
+
+   char delim2[] = "}\t\r\n\v\f";
+   char delim3[] = "-> \t\r\n\v\f";
+   char delim4[] = "->{, \t\r\n\v\f";
 
    char *saveptr;
    char *saveptr2;
 
-	char *ptr = strtok_r(RawText, delim, &saveptr);
+	char *ptr = strtok_r(RawText, delim2, &saveptr);
 
    DLL_List * whole_list = NULL;
    int parent_is_in = 0;
@@ -401,12 +386,12 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
       size_t size2 = strlen(ptr) + 1;
       char *ptr_copy = malloc(size2 * sizeof(char));
       memcpy(ptr_copy, ptr, size2);
-      char *ptr2 = strtok_r(ptr_copy, delim2, &saveptr2);
+      char *ptr2 = strtok_r(ptr_copy, delim3, &saveptr2);
 
       if(ptr2 != NULL) {
 
          char *ptr3 = strtok_r(NULL, delim3, &saveptr2);         
-
+         //printf("HELLO : %s : %s\n", ptr2, ptr3);
          DLL_List * dll_node;
          if( isInList(whole_list, ptr2) == 0){
             printf("TEP \n");
@@ -419,7 +404,6 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
             dll_node = getFromList(whole_list, ptr2);
             // TODO CHECK FOR REWRITE
             if(dll_node->children != NULL){
-               printf("HELLO CHILDREN %s\n", dll_node->children->n->title);
                free(RawText);
                // FREE PARENTS ?
                DLL_free_from_top(whole_list);
@@ -475,18 +459,17 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
             addChildren(dll_node, tmp_dll, whole_list);
 
             //printDLL_total(whole_list);
-
             //printf("ADD PARENTS\n");
             
             addParents(tmp_dll, dll_node);
             
             parent_is_in = 0;
             //printDLL_total(whole_list);
-            ptr2 = strtok_r(NULL, delim5, &saveptr2);
+            ptr2 = strtok_r(NULL, delim4, &saveptr2);
          }
 
       }
-      ptr = strtok_r(NULL, delim, &saveptr);
+      ptr = strtok_r(NULL, delim2, &saveptr);
       free(ptr_copy);
 	}
 
@@ -494,9 +477,38 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
 
    printf("ENNNNNNNND\n");
    printDLL_total(whole_list);
+
+   // ADD properties
+
+
+   // ADD countermeasures
+
+
+
    create_Json_file(whole_list);
 
    DLL_free_from_top(whole_list);
 
+	return 0;
+}
+
+
+int main (int argc, char * argv[]) { 
+	printf("STARTING TEST \n");
+	//char *path = "/home/flo/Desktop/Github/AttackTree/Structure/StructureGraph.json";
+	//mainfct(path);
+	//CustomList * l = getList();
+	//CustomNode * n = getNode();
+	//printf("START");
+	//printf("l pointer : %p", (void *) l);
+	//printf("HHHHHHHHHHHHHH %s, ",l->data->name);
+	//freeNode(n);
+	//freeList(l);
+
+   char a[]= " D3 -OR-> {F3, R, S} F3 -AND-> {F12} R -AND-> {F12} S -OR-> {F12} R -OR-> {F13}";
+   char b[]= "blahblahblah";
+   char c[]= "blahblahblah";
+
+   int r = parser(a, b, c);
 	return 0;
 }

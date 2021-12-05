@@ -246,6 +246,8 @@ int main(int argc, char *argv[]) {
    list_free(list);
    elist_free(edges);
    form_free(form);
+   free(ret);
+   free(buffer);
 
    return 0;
 }
