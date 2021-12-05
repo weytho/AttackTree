@@ -234,13 +234,21 @@ BasicList * flatten_tree_uniq(DLL_List *list, BasicList *baseList){
       return baseList;
    }
    DLL_List * current = list;
+   DLL_List * children = NULL;
+   DLL_List * next = NULL;
    while (current != NULL) {
       if (is_in_flatList(baseList, current->n->title) == 0){
          BasicList * tmp = createNode_flatList(current);
          baseList = push_flatlist(baseList, tmp);
+         children = current->children;
+         next = current->next;
+      } else {
+         children = current->children;
+         next = current->next;
+         free(current);
       }
-      baseList = flatten_tree_uniq(current->children, baseList);
-      current = current->next;
+      baseList = flatten_tree_uniq(children, baseList);
+      current = next;
    }
    return baseList;
 }
@@ -253,10 +261,12 @@ void free_flat_list(BasicList *list)
    BasicList * runner = list;
    BasicList * current = NULL;
    DLL_List * parent = NULL;
+   DLL_List * child = NULL;
    DLL_List * tmp = NULL;
    while (runner != NULL) {
       current = runner;
       runner = current->next;
+
       free(current->data->n);
       current->data->n = NULL;
 
@@ -267,6 +277,10 @@ void free_flat_list(BasicList *list)
          parent = tmp;
       }
       current->data->parents = NULL;
+
+      /*child = current->data->children;
+      free(child);
+      current->data->children = NULL;*/
 
       free(current->data);
       current->data = NULL;
