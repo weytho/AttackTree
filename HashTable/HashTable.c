@@ -47,7 +47,7 @@ int NodePKey(NodeP *n) {
    }
    int cnt = 0;
    int sum = 0;
-   while(n->Name[cnt] != '\n'){
+   while(n->Name[cnt] != '\0'){
       sum = sum + (int) n->Name[cnt];
       cnt++;
    }
@@ -82,20 +82,21 @@ NodeP * getH(HashTable *h, int index){
    return &(h->NodeArray[index]);
 }
 
-void resize(HashTable **h){
-   HashTable * newH = newHastable((*h)->size*2);
-   for(int i=0; i<(*h)->size; i++){
-      if((*h)->hashArray[i] >= 0){
-         insertH(newH, &(*h)->NodeArray[i]);
+HashTable * resize(HashTable *h){
+   HashTable * newH = newHastable(h->size*2);
+   for(int i=0; i<h->size; i++){
+      if(h->hashArray[i] >= 0){
+         insertH(newH, &(h->NodeArray[i]));
       }
    }
-   freeH(*h);
-   *h = newH;
+   //displayH(newH);
+   //freeH(*h);
+   return newH;
 }
 
 void insertH(HashTable *h, NodeP *n) {
    if(h->numberElem+1 > h->size/2){
-      resize(&h);
+      *h = *resize(h);
    }
    //get the hash 
    int key = NodePKey(n);
@@ -172,15 +173,15 @@ int main() {
    struct HashTable *h = newHastable(4);
    displayH(h);
    NodeP *n = malloc(sizeof(NodeP));
-   n->Name = "Flocon\n";
+   n->Name = "Flocon";
    NodeP *n2 = malloc(sizeof(NodeP));
-   n2->Name = "Thoma\n";
+   n2->Name = "Thoma";
    NodeP *n3 = malloc(sizeof(NodeP));
-   n3->Name = "Maxence\n";
+   n3->Name = "Maxence";
    NodeP *n4 = malloc(sizeof(NodeP));
-   n4->Name = "Alex\n";
+   n4->Name = "Alex";
    NodeP *n5 = malloc(sizeof(NodeP));
-   n5->Name = "Remiche\n";
+   n5->Name = "Remiche";
    insertH(h,n);
    displayH(h);
    //displayN(h);
