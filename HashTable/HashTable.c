@@ -78,7 +78,46 @@ int NodeIndex(HashTable *h, NodeP *n) {
    return -1;        
 }
 
+int NamePKey(char * Name) {
+   int cnt = 0;
+   int sum = 0;
+   while(Name[cnt] != '\0'){
+      sum = sum + (int) Name[cnt];
+      cnt++;
+   }
+   return sum;
+}
+
+int NameIndex(HashTable *h, char * Name) {
+   //get the hash 
+   int key = NamePKey(Name);
+   if(key<0){
+      printf("Negative key for NodeP\n");
+      return -1;
+   }
+   int hashIndex = hashCodeH(h,key);  
+   
+   //move in array until an empty 
+   while(h->hashArray[hashIndex] >= 0) {
+      int cmp = strcmp(Name,h->NodeArray[hashIndex].Name);
+      if(cmp == 0){
+         return hashIndex;
+      }
+      //go to next cell
+      ++hashIndex;
+      
+      //wrap around the table
+      hashIndex %= h->size;
+   }        
+   return -1;        
+}
+
+
+
 NodeP * getH(HashTable *h, int index){
+   if (index < 0 || index > h->size-1){
+      return NULL;
+   }
    return &(h->NodeArray[index]);
 }
 
@@ -89,8 +128,7 @@ HashTable * resize(HashTable *h){
          insertH(newH, &(h->NodeArray[i]));
       }
    }
-   //displayH(newH);
-   //freeH(*h);
+   //free(h);
    return newH;
 }
 
@@ -162,15 +200,15 @@ void displayN(HashTable *h) {
    }
 }
 
-void freeH(HashTable **h){
-   free((*h)->NodeArray);
-   free((*h)->hashArray);
-   free(*h);
+void freeH(HashTable *h){
+   free(h->NodeArray);
+   free(h->hashArray);
+   free(h);
 }
 
 int main() {
    printf("Main\n");
-   struct HashTable *h = newHastable(4);
+   struct HashTable *h = newHastable(2);
    displayH(h);
    NodeP *n = malloc(sizeof(NodeP));
    n->Name = "Flocon";
@@ -209,9 +247,14 @@ int main() {
    printf("Index : %d\n",NodeIndex(h,n3));
    printf("Index : %d\n",NodeIndex(h,n4));
    printf("Index : %d\n",NodeIndex(h,n5));
+   printf("Index : %d\n",NameIndex(h,"Flocon"));
+   printf("Index : %d\n",NameIndex(h,"Thoma"));
+   printf("Index : %d\n",NameIndex(h,"Maxence"));
+   printf("Index : %d\n",NameIndex(h,"Alex"));
+   printf("Index : %d\n",NameIndex(h,"Remiche"));
 
    NodeP * Nn = getH(h,index);
-   printf("Got node : %s",Nn->Name);
+   printf("Got node : %s\n",Nn->Name);
 
    deleteH(h,n);
    deleteH(h,n5);
@@ -223,7 +266,7 @@ int main() {
    printf("Index : %d\n",NodeIndex(h,n5));
 
 
-   freeH(&h);
+   freeH(h);
    free(n);
    free(n2);
    free(n3);
