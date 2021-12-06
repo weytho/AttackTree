@@ -2,6 +2,7 @@
 #include<string.h>
 #include<json-c/json.h>
 #include"structures.c"
+#include "HashTable.c"
 
 
 typedef struct custom_List DLL_List;
@@ -322,4 +323,33 @@ int cycle_check(DLL_List *parent, char * child_name){
    }
    return 0;
 
+}
+
+
+void set_properties(DLL_List * list, HashTable * h){
+   DLL_List * current = list;
+   DLL_List * new_current2 = current->children;
+
+   if (new_current2 == NULL) {
+      // check for properties
+
+      NodeP * Nn = getH(h, NodeIndex(h, current->n->title));
+      if(Nn != NULL){
+         current->n->cost = Nn->cost;
+         current->n->prob = Nn->prob;
+      }
+
+   }
+}
+
+void set_properties_total(DLL_List * list, HashTable * h){
+   DLL_List * current = list;
+   if(current != NULL){
+      set_properties(current, h);
+      current = current->children;
+      while (current != NULL) {
+         set_properties_total(current, h);
+         current = current->next;
+      }
+   }
 }

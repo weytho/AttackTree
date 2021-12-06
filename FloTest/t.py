@@ -1,7 +1,7 @@
 from random import random
 import sys
-from PyQt5 import QtCore, QtGui
-from PyQt5 import QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 # gcc -shared -Wl,-soname,testlib -o testlib.so -fPIC testlib.c
@@ -20,20 +20,17 @@ import time
 from PyQt5.QtCore import QObject, QThread, QUrl, pyqtSignal, Qt
 import ctypes
 import os
-import itertools
-import PIL
 from pyvis.network import Network
 import randomTree
 from pysat.solvers import Glucose3
-import plotly
 import re
 from math import inf
 from collections import Counter
-import matplotlib.image as mpimg
-from PIL import Image
 from sympy import *
 from sympy.parsing.sympy_parser import parse_expr
 import json
+
+dirname = os.path.dirname(__file__)
 
 
 from PyQt5.QtWidgets import (
@@ -148,7 +145,9 @@ class Worker(QObject):
         #print(str_formula)
         #self.str_formula = str_formula
 
-        #print(type(str_formula))
+        print(type(str_formula))
+        print(str_formula)
+        print(parse_expr(str_formula))
         #print(to_cnf(parse_expr(str_formula)))
 
         # STR TO CNF SYMPY
@@ -163,7 +162,7 @@ class Worker(QObject):
         #self.plot
 
 class ParserWorker(QObject):
-    finished = pyqtSignal()
+    finished = pyqtSignal(int)
 
     def run(self):
 
@@ -193,7 +192,7 @@ class ParserWorker(QObject):
         ret = my_function.parser(s, s2, s3)
 
         time.sleep(2)
-        self.finished.emit()
+        self.finished.emit(ret)
 
         if ret == 0 :
             print("NICE WE GOT HERE")
@@ -484,7 +483,8 @@ class Window(QDialog):
         # https://networkx.org/documentation/stable/_modules/networkx/drawing/nx_agraph.html#pygraphviz_layout
         #nt.show_buttons()
   
-        with open("/home/thomas/UCL/AttackTree/FloTest/pyvis_param.json", 'r') as file:
+        settings_file = os.path.join(dirname, 'pyvis_param.json')
+        with open(settings_file, 'r') as file:
             data_options = json.load(file)
         nt.set_options("var options = " + json.dumps(data_options))
         nt.save_graph('nx.html') 
@@ -497,7 +497,8 @@ class Window(QDialog):
         self.figure.clear()
         self.get_canvas(node_list, edge_list, leaf_cnt)    
         #self.canvas.setContextMenuPolicy(Qt.NoContextMenu)
-        local_url = QUrl.fromLocalFile('/home/thomas/UCL/AttackTree/FloTest/nx.html')
+        html_file = os.path.join(dirname, 'nx.html')
+        local_url = QUrl.fromLocalFile(html_file)
         self.canvas.load(local_url)
         #self.canvas.draw()
         print("pressed")
@@ -545,6 +546,7 @@ class Window(QDialog):
         self.parser_worker.moveToThread(self.parser_thread)
         self.parser_thread.started.connect(self.parser_worker.run)
         self.parser_worker.finished.connect(self.parser_thread.quit)
+        self.parser_worker.finished.connect(self.show_popup)
         self.parser_worker.finished.connect(self.parser_worker.deleteLater)
         self.parser_thread.finished.connect(self.parser_thread.deleteLater)
         self.parser_thread.start()
@@ -553,6 +555,22 @@ class Window(QDialog):
         self.parser_thread.finished.connect(
             lambda: self.buttonParse.setEnabled(True)
         )
+
+    def show_popup(self, error_id):
+        if( error_id == 0):
+            return
+        msg = QMessageBox()
+        msg.setWindowTitle("Error in Grammar during Tree generation")
+        if(error_id == 1):
+            msg.setText("Empty !")
+        elif(error_id == 2):
+            msg.setText("Redefinition of relation !")
+        elif(error_id == 3):
+            msg.setText("Loop detected in tree !")
+        else:
+            msg.setText("This is the main text!")
+        msg.setIcon(QMessageBox.Critical)
+        x = msg.exec_()
         
 
 # driver code
