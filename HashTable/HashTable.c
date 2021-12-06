@@ -64,10 +64,12 @@ int NodeIndex(HashTable *h, NodeP *n) {
    int hashIndex = hashCodeH(h,key);  
    
    //move in array until an empty 
-   while(h->hashArray[hashIndex] >= 0) {
-      int cmp = strcmp(n->Name,h->NodeArray[hashIndex].Name);
-      if(cmp == 0){
-         return hashIndex;
+   while(h->hashArray[hashIndex] != -1) {
+      if(h->hashArray[hashIndex] >= 0){
+         int cmp = strcmp(n->Name,h->NodeArray[hashIndex].Name);
+         if(cmp == 0){
+            return hashIndex;
+         }
       }
       //go to next cell
       ++hashIndex;
@@ -98,10 +100,12 @@ int NameIndex(HashTable *h, char * Name) {
    int hashIndex = hashCodeH(h,key);  
    
    //move in array until an empty 
-   while(h->hashArray[hashIndex] >= 0) {
-      int cmp = strcmp(Name,h->NodeArray[hashIndex].Name);
-      if(cmp == 0){
-         return hashIndex;
+   while(h->hashArray[hashIndex] != -1) {
+      if(h->hashArray[hashIndex] >= 0){
+         int cmp = strcmp(Name,h->NodeArray[hashIndex].Name);
+         if(cmp == 0){
+            return hashIndex;
+         }
       }
       //go to next cell
       ++hashIndex;
@@ -236,6 +240,8 @@ int main() {
    insertH(h,n3);
    displayH(h);
    insertH(h,n4);
+   displayH(h);
+   insertH(h,n5);
    displayH(h);
    insertH(h,n5);
    displayH(h);
