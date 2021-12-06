@@ -363,6 +363,73 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
    if(toParse == NULL || is_empty(toParse)){
       return 1;
    }
+
+   char *saveptr3;
+   char *saveptr4;
+   char *saveptr5;
+
+   char delim5[] = "\t\r\n\v\f";
+   char delim6[] = ": \t\r\n\v\f";
+   char delim7[] = ":= \t\r\n\v\f";
+   char delim8[] = ":=, \t\r\n\v\f";
+
+   size_t size_prop = strlen(prop_text) + 1;
+   char *length_ptr = malloc(size_prop * sizeof(char));
+   memcpy(length_ptr, prop_text, size_prop);
+
+   printf("@@@@@@@@@@@@@ NODES @@@@@@@@@@@@@\n");
+
+   char delim_lines[] = ":";
+   int count = 0;
+   char *length_runner = strtok_r(length_ptr, delim_lines, &saveptr5);
+
+   while(length_runner != NULL){
+      count = count + 1;
+      length_runner = strtok_r(NULL, delim_lines, &saveptr5);
+   }
+   if( count > 0 ){
+      count = count - 1;
+   }
+
+
+   free(length_ptr);
+
+   struct HashTable *ht_properties = newHastable(count * 2);
+
+   char *ptr_prop = strtok_r(prop_text, delim5, &saveptr3);
+   char * prop_name;
+   char * prop_value;
+
+   while(ptr_prop != NULL){
+
+      size_t size2 = strlen(ptr_prop) + 1;
+      char *ptr_prop_copy = malloc(size2 * sizeof(char));
+      memcpy(ptr_prop_copy, ptr_prop, size2);
+
+      ptr_prop = strtok_r(ptr_prop_copy, delim6, &saveptr4);
+
+      NodeP *n_prop = malloc(sizeof(NodeP));
+      n_prop->Name = ptr_prop;
+
+      prop_name = strtok_r(NULL, delim7, &saveptr4);
+
+      while(prop_name != NULL){
+
+         prop_value = strtok_r(NULL, delim8, &saveptr4);
+         prop_name = strtok_r(NULL, delim7, &saveptr4);
+
+      }
+
+      insertH(ht_properties,n_prop);
+
+      ptr_prop = strtok_r(NULL, delim5, &saveptr3); 
+      free(ptr_prop_copy);
+   }
+
+   displayH(ht_properties);
+
+
+
    size_t size = strlen(toParse) + 1;
    char * RawText = malloc(size * sizeof(char));
    memcpy(RawText, toParse, size);
@@ -487,11 +554,13 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
    // ADD properties
 
 
+
+
    // ADD countermeasures
 
 
 
-   //create_Json_file(whole_list);
+   create_Json_file(whole_list);
 
    DLL_free_from_top(whole_list);
 
