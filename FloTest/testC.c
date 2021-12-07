@@ -373,6 +373,7 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
    }
    int boolean_mode = 0;
    if(is_empty(prop_text)){
+      printf("BOOLEAN MODE \n");
       boolean_mode = 1;
    }
    setlocale(LC_NUMERIC, "C");
@@ -592,9 +593,8 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
 
    // ADD properties
 
-   displayH(ht_properties);
-   displayH(ht_properties);
    if( boolean_mode == 0 ){
+      displayH(ht_properties);
       set_properties_total(whole_list, ht_properties);
       freeH(ht_properties);
    }

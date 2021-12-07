@@ -142,6 +142,8 @@ class Worker(QObject):
             ))
             good_formula.append(d)
 
+        #print("FORMAULTATION DHHDHDHDHDHDHDHDHDHD")
+        #print(self.formula)
         #print(good_formula)
         #print(str_formula)
         #self.str_formula = str_formula
@@ -218,51 +220,32 @@ class ParserWorker(QObject):
 class Window(QDialog):
     def __init__(self, parent=None):
         super().__init__()
-        # a figure instance to plot on
-        #self.figure = plt.figure(figsize=(20,20))
         self.figure = plt.figure()
         self.width = 1000
         self.height = 800
         self.setGeometry(0, 0, self.width, self.height)
-        # this is the Canvas Widget that 
-        # displays the 'figure'it takes the
-        # 'figure' instance as a parameter to __init__
-        # TODO
-        #self.canvas = FigureCanvas(self.figure)
-        #self.canvas.setParent(self)
         self.canvas = QWebEngineView()
-        # this is the Navigation widget
-        # it takes the Canvas widget and a parent
-        #self.toolbar = NavigationToolbar2QT(self.canvas, self)
-        # Just some button connected to 'plot' method
         self.button = QPushButton('Import')
         self.buttonParse = QPushButton('Create JSON')
-        # adding action to the button
         self.button.clicked.connect(self.getfiles)
         self.buttonParse.clicked.connect(self.parser)
-        # print file path
+
         self.pathFile = QtWidgets.QTextEdit(self)
         self.pathFile.setFixedSize(self.width, 30)
-
         self.tracesFound = QtWidgets.QTextEdit(self)
         self.tracesFound.setFixedSize(self.width, 60)
 
         layout = QHBoxLayout()
-        # creating a Vertical Box layout
+
         Vlayout_left = QVBoxLayout()
         Vlayout_right= QVBoxLayout()
         layout.addLayout(Vlayout_left)
         layout.addLayout(Vlayout_right)
-        # adding tool bar to the layout
-        #Vlayout_left.addWidget(self.toolbar)         
-        # adding canvas to the layout
-        Vlayout_left.addWidget(self.canvas)    
-        # adding push button to the layout
+        Vlayout_left.addWidget(self.canvas)
         Vlayout_left.addWidget(self.button)   
 
         Vlayout_left.addWidget(self.pathFile)  
-        Vlayout_left.addWidget(self.tracesFound)  
-        # setting layout to the main window
+        Vlayout_left.addWidget(self.tracesFound)
 
         self.grammarText = QtWidgets.QTextEdit(self)
         self.grammarText.setFixedWidth(400)
@@ -297,18 +280,9 @@ class Window(QDialog):
         COUNTERMEASURES
             CM1 (F13, F12)
         """
-        
 
         # TODO
         #str,cost = randomTree.TreeGen(5, 3)
-
-        '''
-        g = Glucose3()
-        g.add_clause([-1, 2])
-        g.add_clause([-2, 3])
-        print(g.solve())
-        print(g.get_model())
-        '''
 
         # TODO
         self.grammarText.setText(str)
@@ -318,8 +292,7 @@ class Window(QDialog):
 
         # example stackoverflow
 
-        print("###########################################")     
-        #self.figure.set_size_inches(10*3, 6*3, forward=True)
+        print("###########################################")
 
         g = nx.DiGraph()
         
@@ -356,12 +329,9 @@ class Window(QDialog):
                 logic_edge.append(edge)
                 
         g.add_nodes_from(logic_nodes)
-        #for (u, d) in g.nodes(data=True):
-         #   print(u, d)
 
         # attention aux CM !!
         for (u, v) in le:
-            # if type != cntms
             if v not in counter_list:
                 edge = (u + '_' + "LOGIC", v)
                 new_le.append(edge)
@@ -375,74 +345,14 @@ class Window(QDialog):
         g.add_edges_from(logic_edge)
         g.add_edges_from(new_le)
 
-        #ng = nx.nx_agraph.to_agraph(g)
-        #ng.graph_attr.update(size="100,100")
-        
-        #ng.layout(prog="dot")
-        #print(ng)
-        #g = nx.nx_agraph.from_agraph(ng)
         pos = nx.nx_agraph.graphviz_layout(g, prog='dot', args='-Gnodesep=0.2 -Gsize=10,6\! -Gdpi=100 -Gratio=fill')
 
-        '''
-        for k, v in pos.items():
-            #pos[k][0] = pos[k][0] *1.5
-
-            new_pos = list(pos[k])
-            new_pos[1] = pos[k][1]# * 5
-            pos[k] = tuple(new_pos)
-        '''
-        
-        print("HHHHHH")
-        
-        '''ng.layout(prog="dot")
-        list = ng.nodes()
-        print(list)
-        for element in list:
-            print(element)
-        #print(ng.nodes)
-        '''
-        #print(pos)
-
         # RESIZE figure
-        list_width = []
-        for k, v in pos.items():
-            list_width.append(v[1])
-        # TODO CA AVANCE
-        # 10 * 6 inches
-        # 100 dpi
-        # For 5 leaves ?
-        # 1000 * 600 pixels
-        current_size_x = 10
-        current_size_y = 6
-        current_dpi = 100
-        list_level = Counter(list_width).most_common()
-        biggest_level = list_level[0][1]
-        biggest_trace = len(list_level)
-        #print("HERE IS THE BIGGEST")
-        #print(list_level)
-        #print(biggest_level)
-        #print(biggest_trace)
-        if( biggest_level > 7 or biggest_trace > 9):
-            # TODO FIXE THIS NBR
-            max_number_on_line = 7
-            coeff1 = (biggest_level + 1) / max_number_on_line
-            max_number_on_trace = 7
-            coeff2 = (biggest_trace + 1) / max_number_on_trace
-            coeff = max(coeff1, coeff2)
-            self.figure.set_size_inches(current_size_x*coeff, current_size_y*coeff, forward=True)
-            self.figure.set_dpi(current_dpi/coeff)
-        else:
-            self.figure.set_size_inches(current_size_x, current_size_y, forward=True)
-            self.figure.set_dpi(current_dpi)
-            #pass
 
-        #self.figure.set_size_inches(current_size_x, current_size_y, forward=True)
+        # TODO CA AVANCE
 
         # CM entre noeud et noeud logic
-
-        for (u, d) in g.nodes(data=True):
-            print(u, d)
-            
+        for (u, d) in g.nodes(data=True):            
             if(d['type'] == 'logic'):
                 new_pos = list(pos[u])
                 new_pos[0] = pos[d['parent']][0]
@@ -454,34 +364,11 @@ class Window(QDialog):
             print(u, v, d)
 
         print("######### EDGES #############")
-        #print(le)
+        print(le)
         
-        # edges
-        nx.draw_networkx_edges(g, pos, edgelist=logic_edge, connectionstyle='arc3, rad=0.0')
-        nx.draw_networkx_edges(g, pos, edgelist=new_le, connectionstyle='arc3, rad=0.0')
-        # labels
-        nx.draw_networkx_labels(g, pos, labels, font_size=14, font_color='black', font_family='sans-serif', bbox=dict(facecolor="white", edgecolor='black', boxstyle='round,pad=0.8'))
-        nx.draw_networkx_labels(g, pos, labels_logic, font_size=14, font_color='b', font_family='sans-serif', bbox=dict(facecolor="white", edgecolor='black', boxstyle='round,pad=0.8'))
-        nx.draw_networkx_labels(g, pos, labels_counter, font_size=14, font_color='g', font_family='sans-serif', bbox=dict(facecolor="white", edgecolor='black', boxstyle='round,pad=0.8'))
-
-        pos_higher = {}
-        y_off = -20  # offset on the y axis
-
-        for k, v in pos.items():
-            pos_higher[k] = (v[0], v[1]+y_off)
-
-        nx.draw_networkx_labels(g, pos_higher, labels_cost,  font_size=10, font_color='b', font_family='sans-serif', bbox=dict(facecolor="white", edgecolor='black', boxstyle='round,pad=0.2'))
-
-        plt.axis('off')
-        
-        plt.subplots_adjust(left=0.00, right=1.0, bottom=0.00, top=1.0, hspace = 0, wspace=0)
-        #self.figure = plt.gcf()
-
-        plt.savefig('testingImage.png')
         nt = Network(height="100%", width="100%")#('600px', '1000px') 
         
         # Title can be html
-
         for (n, d) in ln:
             if (d['leaf'] == 1):
                 nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=n + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob']), group="leaf")
