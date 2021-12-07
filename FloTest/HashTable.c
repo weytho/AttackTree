@@ -5,7 +5,7 @@
 
 typedef struct NodeProperty NodeP;
 struct NodeProperty {
-   char * Name;
+   char Name [50];
    int cost;
    double prob;
 };
@@ -67,9 +67,11 @@ int NodeIndex(HashTable *h, NodeP *n) {
    
    //move in array until an empty 
    while(h->hashArray[hashIndex] != -1) {
-      int cmp = strcmp(n->Name,h->NodeArray[hashIndex].Name);
-      if(cmp == 0){
-         return hashIndex;
+      if(h->hashArray[hashIndex] >= 0){
+         int cmp = strcmp(n->Name,h->NodeArray[hashIndex].Name);
+         if(cmp == 0){
+            return hashIndex;
+         }
       }
       //go to next cell
       ++hashIndex;
@@ -101,9 +103,11 @@ int NameIndex(HashTable *h, char * Name) {
    
    //move in array until an empty 
    while(h->hashArray[hashIndex] != -1) {
-      int cmp = strcmp(Name,h->NodeArray[hashIndex].Name);
-      if(cmp == 0){
-         return hashIndex;
+      if(h->hashArray[hashIndex] >= 0){
+         int cmp = strcmp(Name,h->NodeArray[hashIndex].Name);
+         if(cmp == 0){
+            return hashIndex;
+         }
       }
       //go to next cell
       ++hashIndex;
@@ -208,7 +212,7 @@ void freeH(HashTable *h){
    free(h);
 }
 
-/* int main() {
+/*int main() {
    printf("Main\n");
    struct HashTable *h = newHastable(2);
    displayH(h);
@@ -238,6 +242,8 @@ void freeH(HashTable *h){
    insertH(h,n3);
    displayH(h);
    insertH(h,n4);
+   displayH(h);
+   insertH(h,n5);
    displayH(h);
    insertH(h,n5);
    displayH(h);

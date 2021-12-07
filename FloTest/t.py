@@ -1,7 +1,7 @@
 from random import random
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QLabel, QMessageBox
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 # gcc -shared -Wl,-soname,testlib -o testlib.so -fPIC testlib.c
@@ -46,6 +46,7 @@ class CustomNode(ctypes.Structure):
         ('root', ctypes.c_int),
         ('leaf', ctypes.c_int),
         ('cost', ctypes.c_int),
+        ('prob', ctypes.c_double),
         ('CM', ctypes.c_int),]
 
 class EdgeNode(ctypes.Structure):
@@ -89,7 +90,7 @@ class Worker(QObject):
         # .decode('utf-8') better way ?
         if newlist != None :
             tmp_node = CustomNode.from_address(newlist.data)
-            newdict = {'type': tmp_node.type.decode('utf-8'),'leaf': tmp_node.leaf, 'root': tmp_node.root, 'cost': tmp_node.cost}
+            newdict = {'type': tmp_node.type.decode('utf-8'),'leaf': tmp_node.leaf, 'root': tmp_node.root, 'cost': tmp_node.cost, 'prob': tmp_node.prob}
             if( newdict['leaf'] == 1 ):
                 self.leaf_cnt = self.leaf_cnt + 1
             newtuple = (tmp_node.title.decode('utf-8'), newdict)
@@ -98,7 +99,7 @@ class Worker(QObject):
             while newlist.next != None:
                 newlist = CustomList.from_address(newlist.next)
                 tmp_node = CustomNode.from_address(newlist.data)
-                newdict = {'type': tmp_node.type.decode('utf-8'),'leaf': tmp_node.leaf, 'root': tmp_node.root, 'cost': tmp_node.cost}
+                newdict = {'type': tmp_node.type.decode('utf-8'),'leaf': tmp_node.leaf, 'root': tmp_node.root, 'cost': tmp_node.cost, 'prob': tmp_node.prob}
                 if( newdict['leaf'] == 1 ):
                     self.leaf_cnt = self.leaf_cnt + 1
                 newtuple = (tmp_node.title.decode('utf-8'), newdict)
@@ -145,9 +146,9 @@ class Worker(QObject):
         #print(str_formula)
         #self.str_formula = str_formula
 
-        print(type(str_formula))
-        print(str_formula)
-        print(parse_expr(str_formula))
+        #print(type(str_formula))
+        #print(str_formula)
+        #print(parse_expr(str_formula))
         #print(to_cnf(parse_expr(str_formula)))
 
         # STR TO CNF SYMPY
@@ -174,22 +175,33 @@ class ParserWorker(QObject):
 
         strTest = self.fullText
         new_s = strTest.split("RELATIONS")
-        new_s2 = new_s[1].split("PROPERTIES")
-        new_s3 = new_s2[1].split("COUNTERMEASURES")
+        print(new_s)
+        new_s2 = new_s[1].split("COUNTERMEASURES")
+        print(new_s2)
+        new_s3 = new_s2[1].split("PROPERTIES")
+        print(new_s3)
 
-        print(new_s2[0])
-        print(new_s3[0])
-        print(new_s3[1])
+        if(len(new_s3) <= 1):
+            print("Boolean mode")
+            s = ctypes.create_string_buffer(new_s2[0].encode('utf-8'))
+            s2 = ctypes.create_string_buffer(new_s3[0].encode('utf-8'))
 
-        # sanitize and check input
+            my_function.parser.restype = ctypes.c_int
+            my_function.parser.argtypes = [ctypes.c_char_p]
+            ret = my_function.parser(s, "", s2)
+        else:
+            print(new_s2[0])
+            print(new_s3[0])
+            print(new_s3[1])
 
-        s = ctypes.create_string_buffer(new_s2[0].encode('utf-8'))
-        s2 = ctypes.create_string_buffer(new_s3[0].encode('utf-8'))
-        s3 = ctypes.create_string_buffer(new_s2[1].encode('utf-8'))
+            # sanitize and check input
+            s = ctypes.create_string_buffer(new_s2[0].encode('utf-8'))
+            s2 = ctypes.create_string_buffer(new_s3[0].encode('utf-8'))
+            s3 = ctypes.create_string_buffer(new_s3[1].encode('utf-8'))
 
-        my_function.parser.restype = ctypes.c_int
-        my_function.parser.argtypes = [ctypes.c_char_p]
-        ret = my_function.parser(s, s2, s3)
+            my_function.parser.restype = ctypes.c_int
+            my_function.parser.argtypes = [ctypes.c_char_p]
+            ret = my_function.parser(s, s3, s2)
 
         time.sleep(2)
         self.finished.emit(ret)
@@ -262,9 +274,18 @@ class Window(QDialog):
         #self.getfiles()
         '''
         str = """
-            A1 -AND-> { B1, A12}
-            G -OR-> {A1, A2}
-            """
+        RELATIONS
+            D3-OR-> {F3, R, S}
+            F3 -AND-> {F12}
+            R -AND-> {F12}
+            S -OR-> {F13}
+        COUNTERMEASURES
+            CM1 (F13, F12)
+        PROPERTIES
+            F12 : {cost = 10, prob = 1.0}
+            F13 : {cost = 1, prob = 2.5}
+            CM1 : {cost = 2}
+        """
         '''
 
         str = """
@@ -272,27 +293,26 @@ class Window(QDialog):
             D3-OR-> {F3, R, S}
             F3 -AND-> {F12}
             R -AND-> {F12}
-            S -OR-> {F12}
-        PROPERTIES
-            F12 : {cost = 10, proba = 1.0}
+            S -OR-> {F13}
         COUNTERMEASURES
-            CM1 (F13, F12) : {cost = 2}
+            CM1 (F13, F12)
         """
         
 
         # TODO
         #str,cost = randomTree.TreeGen(5, 3)
 
+        '''
         g = Glucose3()
         g.add_clause([-1, 2])
         g.add_clause([-2, 3])
         print(g.solve())
         print(g.get_model())
+        '''
 
         # TODO
         self.grammarText.setText(str)
-        self.parser()
-        
+        self.parser()        
 
     def get_canvas(self, ln, le, leaf_cnt):
 
@@ -336,8 +356,8 @@ class Window(QDialog):
                 logic_edge.append(edge)
                 
         g.add_nodes_from(logic_nodes)
-        for (u, d) in g.nodes(data=True):
-            print(u, d)
+        #for (u, d) in g.nodes(data=True):
+         #   print(u, d)
 
         # attention aux CM !!
         for (u, v) in le:
@@ -381,7 +401,7 @@ class Window(QDialog):
             print(element)
         #print(ng.nodes)
         '''
-        print(pos)
+        #print(pos)
 
         # RESIZE figure
         list_width = []
@@ -398,10 +418,10 @@ class Window(QDialog):
         list_level = Counter(list_width).most_common()
         biggest_level = list_level[0][1]
         biggest_trace = len(list_level)
-        print("HERE IS THE BIGGEST")
-        print(list_level)
-        print(biggest_level)
-        print(biggest_trace)
+        #print("HERE IS THE BIGGEST")
+        #print(list_level)
+        #print(biggest_level)
+        #print(biggest_trace)
         if( biggest_level > 7 or biggest_trace > 9):
             # TODO FIXE THIS NBR
             max_number_on_line = 7
@@ -434,7 +454,7 @@ class Window(QDialog):
             print(u, v, d)
 
         print("######### EDGES #############")
-        print(le)
+        #print(le)
         
         # edges
         nx.draw_networkx_edges(g, pos, edgelist=logic_edge, connectionstyle='arc3, rad=0.0')
@@ -464,10 +484,10 @@ class Window(QDialog):
 
         for (n, d) in ln:
             if (d['leaf'] == 1):
-                nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=n, group="leaf")
+                nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=n + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob']), group="leaf")
                 # htmlTitle("Go wild <'span style='display: inline-block; animation: be-tacky 5s ease-in-out alternate infinite; margin: 5px;'>!<'/span>")
             else:
-                nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=n)
+                nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=n + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob']))
 
         for (n, d) in logic_nodes:
             nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=labels_logic[n], shape='box', group="logic")

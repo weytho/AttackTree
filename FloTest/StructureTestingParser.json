@@ -27,7 +27,7 @@
       "Type":"OR",
       "Child":[
         {
-          "Action":"F12",
+          "Action":"F13",
           "Type":"LEAF"
         }
       ]

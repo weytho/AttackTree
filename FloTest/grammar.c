@@ -332,12 +332,13 @@ void set_properties(DLL_List * list, HashTable * h){
 
    if (new_current2 == NULL) {
       // check for properties
-      printf("NICE1111 !! %s \n", current->n->title);
-      int i = NameIndex(h, "F12");//current->n->title);
+      printf("NICE1111 !%s! \n", current->n->title);
+      int i = NameIndex(h, current->n->title);//current->n->title);
       printf("%d\n", i);
+      displayH(h);
       NodeP * Nn = getH(h, i);
       if(Nn != NULL){
-         printf("NICE !! \n");
+         printf("NICE !! %d, %f\n", Nn->cost, Nn->prob);
          current->n->cost = Nn->cost;
          current->n->prob = Nn->prob;
          deleteH(h, Nn);

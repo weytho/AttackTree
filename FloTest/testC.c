@@ -5,6 +5,7 @@
 //#include "structures.c"
 #include "grammar.c"
 #include <ctype.h>
+#include <locale.h>
 // sudo apt install libjson-c-dev
 // gcc -shared -Wl,-soname,testlib -o testlib.so -fPIC testC.c -ljson-c
 // /bin/python3 /home/flo/Desktop/Github/AttackTree/testThread.py
@@ -309,6 +310,13 @@ json_object * build_json(json_object * parent , DLL_List * tree){
 
    json_object_object_add(parent, "Action", json_object_new_string(tree->n->title));
    json_object_object_add(parent, "Type", json_object_new_string(tree->n->type));
+
+   // TODO vérifier autrement
+   if(tree->n->cost){
+      json_object_object_add(parent, "Cost", json_object_new_int(tree->n->cost));
+      json_object_object_add(parent, "Prob", json_object_new_double(tree->n->prob));
+   }
+
    //json_object_object_add(parent, "CM", json_object_new_array());
 
    /*DLL_List * CM_list = tree->n->CM;
@@ -363,88 +371,99 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
    if(toParse == NULL || is_empty(toParse)){
       return 1;
    }
-
-   char *saveptr3;
-   char *saveptr4;
-   char *saveptr5;
-
-   char delim5[] = "}\t\r\n\v\f";
-   char delim6[] = ": \t\r\n\v\f";
-   char delim7[] = "{:= \t\r\n\v\f";
-   char delim8[] = ":=, \t\r\n\v\f";
-
-   size_t size_prop = strlen(prop_text) + 1;
-   char *length_ptr = malloc(size_prop * sizeof(char));
-   memcpy(length_ptr, prop_text, size_prop);
-
-   printf("@@@@@@@@@@@@@ NODES @@@@@@@@@@@@@\n");
-
-   char delim_lines[] = ":";
-   int count = 0;
-   char *length_runner = strtok_r(length_ptr, delim_lines, &saveptr5);
-
-   while(length_runner != NULL){
-      count = count + 1;
-      length_runner = strtok_r(NULL, delim_lines, &saveptr5);
+   int boolean_mode = 0;
+   if(is_empty(prop_text)){
+      boolean_mode = 1;
    }
-   if( count > 0 ){
-      count = count - 1;
-   }
+   setlocale(LC_NUMERIC, "C");
 
+   struct HashTable *ht_properties;
 
-   free(length_ptr);
+   if(boolean_mode == 0){
 
-   struct HashTable *ht_properties = newHastable(count * 2);
+      char *saveptr3;
+      char *saveptr4;
+      char *saveptr5;
 
-   char *ptr_prop = strtok_r(prop_text, delim5, &saveptr3);
-   char * prop_name;
-   char * prop_value;
+      char delim5[] = "}\t\r\n\v\f";
+      char delim6[] = ": \t\r\n\v\f";
+      char delim7[] = "{:= \t\r\n\v\f";
+      char delim8[] = ":=, \t\r\n\v\f";
 
-   while(ptr_prop != NULL){
+      size_t size_prop = strlen(prop_text) + 1;
+      char *length_ptr = malloc(size_prop * sizeof(char));
+      memcpy(length_ptr, prop_text, size_prop);
 
-      if(!is_empty(ptr_prop)){
+      printf("@@@@@@@@@@@@@ NODES @@@@@@@@@@@@@\n");
 
-         printf("GAGAGAGAGAGA we have : %s\n", ptr_prop);
+      char delim_lines[] = ":";
+      int count = 0;
+      char *length_runner = strtok_r(length_ptr, delim_lines, &saveptr5);
 
-         size_t size2 = strlen(ptr_prop) + 1;
-         char *ptr_prop_copy = malloc(size2 * sizeof(char));
-         memcpy(ptr_prop_copy, ptr_prop, size2);
+      while(length_runner != NULL){
+         count = count + 1;
+         length_runner = strtok_r(NULL, delim_lines, &saveptr5);
+      }
+      if( count > 0 ){
+         count = count - 1;
+      }
 
-         ptr_prop = strtok_r(ptr_prop_copy, delim6, &saveptr4);
+      free(length_ptr);
 
-         printf("ATATATATATAT we have : %s\n", ptr_prop);
+      ht_properties = newHastable(count * 2);
 
-         NodeP *n_prop = malloc(sizeof(NodeP));
-         printf("NIIIIIIIIIIIIIIIIIIIIII !! %s \n", ptr_prop);
-         n_prop->Name = ptr_prop;
+      char *ptr_prop = strtok_r(prop_text, delim5, &saveptr3);
+      char * prop_name;
+      char * prop_value;
 
-         prop_name = strtok_r(NULL, delim7, &saveptr4);
+      while(ptr_prop != NULL){
 
-         while(prop_name != NULL){
+         if(!is_empty(ptr_prop)){
 
-            prop_value = strtok_r(NULL, delim8, &saveptr4);
+            printf("GAGAGAGAGAGA we have : %s\n", ptr_prop);
 
-            char * end;
-            
-            if(strcmp(prop_name, "cost") == 0){
-               n_prop->cost = strtol(prop_value, &end, 10);
-            } else if (strcmp(prop_name, "prob") == 0){
-               n_prop->prob = strtod(prop_value, &end);
-            }
+            size_t size2 = strlen(ptr_prop) + 1;
+            char *ptr_prop_copy = malloc(size2 * sizeof(char));
+            memcpy(ptr_prop_copy, ptr_prop, size2);
+
+            ptr_prop = strtok_r(ptr_prop_copy, delim6, &saveptr4);
+
+            printf("ATATATATATAT we have : %s\n", ptr_prop);
+
+            NodeP *n_prop = malloc(sizeof(NodeP));
+            printf("NIIIIIIIIIIIIIIIIIIIIII !%s! \n", ptr_prop);
+            //n_prop->Name = ptr_prop;
+            // TODO MIEUX
+            memcpy(n_prop->Name, ptr_prop, sizeof(n_prop->Name));
 
             prop_name = strtok_r(NULL, delim7, &saveptr4);
 
+            while(prop_name != NULL){
+
+               prop_value = strtok_r(NULL, delim8, &saveptr4);
+
+               char * end;
+               char * end2;
+               
+               if(strcmp(prop_name, "cost") == 0){
+                  n_prop->cost = strtol(prop_value, NULL, 10);
+               } else if (strcmp(prop_name, "prob") == 0){
+                  n_prop->prob = strtod(prop_value, NULL);//atof(myNumber);
+               }
+
+               prop_name = strtok_r(NULL, delim7, &saveptr4);
+
+            }
+
+            insertH(ht_properties,n_prop);
+            free(ptr_prop_copy);
          }
 
-         insertH(ht_properties,n_prop);
-         free(ptr_prop_copy);
+         ptr_prop = strtok_r(NULL, delim5, &saveptr3); 
       }
 
-      ptr_prop = strtok_r(NULL, delim5, &saveptr3); 
+      displayH(ht_properties);
    }
-
-   displayH(ht_properties);
-
 
 
    size_t size = strlen(toParse) + 1;
@@ -574,12 +593,13 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
    // ADD properties
 
    displayH(ht_properties);
-   set_properties_total(whole_list, ht_properties);
-
+   displayH(ht_properties);
+   if( boolean_mode == 0 ){
+      set_properties_total(whole_list, ht_properties);
+      freeH(ht_properties);
+   }
 
    // ADD countermeasures
-
-
 
    create_Json_file(whole_list);
 
