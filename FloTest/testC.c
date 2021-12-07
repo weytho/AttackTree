@@ -19,7 +19,6 @@ struct full_List {
 };
 
 CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edges, Formula **form, Node *parent, int root){
-   printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
    // READ THE JSON //
    struct json_object *action;
    struct json_object *type;
@@ -210,7 +209,6 @@ FList * mainfct(char * path) {
 	struct json_object *parsed_json;
 	fp = fopen(path,"r");  
 
-   printf("Path to file is : %s \n", path);
    fseek(fp, 0, SEEK_END);
    long size = ftell(fp);
    fseek(fp, 0, SEEK_SET);
@@ -218,7 +216,7 @@ FList * mainfct(char * path) {
 	fread(buffer, size, 1, fp);
 	fclose(fp);
 	parsed_json = json_tokener_parse(buffer);
-   printf("Path to file is : %s \n", path);
+
 	EList *edges = NULL;
 	List *list = NULL;
    Formula *form = NULL;
@@ -421,19 +419,14 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
 
          if(!is_empty(ptr_prop)){
 
-            printf("GAGAGAGAGAGA we have : %s\n", ptr_prop);
-
             size_t size2 = strlen(ptr_prop) + 1;
             char *ptr_prop_copy = malloc(size2 * sizeof(char));
             memcpy(ptr_prop_copy, ptr_prop, size2);
 
             ptr_prop = strtok_r(ptr_prop_copy, delim6, &saveptr4);
 
-            printf("ATATATATATAT we have : %s\n", ptr_prop);
-
             NodeP *n_prop = malloc(sizeof(NodeP));
-            printf("NIIIIIIIIIIIIIIIIIIIIII !%s! \n", ptr_prop);
-            //n_prop->Name = ptr_prop;
+
             // TODO MIEUX
             memcpy(n_prop->Name, ptr_prop, sizeof(n_prop->Name));
 
@@ -442,9 +435,6 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
             while(prop_name != NULL){
 
                prop_value = strtok_r(NULL, delim8, &saveptr4);
-
-               char * end;
-               char * end2;
                
                if(strcmp(prop_name, "cost") == 0){
                   n_prop->cost = strtol(prop_value, NULL, 10);
@@ -470,7 +460,7 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
    size_t size = strlen(toParse) + 1;
    char * RawText = malloc(size * sizeof(char));
    memcpy(RawText, toParse, size);
-   printf("###\n");
+
    printf("TEXT IS HERE '%s'\n", RawText);
 
    char delim2[] = "}\t\r\n\v\f";
