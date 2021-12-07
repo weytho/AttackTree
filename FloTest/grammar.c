@@ -332,11 +332,16 @@ void set_properties(DLL_List * list, HashTable * h){
 
    if (new_current2 == NULL) {
       // check for properties
-
-      NodeP * Nn = getH(h, NodeIndex(h, current->n->title));
+      printf("NICE1111 !! %s \n", current->n->title);
+      int i = NameIndex(h, "F12");//current->n->title);
+      printf("%d\n", i);
+      NodeP * Nn = getH(h, i);
       if(Nn != NULL){
+         printf("NICE !! \n");
          current->n->cost = Nn->cost;
          current->n->prob = Nn->prob;
+         deleteH(h, Nn);
+         displayH(h);
       }
 
    }
@@ -345,6 +350,7 @@ void set_properties(DLL_List * list, HashTable * h){
 void set_properties_total(DLL_List * list, HashTable * h){
    DLL_List * current = list;
    if(current != NULL){
+      printf("NICE000 !! \n");
       set_properties(current, h);
       current = current->children;
       while (current != NULL) {

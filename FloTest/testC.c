@@ -368,9 +368,9 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
    char *saveptr4;
    char *saveptr5;
 
-   char delim5[] = "\t\r\n\v\f";
+   char delim5[] = "}\t\r\n\v\f";
    char delim6[] = ": \t\r\n\v\f";
-   char delim7[] = ":= \t\r\n\v\f";
+   char delim7[] = "{:= \t\r\n\v\f";
    char delim8[] = ":=, \t\r\n\v\f";
 
    size_t size_prop = strlen(prop_text) + 1;
@@ -402,28 +402,45 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
 
    while(ptr_prop != NULL){
 
-      size_t size2 = strlen(ptr_prop) + 1;
-      char *ptr_prop_copy = malloc(size2 * sizeof(char));
-      memcpy(ptr_prop_copy, ptr_prop, size2);
+      if(!is_empty(ptr_prop)){
 
-      ptr_prop = strtok_r(ptr_prop_copy, delim6, &saveptr4);
+         printf("GAGAGAGAGAGA we have : %s\n", ptr_prop);
 
-      NodeP *n_prop = malloc(sizeof(NodeP));
-      n_prop->Name = ptr_prop;
+         size_t size2 = strlen(ptr_prop) + 1;
+         char *ptr_prop_copy = malloc(size2 * sizeof(char));
+         memcpy(ptr_prop_copy, ptr_prop, size2);
 
-      prop_name = strtok_r(NULL, delim7, &saveptr4);
+         ptr_prop = strtok_r(ptr_prop_copy, delim6, &saveptr4);
 
-      while(prop_name != NULL){
+         printf("ATATATATATAT we have : %s\n", ptr_prop);
 
-         prop_value = strtok_r(NULL, delim8, &saveptr4);
+         NodeP *n_prop = malloc(sizeof(NodeP));
+         printf("NIIIIIIIIIIIIIIIIIIIIII !! %s \n", ptr_prop);
+         n_prop->Name = ptr_prop;
+
          prop_name = strtok_r(NULL, delim7, &saveptr4);
 
+         while(prop_name != NULL){
+
+            prop_value = strtok_r(NULL, delim8, &saveptr4);
+
+            char * end;
+            
+            if(strcmp(prop_name, "cost") == 0){
+               n_prop->cost = strtol(prop_value, &end, 10);
+            } else if (strcmp(prop_name, "prob") == 0){
+               n_prop->prob = strtod(prop_value, &end);
+            }
+
+            prop_name = strtok_r(NULL, delim7, &saveptr4);
+
+         }
+
+         insertH(ht_properties,n_prop);
+         free(ptr_prop_copy);
       }
 
-      insertH(ht_properties,n_prop);
-
       ptr_prop = strtok_r(NULL, delim5, &saveptr3); 
-      free(ptr_prop_copy);
    }
 
    displayH(ht_properties);
@@ -448,102 +465,105 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
    DLL_List * whole_list = NULL;
    int parent_is_in = 0;
 
-	while (ptr != NULL && !is_empty(ptr))	{
-      
-      size_t size2 = strlen(ptr) + 1;
-      char *ptr_copy = malloc(size2 * sizeof(char));
-      memcpy(ptr_copy, ptr, size2);
-      char *ptr2 = strtok_r(ptr_copy, delim3, &saveptr2);
+	while (ptr != NULL) {
 
-      if(ptr2 != NULL) {
+      if(!is_empty(ptr)){
+         
+         size_t size2 = strlen(ptr) + 1;
+         char *ptr_copy = malloc(size2 * sizeof(char));
+         memcpy(ptr_copy, ptr, size2);
+         char *ptr2 = strtok_r(ptr_copy, delim3, &saveptr2);
 
-         char *ptr3 = strtok_r(NULL, delim3, &saveptr2);         
-         //printf("HELLO : %s : %s\n", ptr2, ptr3);
-         DLL_List * dll_node;
-         if( isInList(whole_list, ptr2) == 0){
-            printf("TEP \n");
-            dll_node = createDLLNode(ptr2, ptr3);
-            whole_list = addToEndList(whole_list, dll_node);
-            //printDLL_List(whole_list);
-         } else {
-            printf("TEP2 \n");
-            parent_is_in = 1;
-            dll_node = getFromList(whole_list, ptr2);
-            // TODO CHECK FOR REWRITE
-            if(dll_node->children != NULL){
-               free(RawText);
-               free(ptr_copy);
-               // FREE PARENTS ?
-               DLL_free_from_top(whole_list);
-               printf("2\n");
-               return 2;
-            }
-            //memcpy(dll_node->n->type, ptr3, sizeof(dll_node->n->type));
-            snprintf(dll_node->n->type, sizeof(dll_node->n->type), "%s", ptr3);
-         }
+         if(ptr2 != NULL) {
 
-         ptr2 = strtok_r(NULL, delim4, &saveptr2);
-
-         while (ptr2 != NULL && !is_empty(ptr2))   {
-            
-            //printf("INTEP 3\n");
-            DLL_List * tmp_dll;
-            if( isInList(whole_list, ptr2) == 0 ){
-               tmp_dll = createDLLNode(ptr2, "LEAF");
+            char *ptr3 = strtok_r(NULL, delim3, &saveptr2);         
+            //printf("HELLO : %s : %s\n", ptr2, ptr3);
+            DLL_List * dll_node;
+            if( isInList(whole_list, ptr2) == 0){
+               printf("TEP \n");
+               dll_node = createDLLNode(ptr2, ptr3);
+               whole_list = addToEndList(whole_list, dll_node);
+               //printDLL_List(whole_list);
             } else {
-               printf("TEP 4\n");
-               
-               tmp_dll = getFromList(whole_list, ptr2);
-
-               if(parent_is_in == 1 && tmp_dll->children != NULL){
-                  int r = cycle_check(dll_node, tmp_dll->n->title);
-                  if(r != 0){
-                     free(RawText);
-                     free(ptr_copy);
-                     DLL_free_from_top(whole_list);
-                     printf("3\n");
-                     return 3;
-                  }
+               printf("TEP2 \n");
+               parent_is_in = 1;
+               dll_node = getFromList(whole_list, ptr2);
+               // TODO CHECK FOR REWRITE
+               if(dll_node->children != NULL){
+                  free(RawText);
+                  free(ptr_copy);
+                  // FREE PARENTS ?
+                  DLL_free_from_top(whole_list);
+                  printf("2\n");
+                  return 2;
                }
-
-               if(tmp_dll->parents == NULL){
-                  tmp_dll = extractFromList(&whole_list, ptr2);
-                  // Pas suffisant
-                  tmp_dll->next = NULL;
-               } else {
-                  printf("TEP 8\n");
-                  DLL_List * new_tmp_dll = malloc(sizeof(DLL_List));
-                  new_tmp_dll->n = tmp_dll->n; //copy_node(tmp_dll->n); //tmp_dll->n;
-                  new_tmp_dll->children = tmp_dll->children;
-                  new_tmp_dll->parents = tmp_dll->parents;
-                  new_tmp_dll->next = NULL;
-                  tmp_dll = new_tmp_dll;
-
-               }
-               
+               //memcpy(dll_node->n->type, ptr3, sizeof(dll_node->n->type));
+               snprintf(dll_node->n->type, sizeof(dll_node->n->type), "%s", ptr3);
             }
 
-            //printf("DLLL 3\n");
-            printf("we have : %s with : %s\n", dll_node->n->title, tmp_dll->n->title);
-            
-            // TODO REFAIRE PLUS PROPREMENT
-            //printf("ADD CHILDREN\n");
-
-            addChildren(dll_node, tmp_dll, whole_list);
-
-            //printDLL_total(whole_list);
-            //printf("ADD PARENTS\n");
-            
-            addParents(tmp_dll, dll_node);
-            
-            parent_is_in = 0;
-            
             ptr2 = strtok_r(NULL, delim4, &saveptr2);
-         }
 
+            while (ptr2 != NULL && !is_empty(ptr2))   {
+               
+               //printf("INTEP 3\n");
+               DLL_List * tmp_dll;
+               if( isInList(whole_list, ptr2) == 0 ){
+                  tmp_dll = createDLLNode(ptr2, "LEAF");
+               } else {
+                  printf("TEP 4\n");
+                  
+                  tmp_dll = getFromList(whole_list, ptr2);
+
+                  if(parent_is_in == 1 && tmp_dll->children != NULL){
+                     int r = cycle_check(dll_node, tmp_dll->n->title);
+                     if(r != 0){
+                        free(RawText);
+                        free(ptr_copy);
+                        DLL_free_from_top(whole_list);
+                        printf("3\n");
+                        return 3;
+                     }
+                  }
+
+                  if(tmp_dll->parents == NULL){
+                     tmp_dll = extractFromList(&whole_list, ptr2);
+                     // Pas suffisant
+                     tmp_dll->next = NULL;
+                  } else {
+                     printf("TEP 8\n");
+                     DLL_List * new_tmp_dll = malloc(sizeof(DLL_List));
+                     new_tmp_dll->n = tmp_dll->n; //copy_node(tmp_dll->n); //tmp_dll->n;
+                     new_tmp_dll->children = tmp_dll->children;
+                     new_tmp_dll->parents = tmp_dll->parents;
+                     new_tmp_dll->next = NULL;
+                     tmp_dll = new_tmp_dll;
+
+                  }
+                  
+               }
+
+               //printf("DLLL 3\n");
+               printf("we have : %s with : %s\n", dll_node->n->title, tmp_dll->n->title);
+               
+               // TODO REFAIRE PLUS PROPREMENT
+               //printf("ADD CHILDREN\n");
+
+               addChildren(dll_node, tmp_dll, whole_list);
+
+               //printDLL_total(whole_list);
+               //printf("ADD PARENTS\n");
+               
+               addParents(tmp_dll, dll_node);
+               
+               parent_is_in = 0;
+               
+               ptr2 = strtok_r(NULL, delim4, &saveptr2);
+            }
+
+         }
+      free(ptr_copy);
       }
       ptr = strtok_r(NULL, delim2, &saveptr);
-      free(ptr_copy);
 	}
 
    free(RawText);
@@ -553,7 +573,8 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
 
    // ADD properties
 
-
+   displayH(ht_properties);
+   set_properties_total(whole_list, ht_properties);
 
 
    // ADD countermeasures

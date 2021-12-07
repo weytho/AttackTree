@@ -50,9 +50,9 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
    char *saveptr3;
    char *saveptr4;
 
-   char delim5[] = "\t\r\n\v\f";
+   char delim5[] = "}\t\r\n\v\f";
    char delim6[] = ": \t\r\n\v\f";
-   char delim7[] = ":= \t\r\n\v\f";
+   char delim7[] = "{:= \t\r\n\v\f";
    char delim8[] = ":=, \t\r\n\v\f";
 
    printf("TEXT IS HERE '%s'\n", prop_text);
@@ -72,7 +72,7 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
       new_ptr = strtok_r(n_ptr_copy, delim6, &saveptr4);
 
          ////
-      printf("here we have : %s\n", new_ptr);
+      printf("here4444444444444 we have : %s\n", new_ptr);
       new_ptr = strtok_r(NULL, delim7, &saveptr4);
          ////
 
@@ -114,15 +114,15 @@ int main (int argc, char * argv[]) {
 	printf("STARTING TEST \n");
 
    char a[]= " \
-   D3 -OR-> {F3, R, S} \
-   F3 -AND-> {F12} \
-   R -AND-> {F12} \
-   S -OR-> {F12} \
+   D3 -OR-> {F3, R, S} \n \
+   F3 -AND-> {F12} \n \
+   R -AND-> {F12} \n \
+   S -OR-> {F12} \n \
    R -OR-> {F13}\
    ";
    char b[]= " \
-   F13 : cost = 10, proba = 1.0 \n \
-   F12 : cost = 10, proba = 1.0 \
+   F13 : {cost = 10, proba = 1.0 }\n \
+   F12 : {cost = 10, proba = 1.0} \
    ";
    char c[]= "blahblahblah";
 

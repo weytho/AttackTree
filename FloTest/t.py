@@ -273,11 +273,10 @@ class Window(QDialog):
             F3 -AND-> {F12}
             R -AND-> {F12}
             S -OR-> {F12}
-            R -OR-> {F13}
         PROPERTIES
-            F13 : cost = 10, proba = 1.0
+            F12 : {cost = 10, proba = 1.0}
         COUNTERMEASURES
-            CM1 {F13, F12} : cost = 2
+            CM1 (F13, F12) : {cost = 2}
         """
         
 
