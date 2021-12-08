@@ -302,15 +302,15 @@ int is_empty(char *s) {
   return 1;
 }
 
-json_object * build_json(json_object * parent , DLL_List * tree){
+json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mode){
 
-   printDLL_total(tree);
+   //printDLL_total(tree);
 
    json_object_object_add(parent, "Action", json_object_new_string(tree->n->title));
    json_object_object_add(parent, "Type", json_object_new_string(tree->n->type));
 
    // TODO vérifier autrement
-   if(tree->n->cost){
+   if(boolean_mode == 0){
       json_object_object_add(parent, "Cost", json_object_new_int(tree->n->cost));
       json_object_object_add(parent, "Prob", json_object_new_double(tree->n->prob));
    }
@@ -334,7 +334,7 @@ json_object * build_json(json_object * parent , DLL_List * tree){
       json_object_object_add(parent, "Child", children);
       while (new_tree != NULL) {
          json_object *tmp_root = json_object_new_object();
-         json_object_array_add(children, build_json(tmp_root, new_tree));
+         json_object_array_add(children, build_json(tmp_root, new_tree, boolean_mode));
          new_tree = new_tree->next;
       }
    }
@@ -342,7 +342,7 @@ json_object * build_json(json_object * parent , DLL_List * tree){
    return parent;
 }
 
-void create_Json_file(DLL_List * wholeTree){
+void create_Json_file(DLL_List * wholeTree, int boolean_mode){
 
    printf(" NAME FINAL IS %s\n", wholeTree->n->title);
    const char *filename = "StructureTestingParser.json";
@@ -353,7 +353,7 @@ void create_Json_file(DLL_List * wholeTree){
 
    // FULL RECURSIF PLEASE
    DLL_List * new_tree = wholeTree;
-   json_object * new_root = build_json(root, new_tree);
+   json_object * new_root = build_json(root, new_tree, boolean_mode);
 
    if (json_object_to_file_ext(filename, new_root, JSON_C_TO_STRING_PRETTY))
       printf("Error: failed to save %s!!\n", filename);
@@ -591,9 +591,11 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
 
    // ADD countermeasures
 
-   create_Json_file(whole_list);
+   create_Json_file(whole_list, boolean_mode);
 
    DLL_free_from_top(whole_list);
+
+   printf("ENNNNNNNND222222222222\n");
 
 	return 0;
 }
@@ -611,9 +613,12 @@ int main (int argc, char * argv[]) {
 	//freeNode(n);
 	//freeList(l);
 
-   char a[]= " D3 -OR-> {F3, R, S} F3 -AND-> {F12} R -AND-> {F13} S -OR-> {F12, F13}";
-   char b[]= "blahblahblah";
-   char c[]= "blahblahblah";
+   char a[]= " A-AND->{B,C} \
+   C-AND->{F,G,H} \
+   B-OR->{D,E,H} \
+   H-OR->{I,J}";
+   char b[]= "";
+   char c[]= "";
 
    int r = parser(a, b, c);
 	return 0;

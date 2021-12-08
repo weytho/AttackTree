@@ -1,9 +1,8 @@
 from random import random
 import sys
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QLabel, QMessageBox
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtWebEngineWidgets import QWebEngineView
-from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 # gcc -shared -Wl,-soname,testlib -o testlib.so -fPIC testlib.c
 # pyuic5 -o main_window_ui.py ui/main_window.ui
 # https://stackoverflow.com/questions/44726280/include-matplotlib-in-pyqt5-with-hover-labels
@@ -11,13 +10,12 @@ from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 # https://stackoverflow.com/questions/56424297/how-to-draw-a-digraph-in-a-org-chart-fashion
 # https://stackoverflow.com/questions/38661635/ctypes-struct-returned-from-library
 import matplotlib.pyplot as plt
-from networkx.algorithms.traversal.edgebfs import edge_bfs
 from networkx.drawing.nx_agraph import graphviz_layout, pygraphviz_layout
 import numpy as np
 import networkx as nx
 import graphviz
 import time
-from PyQt5.QtCore import QObject, QThread, QUrl, pyqtSignal, Qt
+from PyQt5.QtCore import QObject, QThread, QUrl, pyqtSignal
 import ctypes
 import os
 from pyvis.network import Network
@@ -25,7 +23,6 @@ import randomTree
 from pysat.solvers import Glucose3
 import re
 from math import inf
-from collections import Counter
 from sympy import *
 from sympy.parsing.sympy_parser import parse_expr
 import json
@@ -129,32 +126,16 @@ class Worker(QObject):
                 newdata = newFormula.data.decode('utf-8')
                 self.formula.append(newdata)
 
-        good_formula = []
         str_formula = ""
         for e in self.formula:
             str_formula = str_formula + e
-            #print(e)
-            d = set()
-            t = ()
-            d.add((
-                e,
-                True
-            ))
-            good_formula.append(d)
-
-        #print("FORMAULTATION DHHDHDHDHDHDHDHDHDHD")
-        #print(self.formula)
-        #print(good_formula)
-        #print(str_formula)
-        #self.str_formula = str_formula
-
-        #print(type(str_formula))
-        #print(str_formula)
-        #print(parse_expr(str_formula))
-        #print(to_cnf(parse_expr(str_formula)))
 
         # STR TO CNF SYMPY
-        self.str_formula = str(to_cnf(parse_expr(str_formula)))
+        print(str_formula)
+
+        glob = {}
+        exec('from sympy.core import Symbol', glob) # ok for I, E, S, N, C, O, or Q
+        self.str_formula = str(to_cnf(parse_expr(str_formula, global_dict=glob)))
 
         my_function.freeList(newlist)
         #my_function.freeEList(newEdgeList)
@@ -281,6 +262,16 @@ class Window(QDialog):
             CM1 (F13, F12)
         """
 
+        str = """
+        RELATIONS
+            A-AND->{B,C}
+            C-AND->{F,H}
+            B-OR->{E,H}
+            H-OR->{I,J}
+        COUNTERMEASURES
+            CM1 (A, B)
+        """
+
         # TODO
         #str,cost = randomTree.TreeGen(5, 3)
 
@@ -370,11 +361,12 @@ class Window(QDialog):
         
         # Title can be html
         for (n, d) in ln:
+            title_str = n + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob'])
             if (d['leaf'] == 1):
-                nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=n + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob']), group="leaf")
+                nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str, group="leaf")
                 # htmlTitle("Go wild <'span style='display: inline-block; animation: be-tacky 5s ease-in-out alternate infinite; margin: 5px;'>!<'/span>")
             else:
-                nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=n + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob']))
+                nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str)
 
         for (n, d) in logic_nodes:
             nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=labels_logic[n], shape='box', group="logic")
@@ -406,6 +398,7 @@ class Window(QDialog):
         html_file = os.path.join(dirname, 'nx.html')
         local_url = QUrl.fromLocalFile(html_file)
         self.canvas.load(local_url)
+
         #self.canvas.draw()
         print("pressed")
 
@@ -476,8 +469,7 @@ class Window(QDialog):
         else:
             msg.setText("This is the main text!")
         msg.setIcon(QMessageBox.Critical)
-        x = msg.exec_()
-        
+        msg.exec_()       
 
 # driver code
 if __name__ == '__main__':

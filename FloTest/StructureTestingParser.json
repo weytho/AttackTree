@@ -1,34 +1,52 @@
 {
-  "Action":"D3",
-  "Type":"OR",
+  "Action":"A",
+  "Type":"AND",
   "Child":[
     {
-      "Action":"F3",
-      "Type":"AND",
-      "Child":[
-        {
-          "Action":"F12",
-          "Type":"LEAF"
-        }
-      ]
-    },
-    {
-      "Action":"R",
-      "Type":"AND",
-      "Child":[
-        {
-          "Action":"F12",
-          "Type":"LEAF"
-        }
-      ]
-    },
-    {
-      "Action":"S",
+      "Action":"B",
       "Type":"OR",
       "Child":[
         {
-          "Action":"F13",
+          "Action":"E",
           "Type":"LEAF"
+        },
+        {
+          "Action":"H",
+          "Type":"OR",
+          "Child":[
+            {
+              "Action":"I",
+              "Type":"LEAF"
+            },
+            {
+              "Action":"J",
+              "Type":"LEAF"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Action":"C",
+      "Type":"AND",
+      "Child":[
+        {
+          "Action":"F",
+          "Type":"LEAF"
+        },
+        {
+          "Action":"H",
+          "Type":"OR",
+          "Child":[
+            {
+              "Action":"I",
+              "Type":"LEAF"
+            },
+            {
+              "Action":"J",
+              "Type":"LEAF"
+            }
+          ]
         }
       ]
     }

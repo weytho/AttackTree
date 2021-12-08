@@ -152,6 +152,7 @@ void addChildrentoAllInstances(DLL_List * whole, DLL_List *child, DLL_List *node
    while (current != NULL) {
       if (strcmp(current->n->title, node->n->title) == 0){
          current->children = child;
+         child->next = NULL;
       }
       addChildrentoAllInstances(current->children, child, node);
       current = current->next;
@@ -210,6 +211,17 @@ int is_in_flatList(BasicList *list, char* name){
    return 0;
 }
 
+DLL_List * get_from_flatList(BasicList *list, char* name){
+   BasicList * runner = list;
+   while (runner != NULL) {
+      if (strcmp(runner->data->n->title, name) == 0){
+         return runner->data;
+      }
+      runner = runner->next;
+   }
+   return NULL;
+}
+
 void printFlatList(BasicList *list){
    BasicList * runner = list;
    while (runner != NULL) {
@@ -238,6 +250,8 @@ BasicList * flatten_tree_uniq(DLL_List *list, BasicList *baseList){
    DLL_List * children = NULL;
    DLL_List * next = NULL;
    while (current != NULL) {
+      printFlatList(baseList);
+      printf("CUT\n");
       if (is_in_flatList(baseList, current->n->title) == 0){
          BasicList * tmp = createNode_flatList(current);
          baseList = push_flatlist(baseList, tmp);
@@ -246,7 +260,9 @@ BasicList * flatten_tree_uniq(DLL_List *list, BasicList *baseList){
       } else {
          children = current->children;
          next = current->next;
-         free(current);
+         if( current != get_from_flatList(baseList, current->n->title) ) {
+            free(current);
+         }
       }
       baseList = flatten_tree_uniq(children, baseList);
       current = next;
@@ -279,10 +295,6 @@ void free_flat_list(BasicList *list)
       }
       current->data->parents = NULL;
 
-      /*child = current->data->children;
-      free(child);
-      current->data->children = NULL;*/
-
       free(current->data);
       current->data = NULL;
       free(current);
@@ -293,6 +305,7 @@ void free_flat_list(BasicList *list)
 BasicList * init_flatten(DLL_List *list){
    BasicList * flatList = createNode_flatList(list);
    BasicList * complete = flatten_tree_uniq(list->children, flatList);
+   printf("JDJDJDJDJDJ\n");
    printFlatList(complete);
    free_flat_list(complete);
    return complete;
