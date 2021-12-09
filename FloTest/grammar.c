@@ -305,7 +305,6 @@ void free_flat_list(BasicList *list)
 BasicList * init_flatten(DLL_List *list){
    BasicList * flatList = createNode_flatList(list);
    BasicList * complete = flatten_tree_uniq(list->children, flatList);
-   printf("JDJDJDJDJDJ\n");
    printFlatList(complete);
    free_flat_list(complete);
    return complete;
