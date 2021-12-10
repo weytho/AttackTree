@@ -3,11 +3,18 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+typedef struct NodeCountermeasure NodeCM;
+struct NodeCountermeasure {
+   char CMtitle [50];
+   NodeCM * next;
+};
+
 typedef struct NodeProperty NodeP;
 struct NodeProperty {
    char Name [50];
    int cost;
    double prob;
+   NodeCM * CMlist;
 };
 
 typedef struct HashTable HashTable;

@@ -54,7 +54,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
          CMnode->cost = json_object_get_int(CMcost);
          CMnode->leaf = 1;
          CMnode->root = 0;
-         CMnode->CM = 1;
+         CMnode->CM = 0;
          CMnode->prob = 1;
          if (*list == NULL)
             *list = list_create(CMnode);
@@ -81,7 +81,16 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
    strcpy(node->title, json_object_get_string(action));
    strcpy(node->type, json_object_get_string(type));
    node->root = root;
+
    node->CM = 0;
+   if(CM != NULL){
+      int CMlength = json_object_array_length(CM);
+      if(CMlength >0){
+         node->CM = 1;
+      }
+   }
+
+
    if (strcmp(json_object_get_string(type), "LEAF" )){
       node->leaf = 0;
       node->prob = 1;
@@ -293,16 +302,7 @@ void freeForm(Formula *l) {
 	form_free(l);
 }
 
-int is_empty(char *s) {
-  while (*s != '\0') {
-    if (!isspace((unsigned char)*s))
-      return 0;
-    s++;
-  }
-  return 1;
-}
-
-json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mode){
+json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mode, HashTable *ht_CM){
 
    //printDLL_total(tree);
 
@@ -317,16 +317,26 @@ json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mod
 
    //json_object_object_add(parent, "CM", json_object_new_array());
 
-   /*DLL_List * CM_list = tree->n->CM;
-   if( CM_list != NULL ){
-      json_object *counter = json_object_new_array();
-      json_object_object_add(parent, "CM", counter);
-      while (CM_list != NULL) {
-         json_object *tmp_root = json_object_new_object();
-         json_object_array_add(counter, build_json(tmp_root, CM_list));
-         CM_list = CM_list->next;
+   if(ht_CM != NULL){
+      int i = NameIndex(ht_CM, tree->n->title);//current->n->title);
+      NodeP * Nn = getH(ht_CM, i);
+      if(Nn != NULL){
+         printf("NIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n");
+         NodeCM * CM_list = Nn->CMlist;
+         if( CM_list != NULL ){
+            json_object *counter = json_object_new_array();
+            json_object_object_add(parent, "CM", counter);
+            while (CM_list != NULL) {
+               json_object *tmp_root_cm = json_object_new_object();
+               json_object_object_add(tmp_root_cm, "CMtitle", json_object_new_string(CM_list->CMtitle));
+               json_object_array_add(counter, tmp_root_cm);
+               CM_list = CM_list->next;
+            }
+         }
+         //deleteH(ht_CM, Nn);
+         displayH(ht_CM);
       }
-   }*/
+   }
 
    DLL_List * new_tree = tree->children;
    if( new_tree != NULL ){
@@ -334,7 +344,7 @@ json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mod
       json_object_object_add(parent, "Child", children);
       while (new_tree != NULL) {
          json_object *tmp_root = json_object_new_object();
-         json_object_array_add(children, build_json(tmp_root, new_tree, boolean_mode));
+         json_object_array_add(children, build_json(tmp_root, new_tree, boolean_mode, ht_CM));
          new_tree = new_tree->next;
       }
    }
@@ -342,7 +352,7 @@ json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mod
    return parent;
 }
 
-void create_Json_file(DLL_List * wholeTree, int boolean_mode){
+void create_Json_file(DLL_List * wholeTree, int boolean_mode, HashTable *ht_CM){
 
    printf(" NAME FINAL IS %s\n", wholeTree->n->title);
    const char *filename = "StructureTestingParser.json";
@@ -353,7 +363,7 @@ void create_Json_file(DLL_List * wholeTree, int boolean_mode){
 
    // FULL RECURSIF PLEASE
    DLL_List * new_tree = wholeTree;
-   json_object * new_root = build_json(root, new_tree, boolean_mode);
+   json_object * new_root = build_json(root, new_tree, boolean_mode, ht_CM);
 
    if (json_object_to_file_ext(filename, new_root, JSON_C_TO_STRING_PRETTY))
       printf("Error: failed to save %s!!\n", filename);
@@ -376,84 +386,20 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
    }
    setlocale(LC_NUMERIC, "C");
 
-   struct HashTable *ht_properties;
+   struct HashTable *ht_properties = NULL;
+   struct HashTable *ht_CM = NULL;
 
    if(boolean_mode == 0){
 
-      char *saveptr3;
-      char *saveptr4;
-      char *saveptr5;
+      ht_properties = parse_properties(prop_text);
 
-      char delim5[] = "}\t\r\n\v\f";
-      char delim6[] = ": \t\r\n\v\f";
-      char delim7[] = "{:= \t\r\n\v\f";
-      char delim8[] = ":=, \t\r\n\v\f";
+   }
 
-      size_t size_prop = strlen(prop_text) + 1;
-      char *length_ptr = malloc(size_prop * sizeof(char));
-      memcpy(length_ptr, prop_text, size_prop);
 
-      printf("@@@@@@@@@@@@@ NODES @@@@@@@@@@@@@\n");
+   if(!is_empty(counter_text)){
 
-      char delim_lines[] = ":";
-      int count = 0;
-      char *length_runner = strtok_r(length_ptr, delim_lines, &saveptr5);
+      ht_CM = parse_countermeasures(counter_text);
 
-      while(length_runner != NULL){
-         count = count + 1;
-         length_runner = strtok_r(NULL, delim_lines, &saveptr5);
-      }
-      if( count > 0 ){
-         count = count - 1;
-      }
-
-      free(length_ptr);
-
-      ht_properties = newHastable(count * 2);
-
-      char *ptr_prop = strtok_r(prop_text, delim5, &saveptr3);
-      char * prop_name;
-      char * prop_value;
-
-      while(ptr_prop != NULL){
-
-         if(!is_empty(ptr_prop)){
-
-            size_t size2 = strlen(ptr_prop) + 1;
-            char *ptr_prop_copy = malloc(size2 * sizeof(char));
-            memcpy(ptr_prop_copy, ptr_prop, size2);
-
-            ptr_prop = strtok_r(ptr_prop_copy, delim6, &saveptr4);
-
-            NodeP *n_prop = malloc(sizeof(NodeP));
-
-            // TODO MIEUX
-            memcpy(n_prop->Name, ptr_prop, sizeof(n_prop->Name));
-
-            prop_name = strtok_r(NULL, delim7, &saveptr4);
-
-            while(prop_name != NULL){
-
-               prop_value = strtok_r(NULL, delim8, &saveptr4);
-               
-               if(strcmp(prop_name, "cost") == 0){
-                  n_prop->cost = strtol(prop_value, NULL, 10);
-               } else if (strcmp(prop_name, "prob") == 0){
-                  n_prop->prob = strtod(prop_value, NULL);//atof(myNumber);
-               }
-
-               prop_name = strtok_r(NULL, delim7, &saveptr4);
-
-            }
-
-            insertH(ht_properties,n_prop);
-            free(ptr_prop_copy);
-         }
-
-         ptr_prop = strtok_r(NULL, delim5, &saveptr3); 
-      }
-
-      displayH(ht_properties);
    }
 
 
@@ -591,7 +537,10 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
 
    // ADD countermeasures
 
-   create_Json_file(whole_list, boolean_mode);
+   create_Json_file(whole_list, boolean_mode, ht_CM);
+   if( ht_CM != NULL ){
+      freeH(ht_CM);
+   }
 
    DLL_free_from_top(whole_list);
 

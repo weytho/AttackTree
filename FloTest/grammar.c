@@ -3,6 +3,7 @@
 #include<json-c/json.h>
 #include"structures.c"
 #include "HashTable.c"
+#include <ctype.h>
 
 
 typedef struct custom_List DLL_List;
@@ -18,6 +19,16 @@ Node * copy_node(Node *old){
    memcpy(new_Node->title, old->title, sizeof(new_Node->title));
    memcpy(new_Node->type, old->type, sizeof(new_Node->type));
    return new_Node;
+}
+
+
+int is_empty(char *s) {
+  while (*s != '\0') {
+    if (!isspace((unsigned char)*s))
+      return 0;
+    s++;
+  }
+  return 1;
 }
 
 void printDLL_List(DLL_List * list){
@@ -371,4 +382,185 @@ void set_properties_total(DLL_List * list, HashTable * h){
          current = current->next;
       }
    }
+}
+
+
+HashTable * parse_properties(char * prop_text){
+
+   struct HashTable *ht_properties;
+
+   char *saveptr3;
+   char *saveptr4;
+   char *saveptr5;
+
+   char delim5[] = "}\t\r\n\v\f";
+   char delim6[] = ": \t\r\n\v\f";
+   char delim7[] = "{:= \t\r\n\v\f";
+   char delim8[] = ":=, \t\r\n\v\f";
+
+   size_t size_prop = strlen(prop_text) + 1;
+   char *length_ptr = malloc(size_prop * sizeof(char));
+   memcpy(length_ptr, prop_text, size_prop);
+
+   printf("@@@@@@@@@@@@@ NODES @@@@@@@@@@@@@\n");
+
+   char delim_lines[] = ":";
+   int count = 0;
+   char *length_runner = strtok_r(length_ptr, delim_lines, &saveptr5);
+
+   while(length_runner != NULL){
+      count = count + 1;
+      length_runner = strtok_r(NULL, delim_lines, &saveptr5);
+   }
+   if( count > 0 ){
+      count = count - 1;
+   }
+
+   free(length_ptr);
+
+   ht_properties = newHastable(count * 2);
+
+   char *ptr_prop = strtok_r(prop_text, delim5, &saveptr3);
+   char * prop_name;
+   char * prop_value;
+
+   while(ptr_prop != NULL){
+
+      if(!is_empty(ptr_prop)){
+
+         size_t size2 = strlen(ptr_prop) + 1;
+         char *ptr_prop_copy = malloc(size2 * sizeof(char));
+         memcpy(ptr_prop_copy, ptr_prop, size2);
+
+         ptr_prop = strtok_r(ptr_prop_copy, delim6, &saveptr4);
+
+         NodeP *n_prop = malloc(sizeof(NodeP));
+
+         // TODO MIEUX
+         memcpy(n_prop->Name, ptr_prop, sizeof(n_prop->Name));
+
+         prop_name = strtok_r(NULL, delim7, &saveptr4);
+
+         while(prop_name != NULL){
+
+            prop_value = strtok_r(NULL, delim8, &saveptr4);
+            
+            if(strcmp(prop_name, "cost") == 0){
+               n_prop->cost = strtol(prop_value, NULL, 10);
+            } else if (strcmp(prop_name, "prob") == 0){
+               n_prop->prob = strtod(prop_value, NULL);//atof(myNumber);
+            }
+
+            prop_name = strtok_r(NULL, delim7, &saveptr4);
+
+         }
+
+         insertH(ht_properties, n_prop);
+         free(ptr_prop_copy);
+      }
+
+      ptr_prop = strtok_r(NULL, delim5, &saveptr3); 
+   }
+
+   displayH(ht_properties);
+   return ht_properties;
+}
+
+HashTable * parse_countermeasures(char * counter_text){
+
+   struct HashTable *ht_CM;
+
+   char *saveptr6;
+   char *saveptr7;
+
+   char delim9[] = ")\t\r\n\v\f";
+   char delim10[] = "(, \t\r\n\v\f";
+
+   size_t counter_size = strlen(counter_text) + 1;
+   char * new_counter_text = malloc(counter_size * sizeof(char));
+   memcpy(new_counter_text, counter_text, counter_size);
+
+   char delim_lines[] = ")";
+   int count = 0;
+   char *length_runner = strtok_r(new_counter_text, delim_lines, &saveptr6);
+
+   while(length_runner != NULL){
+      count = count + 1;
+      length_runner = strtok_r(NULL, delim_lines, &saveptr6);
+   }
+   if( count > 0 ){
+      count = count - 1;
+   }
+
+   free(new_counter_text);
+
+   ht_CM = newHastable(count * 2);
+
+   char *new_ptr = strtok_r(counter_text, delim9, &saveptr6);
+   char * ptr_cm;
+
+   while(new_ptr != NULL){
+
+      if(!is_empty(new_ptr)){
+
+         size_t size2 = strlen(new_ptr) + 1;
+         char *n_ptr_copy = malloc(size2 * sizeof(char));
+         memcpy(n_ptr_copy, new_ptr, size2);
+
+         printf("here we have : %s\n", new_ptr);
+         ptr_cm = strtok_r(n_ptr_copy, delim10, &saveptr7);
+
+         printf("here4444444444444 we have : %s\n", ptr_cm);
+         new_ptr = strtok_r(NULL, delim10, &saveptr7);
+         int i = -1;
+
+         while(new_ptr != NULL){
+
+            printf("here2 we have : %s\n", new_ptr);
+            i = NameIndex(ht_CM, new_ptr);
+            printf("index %d\n",i);
+            NodeP * Nn = getH(ht_CM, i);
+            if(Nn != NULL){
+               printf("HEHEHEHEHEHEHEHEHEH CM ! \n");
+               if(Nn->CMlist != NULL){
+                  NodeCM * tmp = Nn->CMlist;
+                  NodeCM * node = malloc(sizeof(NodeCM));
+                  memcpy(node->CMtitle, ptr_cm, sizeof(node->CMtitle));
+                  node->next = NULL;
+                  while(tmp->next != NULL){
+                     tmp = tmp->next;
+                  }
+                  tmp->next = node;
+               } else {
+                  NodeCM * node = malloc(sizeof(NodeCM));
+                  memcpy(node->CMtitle, ptr_cm, sizeof(node->CMtitle));
+                  node->next = NULL;
+                  Nn->CMlist = node;
+               }
+            } else {
+               printf("AHAHAHAHAHAHAHAHA CM ! \n");
+               Nn = malloc(sizeof(NodeP));
+               memcpy(Nn->Name, new_ptr, sizeof(Nn->Name));
+               NodeCM * node = malloc(sizeof(NodeCM));
+               memcpy(node->CMtitle, ptr_cm, sizeof(node->CMtitle));
+               node->next = NULL;
+               Nn->CMlist = node;
+               insertH(ht_CM, Nn);
+               displayH(ht_CM);
+            }
+
+            new_ptr = strtok_r(NULL, delim10, &saveptr7);
+
+         }
+
+      }
+
+      new_ptr = strtok_r(NULL, delim9, &saveptr6);
+      
+   }
+
+   printf("END OF PARSER CM ! \n");
+   displayH(ht_CM);
+   return ht_CM;
+
 }

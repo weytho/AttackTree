@@ -270,8 +270,6 @@ class Window(QDialog):
             H-OR->{I,J}
         COUNTERMEASURES
             CM1 (A, B)
-            CM2 (A, C, B)
-            CM3 (J)
         """
 
         # TODO
@@ -304,7 +302,7 @@ class Window(QDialog):
             types_dict[types[i][0]] = types[i][1]
 
         logic_nodes = []
-        logic_leaf = []
+        leaf_with_cm = []
         nodes_not_leaf = []
         new_le = []
         labels_logic = {}
@@ -349,22 +347,45 @@ class Window(QDialog):
                     labels_logic[name] = d['type']
                     logic_edge.append(edge)
             elif d['CM'] == 1:
-                
-                name_nor = u + '_' + "CMLOGIC"
-                node_nor = (name_nor, {'type': 'logic', 'parent': u, 'CM': 0})
-                logic_nodes.append(node_nor)
+                leaf_with_cm.append(u)
+                name_not = u + '_' + "NOT"
+                node_not = (name_not, {'type': 'cmlogic', 'parent': u, 'CM': 0})
+                logic_nodes.append(node_not)
 
-                logic_leaf.append(name_nor)
+                name_or = u + '_' + "CMLOGIC"
+                node_or = (name_or, {'type': 'cmlogic', 'parent': name_not, 'CM': 0})
+                logic_nodes.append(node_or)
 
-                edge = (u, name_nor)
-                labels_logic[name_nor] = "CM"
+                name_not2 = u + '_' + "NOT_LEAF"
+                node_not2 = (name_not2, {'type': 'cmlogic', 'parent': name_or, 'CM': 0})
+                logic_nodes.append(node_not2)
+
+                #edge = (u, name_not)
+                labels_logic[name_not] = "NOT"
+                #logic_edge.append(edge)
+
+                edge = (name_not, name_or)
+                labels_logic[name_or] = "OR"
+                logic_edge.append(edge)
+
+                edge = (name_or, name_not2)
+                labels_logic[name_not2] = "NOT"
+                logic_edge.append(edge)
+
+                edge = (name_not2, u)
                 logic_edge.append(edge)
 
 
         # attention aux CM !!
+        for i in leaf_with_cm:
+            print("GOTLEAF")
+            print(i)
 
         for (u, v) in le:
-            if v not in counter_list:
+            if v in leaf_with_cm:
+                edge = (u + '_' + "LOGIC", v + '_' + "NOT")
+                new_le.append(edge)
+            elif v not in counter_list:
                 edge = (u + '_' + "LOGIC", v)
                 new_le.append(edge)
             else:

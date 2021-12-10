@@ -49,6 +49,16 @@
             "font": {
                 "color": "#0000FF"
             }
+        },
+        "cm": {
+            "color":{
+                "background": "#00FF00"
+            }
+        },
+        "test": {
+            "color":{
+                "background": "#FFA500"
+            }
         }
     }
 }
