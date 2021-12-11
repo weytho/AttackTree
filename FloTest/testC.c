@@ -328,7 +328,9 @@ json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mod
             json_object_object_add(parent, "CM", counter);
             while (CM_list != NULL) {
                json_object *tmp_root_cm = json_object_new_object();
-               json_object_object_add(tmp_root_cm, "CMtitle", json_object_new_string(CM_list->CMtitle));
+               char buf[101];
+               snprintf(buf, sizeof(buf), "%s_%s", CM_list->CMtitle, Nn->Name);
+               json_object_object_add(tmp_root_cm, "CMtitle", json_object_new_string(buf));
                json_object_array_add(counter, tmp_root_cm);
                CM_list = CM_list->next;
             }
@@ -517,7 +519,7 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
             }
 
          }
-      free(ptr_copy);
+         free(ptr_copy);
       }
       ptr = strtok_r(NULL, delim2, &saveptr);
 	}

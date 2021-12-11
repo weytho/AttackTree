@@ -406,7 +406,9 @@ class Window(QDialog):
             if d['CM'] == 1:
                 nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str, group="test")
             elif d['type'] == 'CntMs':
-                nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str, group="cm")
+                split_t = n.split("_")
+                print(n)
+                nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=split_t[0] + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob']), group="cm")
             elif (d['leaf'] == 1):
                 nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str, group="leaf")
                 # htmlTitle("Go wild <'span style='display: inline-block; animation: be-tacky 5s ease-in-out alternate infinite; margin: 5px;'>!<'/span>")
