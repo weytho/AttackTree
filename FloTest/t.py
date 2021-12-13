@@ -20,8 +20,8 @@ from sympy import *
 from sympy.parsing.sympy_parser import parse_expr
 import json
 # From Folder
-import Worker
-import ParserWorker
+from Worker import *
+from ParserWorker import *
 from Struct import *
 
 dirname = os.path.dirname(__file__)
@@ -53,10 +53,10 @@ class Window(QDialog):
         layout = QHBoxLayout()
         base_layout.addLayout(layout)
 
-        Vlayout_toolbar = QVBoxLayout()
+        #Vlayout_toolbar = QVBoxLayout()
         Vlayout_left = QVBoxLayout()
         Vlayout_right= QVBoxLayout()
-        layout.addLayout(Vlayout_toolbar)
+        #layout.addLayout(Vlayout_toolbar)
         layout.addLayout(Vlayout_left)
         layout.addLayout(Vlayout_right)
         Vlayout_left.addWidget(self.canvas)
@@ -66,11 +66,12 @@ class Window(QDialog):
         ##Vlayout_left.addWidget(self.tracesFound)
 
         # Create pyqt toolbar
-        toolBar = QToolBar()
-        toolBar.setOrientation(Qt.Vertical)
-        Vlayout_toolbar.addWidget(toolBar)
+        #toolBar = QToolBar()
+        #toolBar.setOrientation(Qt.Vertical)
+        #Vlayout_toolbar.addWidget(toolBar)
 
         # Add buttons to toolbar
+        '''
         toolButton = QToolButton()
         toolButton.setText("CNF Formula")
         toolButton.setCheckable(True)
@@ -81,6 +82,7 @@ class Window(QDialog):
         toolButton.setCheckable(True)
         toolButton.setAutoExclusive(True)
         toolBar.addWidget(toolButton)
+        '''
 
         result_layout = QHBoxLayout()
         result_layout.addWidget(self.tracesFound)
@@ -133,7 +135,7 @@ class Window(QDialog):
         """
 
         # TODO
-        str,str1,str2 = randomTree.TreeGen(3, 3, 1)
+        str,str1,str2 = randomTree.TreeGen(4, 3, 1)
 
         # TODO
         self.grammarText.setText(str + "\n" + str1 + "\n" + str2)
@@ -150,11 +152,9 @@ class Window(QDialog):
         g.add_nodes_from(ln)
         print(ln)
         print(le)
-        labels = {n: n for n in g}
 
         types = [(u, d['type']) for (u, d) in g.nodes(data=True)]
         counter_list = [u for (u, d) in g.nodes(data=True) if d['type'] == 'CntMs']
-        labels_counter = {u: u for (u, d) in g.nodes(data=True) if d['type'] == 'CntMs'}
        
         types_dict= {}
 
@@ -190,32 +190,6 @@ class Window(QDialog):
                     labels_logic[name] = d['type']
                     logic_edge.append(edge)
 
-
-                    '''
-                    name_nor = u + '_' + "CMLOGIC"
-                    node_nor = (name_nor, {'type': 'logic', 'parent': u, 'CM': 0})
-                    logic_nodes.append(node_nor)
-
-                    name_not = u + '_' + "NOT"
-                    node_not = (name_not, {'type': 'cmlogic', 'parent': name_nor, 'CM': 0})
-                    logic_nodes.append(node_not)
-
-                    name = u + '_' + "LOGIC"
-                    node = (name, {'type': 'logic', 'parent': name_not, 'CM': 0})
-                    logic_nodes.append(node)
-
-                    edge = (u, name_nor)
-                    labels_logic[name_nor] = "NOR"
-                    logic_edge.append(edge)
-
-                    edge = (name_nor, name_not)
-                    labels_logic[name_not] = "NOT"
-                    logic_edge.append(edge)
-
-                    edge = (name_not, name)
-                    labels_logic[name] = d['type']
-                    logic_edge.append(edge)
-                    '''
                 else:
                     nodes_not_leaf.append(u)
                     name = u + '_' + "LOGIC"
@@ -260,11 +234,7 @@ class Window(QDialog):
 
         # CM entre noeud et noeud logic
         for (u, d) in g.nodes(data=True):
-            print(u,d)    
-            #if(d['type'] == 'logic'):
-            #    new_pos = list(pos[u])
-            #    new_pos[0] = pos[d['parent']][0]
-             #   pos[u] = tuple(new_pos)
+            print(u,d)
 
     
 
@@ -280,9 +250,9 @@ class Window(QDialog):
         # Title can be html
         for (n, d) in ln:
             title_str = n + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob'])
-            if d['CM'] == 1:
-                nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str, group="test")
-            elif d['type'] == 'CntMs':
+            #if d['CM'] == 1:
+            #    nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str, group="test")
+            if d['type'] == 'CntMs':
                 nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=d['variable'], shape='box', title=d['variable'] + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob']), group="cm")
             elif (d['leaf'] == 1):
                 nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str, group="leaf")
@@ -302,6 +272,8 @@ class Window(QDialog):
         #nt.from_nx(g)
         # https://networkx.org/documentation/stable/_modules/networkx/drawing/nx_agraph.html#pygraphviz_layout
         #nt.show_buttons()
+
+        #https://visjs.github.io/vis-network/docs/network/nodes.html
   
         settings_file = os.path.join(dirname, 'pyvis_param.json')
         with open(settings_file, 'r') as file:

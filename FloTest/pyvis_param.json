@@ -47,7 +47,10 @@
         },
         "logic": {
             "font": {
-                "color": "#0000FF"
+                "color": "#000000"
+            },
+            "color":{
+                "background": "#FF7F00"
             }
         },
         "cm": {
