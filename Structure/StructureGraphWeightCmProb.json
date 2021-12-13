@@ -15,11 +15,11 @@
             "Prob":1.0,
             "CM": [
                 {
-                    "CMtitle":"CM1",
+                    "CMtitle":"CM11",
                     "CMcost":12
                 },
                 {
-                    "CMtitle":"CM1.1",
+                    "CMtitle":"CM12",
                     "CMcost":0
                 }
             ]
