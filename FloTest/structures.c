@@ -4,6 +4,7 @@
 typedef struct s_Node Node;
 struct s_Node {
    char  title[50];
+   char  variable[50];
    char  type[5];
    int   root;
    int   leaf;
@@ -159,6 +160,9 @@ Formula * formula(char* type){
    }
    else if(!strncmp("OR",type,3)){
       new->data = " | ";
+   }
+   else if(!strncmp("NOT",type,4)){
+      new->data = " ~ ";
    }
    else{
       new->data = " & ";

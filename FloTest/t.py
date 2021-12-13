@@ -39,6 +39,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 class CustomNode(ctypes.Structure):
     _fields_ = [('title', ctypes.c_char * 50),
+        ('variable', ctypes.c_char * 50),
         ('type', ctypes.c_char * 5),
         ('root', ctypes.c_int),
         ('leaf', ctypes.c_int),
@@ -84,6 +85,8 @@ class Worker(QObject):
         fulllist = FullList.from_address(my_function.mainfct(s))
         newlist = CustomList.from_address(fulllist.nl)
 
+        node_list_uniq_cm = []
+
         # .decode('utf-8') better way ?
         if newlist != None :
             tmp_node = CustomNode.from_address(newlist.data)
@@ -93,6 +96,12 @@ class Worker(QObject):
             newtuple = (tmp_node.title.decode('utf-8'), newdict)
             self.node_list.append(newtuple)
 
+            if( newdict['type'] == 'CntMs' ):
+                node_list_uniq_cm.append(tmp_node.variable.decode('utf-8'))
+            else:
+                node_list_uniq_cm.append(newtuple[0])
+
+
             while newlist.next != None:
                 newlist = CustomList.from_address(newlist.next)
                 tmp_node = CustomNode.from_address(newlist.data)
@@ -101,6 +110,11 @@ class Worker(QObject):
                     self.leaf_cnt = self.leaf_cnt + 1
                 newtuple = (tmp_node.title.decode('utf-8'), newdict)
                 self.node_list.append(newtuple)
+
+                if( newdict['type'] == 'CntMs' ):
+                    node_list_uniq_cm.append(tmp_node.variable.decode('utf-8'))
+                else:
+                    node_list_uniq_cm.append(newtuple[0])
 
         newEdgeList = CustomList.from_address(fulllist.el)
 
@@ -136,10 +150,10 @@ class Worker(QObject):
         glob = {}
         exec('from sympy.core import Symbol', glob) # ok for I, E, S, N, C, O, or Q
         tmp_formula = to_cnf(parse_expr(str_formula, global_dict=glob))
-        self.str_formula = str(tmp_formula)
+        self.str_formula = str_formula#str(tmp_formula)
 
 
-        self.sat_solver(tmp_formula, self.node_list)
+        self.sat_solver(tmp_formula, node_list_uniq_cm)
 
 
         my_function.freeList(newlist)
@@ -150,9 +164,7 @@ class Worker(QObject):
         self.finished.emit()
         #self.plot
 
-    def sat_solver(self, formula, node_list):
-
-        list_var = [u for (u, _) in node_list]
+    def sat_solver(self, formula, list_var):
         print(list_var)
 
         if formula == None:

@@ -17,87 +17,91 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
    json_object_object_get_ex(parsed_json, "CM", &CM);
    
    // Compute CM 
-   int CMlength = json_object_array_length(CM);
    int totCMcost = 0;
    int cnt = 0;
-   while (cnt < CMlength){
-      struct json_object *CMchild;
-      struct json_object *CMtitle;
-      struct json_object *CMcost;
-      CMchild = json_object_array_get_idx(CM, cnt);
-      json_object_object_get_ex(CMchild, "CMtitle", &CMtitle);
-      json_object_object_get_ex(CMchild, "CMcost", &CMcost);
-      totCMcost += json_object_get_int(CMcost);
+   if(CM != NULL){
+   int CMlength = json_object_array_length(CM);
+      while (cnt < CMlength){
+         struct json_object *CMchild;
+         struct json_object *CMtitle;
+         struct json_object *CMcost;
+         CMchild = json_object_array_get_idx(CM, cnt);
+         json_object_object_get_ex(CMchild, "CMtitle", &CMtitle);
+         json_object_object_get_ex(CMchild, "CMcost", &CMcost);
+         totCMcost += json_object_get_int(CMcost);
 
-      // ADD CM to nodes
-      Node *CMnode = malloc(sizeof(Node));
-      if (CMnode == NULL){
-         printf("[Node] Malloc error\n");
-      }
-      strcpy(CMnode->title, json_object_get_string(CMtitle));
-      strcpy(CMnode->type, "CntMs");
-      CMnode->cost = json_object_get_int(CMcost);
-      CMnode->leaf = 1;
-      CMnode->root = 0;
-      CMnode->CM = 0;
-      CMnode->prob = 1;
-      if (*list == NULL)
-         *list = list_create(CMnode);
-      else 
-         *list = list_add(*list, CMnode);
-      // Edge
-      Edge *CMed = malloc(sizeof(Edge));
-      memcpy(CMed->parent, json_object_get_string(action), sizeof(char)*50);
-      memcpy(CMed->child, CMnode->title, sizeof(char)*50);
-      CMed->CM = 1;
-      if (*edges == NULL)
-         *edges = elist_create(CMed);
-      else
-         *edges = elist_add(*edges, CMed);
+         // ADD CM to nodes
+         Node *CMnode = malloc(sizeof(Node));
+         if (CMnode == NULL){
+            printf("[Node] Malloc error\n");
+         }
+         char buf[101];
+         snprintf(buf, sizeof(buf), "%s_%s", json_object_get_string(CMtitle), json_object_get_string(action));
+         strcpy(CMnode->title, buf);
+         strcpy(CMnode->type, "CntMs");
+         CMnode->cost = json_object_get_int(CMcost);
+         CMnode->leaf = 1;
+         CMnode->root = 0;
+         CMnode->CM = 0;
+         CMnode->prob = 1;
+         if (*list == NULL)
+            *list = list_create(CMnode);
+         else 
+            *list = list_add(*list, CMnode);
+         // Edge
+         Edge *CMed = malloc(sizeof(Edge));
+         memcpy(CMed->parent, json_object_get_string(action), sizeof(char)*50);
+         memcpy(CMed->child, CMnode->title, sizeof(char)*50);
+         CMed->CM = 1;
+         if (*edges == NULL)
+            *edges = elist_create(CMed);
+         else
+            *edges = elist_add(*edges, CMed);
 
-      if(CMformula == 1){
-         // ADD CM to formula
-         if (cnt == 0){
-            Formula *not = formula("NOT");
-            Formula *left = formula("LEFT");
-            not->next = left;
-            if((*form) == NULL){
-               (*form) = not;
+         if(CMformula == 1){
+            // ADD CM to formula
+            if (cnt == 0){
+               Formula *not = formula("NOT");
+               Formula *left = formula("LEFT");
+               not->next = left;
+               if((*form) == NULL){
+                  (*form) = not;
+               }
+               else{
+                  Formula *runner = *(form);
+                  while(runner->next != NULL){
+                     runner = runner->next;
+                  }
+                  runner->next = not;
+               }
+            }
+            Formula *newVar = malloc(sizeof(Formula));
+            newVar->data = json_object_get_string(CMtitle);
+            newVar->next = NULL;
+            Formula *runner = *(form);
+            while(runner->next != NULL){
+               runner = runner->next;
+            }
+            runner->next = newVar;
+
+            Formula *next = NULL;
+            if (cnt < CMlength - 1){
+               next = formula("OR");         
             }
             else{
-               Formula *runner = *(form);
-               while(runner->next != NULL){
-                  runner = runner->next;
-               }
-               runner->next = not;
+               next = formula("RIGHT");
+               next->next = formula("AND");
             }
-         }
-         Formula *newVar = malloc(sizeof(Formula));
-         newVar->data = json_object_get_string(CMtitle);
-         newVar->next = NULL;
-         Formula *runner = *(form);
-         while(runner->next != NULL){
-            runner = runner->next;
-         }
-         runner->next = newVar;
 
-         Formula *next = NULL;
-         if (cnt < CMlength - 1){
-            next = formula("OR");         
-         }
-         else{
-            next = formula("RIGHT");
-            next->next = formula("AND");
+            runner = *(form);
+            while(runner->next != NULL){
+               runner = runner->next;
+            }
+            runner->next = next;
          }
 
-         runner = *(form);
-         while(runner->next != NULL){
-            runner = runner->next;
-         }
-         runner->next = next;
+         cnt++;
       }
-
-      cnt++;
    }
 
    // CREATE + FILL THE NODE
@@ -108,12 +112,15 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
    strcpy(node->title, json_object_get_string(action));
    strcpy(node->type, json_object_get_string(type));
    node->root = root;
-   if (CMlength > 0){
-      node->CM = 1;
+   
+   node->CM = 0;
+   if(CM != NULL){
+      int CMlength = json_object_array_length(CM);
+      if(CMlength >0){
+         node->CM = 1;
+      }
    }
-   else{
-      node->CM = 0;
-   }
+
    if (strcmp(json_object_get_string(type), "LEAF" )){
       node->leaf = 0;
       node->prob = 1;
