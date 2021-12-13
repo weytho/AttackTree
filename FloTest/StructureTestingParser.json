@@ -1,45 +1,106 @@
 {
-  "Action":"A",
+  "Action":"node",
   "Type":"AND",
-  "CM":[
-    {
-      "CMtitle":"CM1"
-    },
-    {
-      "CMtitle":"CM2"
-    }
-  ],
+  "Cost":0,
+  "Prob":0.0,
   "Child":[
     {
-      "Action":"B",
-      "Type":"OR",
-      "CM":[
-        {
-          "CMtitle":"CM1"
-        },
-        {
-          "CMtitle":"CM2"
-        }
-      ],
+      "Action":"node0",
+      "Type":"AND",
+      "Cost":0,
+      "Prob":0.0,
       "Child":[
         {
-          "Action":"E",
-          "Type":"LEAF"
-        },
-        {
-          "Action":"H",
-          "Type":"OR",
+          "Action":"node00",
+          "Type":"AND",
+          "Cost":0,
+          "Prob":0.0,
           "Child":[
             {
-              "Action":"I",
-              "Type":"LEAF"
+              "Action":"node000",
+              "Type":"SAND",
+              "Cost":0,
+              "Prob":0.0,
+              "Child":[
+                {
+                  "Action":"node0000",
+                  "Type":"LEAF",
+                  "Cost":6,
+                  "Prob":1.0,
+                  "CM":[
+                    {
+                      "CMtitle":"CMnode0000"
+                    }
+                  ]
+                },
+                {
+                  "Action":"node0001",
+                  "Type":"LEAF",
+                  "Cost":8,
+                  "Prob":1.0
+                },
+                {
+                  "Action":"node0002",
+                  "Type":"LEAF",
+                  "Cost":10,
+                  "Prob":1.0
+                }
+              ]
             },
             {
-              "Action":"J",
+              "Action":"node001",
               "Type":"LEAF",
-              "CM":[
+              "Cost":2,
+              "Prob":1.0
+            }
+          ]
+        },
+        {
+          "Action":"node01",
+          "Type":"LEAF",
+          "Cost":3,
+          "Prob":1.0
+        },
+        {
+          "Action":"node02",
+          "Type":"SAND",
+          "Cost":0,
+          "Prob":0.0,
+          "Child":[
+            {
+              "Action":"node020",
+              "Type":"LEAF",
+              "Cost":8,
+              "Prob":1.0
+            },
+            {
+              "Action":"node021",
+              "Type":"LEAF",
+              "Cost":5,
+              "Prob":1.0
+            },
+            {
+              "Action":"node022",
+              "Type":"OR",
+              "Cost":0,
+              "Prob":0.0,
+              "Child":[
                 {
-                  "CMtitle":"CM3"
+                  "Action":"node0220",
+                  "Type":"LEAF",
+                  "Cost":3,
+                  "Prob":1.0,
+                  "CM":[
+                    {
+                      "CMtitle":"CMnode0220"
+                    }
+                  ]
+                },
+                {
+                  "Action":"node0221",
+                  "Type":"LEAF",
+                  "Cost":10,
+                  "Prob":1.0
                 }
               ]
             }
@@ -48,34 +109,70 @@
       ]
     },
     {
-      "Action":"C",
-      "Type":"AND",
-      "CM":[
-        {
-          "CMtitle":"CM2"
-        }
-      ],
+      "Action":"node1",
+      "Type":"SAND",
+      "Cost":0,
+      "Prob":0.0,
       "Child":[
         {
-          "Action":"F",
-          "Type":"LEAF"
+          "Action":"node10",
+          "Type":"LEAF",
+          "Cost":9,
+          "Prob":1.0
         },
         {
-          "Action":"H",
-          "Type":"OR",
+          "Action":"node11",
+          "Type":"SAND",
+          "Cost":0,
+          "Prob":0.0,
           "Child":[
             {
-              "Action":"I",
-              "Type":"LEAF"
-            },
-            {
-              "Action":"J",
-              "Type":"LEAF",
-              "CM":[
+              "Action":"node110",
+              "Type":"AND",
+              "Cost":0,
+              "Prob":0.0,
+              "Child":[
                 {
-                  "CMtitle":"CM3"
+                  "Action":"node1100",
+                  "Type":"LEAF",
+                  "Cost":5,
+                  "Prob":1.0,
+                  "CM":[
+                    {
+                      "CMtitle":"CMnode1100"
+                    }
+                  ]
+                },
+                {
+                  "Action":"node1101",
+                  "Type":"LEAF",
+                  "Cost":10,
+                  "Prob":1.0
+                },
+                {
+                  "Action":"node1102",
+                  "Type":"LEAF",
+                  "Cost":5,
+                  "Prob":1.0,
+                  "CM":[
+                    {
+                      "CMtitle":"CMnode1102"
+                    }
+                  ]
                 }
               ]
+            },
+            {
+              "Action":"node111",
+              "Type":"LEAF",
+              "Cost":7,
+              "Prob":1.0
+            },
+            {
+              "Action":"node112",
+              "Type":"LEAF",
+              "Cost":5,
+              "Prob":1.0
             }
           ]
         }
