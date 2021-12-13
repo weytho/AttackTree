@@ -1,7 +1,7 @@
 from random import random
 import sys
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QToolBar, QToolButton
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 # gcc -shared -Wl,-soname,testlib -o testlib.so -fPIC testlib.c
 # pyuic5 -o main_window_ui.py ui/main_window.ui
@@ -11,264 +11,24 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView
 # https://stackoverflow.com/questions/38661635/ctypes-struct-returned-from-library
 import matplotlib.pyplot as plt
 from networkx.drawing.nx_agraph import graphviz_layout, pygraphviz_layout
-import numpy as np
 import networkx as nx
-import graphviz
-import time
-from PyQt5.QtCore import QObject, QThread, QUrl, pyqtSignal
-import ctypes
+from PyQt5.QtCore import QThread, QUrl, Qt
 import os
 from pyvis.network import Network
 import randomTree
-from pysat.solvers import Glucose3
-import re
-from math import inf
 from sympy import *
 from sympy.parsing.sympy_parser import parse_expr
 import json
+# From Folder
+from Worker import *
+from ParserWorker import *
+from Struct import *
 
 dirname = os.path.dirname(__file__)
-
 
 from PyQt5.QtWidgets import (
     QApplication, QDialog, QHBoxLayout, QPushButton, QVBoxLayout
 )
-
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-
-
-class CustomNode(ctypes.Structure):
-    _fields_ = [('title', ctypes.c_char * 50),
-        ('variable', ctypes.c_char * 50),
-        ('type', ctypes.c_char * 5),
-        ('root', ctypes.c_int),
-        ('leaf', ctypes.c_int),
-        ('cost', ctypes.c_int),
-        ('prob', ctypes.c_double),
-        ('CM', ctypes.c_int),]
-
-class EdgeNode(ctypes.Structure):
-    _fields_ = [('parent', ctypes.c_char * 50),
-        ('child', ctypes.c_char * 50)]
-
-class FormulaNode(ctypes.Structure):
-    _fields_ = [('data', ctypes.c_char_p),
-        ('next', ctypes.c_void_p)]
-
-class CustomList(ctypes.Structure):
-    _fields_ = [('next', ctypes.c_void_p),
-        ('data', ctypes.c_void_p)]
-
-class FullList(ctypes.Structure):
-    _fields_ = [('nl', ctypes.c_void_p),
-        ('el', ctypes.c_void_p),
-        ('fo', ctypes.c_void_p)]
-
-class Worker(QObject):
-    finished = pyqtSignal()
-
-    def run(self):
-        print("WORKER")
-        self.node_list= []
-        self.edge_list = []
-        self.leaf_cnt = 0
-        self.formula = []
-        dirname = os.path.dirname(__file__)
-        so_file = os.path.join(dirname, 'testlib.so')
-        my_function = ctypes.CDLL(so_file)
-
-        s = ctypes.create_string_buffer(self.pathFile.encode('utf-8'))
-     
-        my_function.mainfct.restype = ctypes.c_void_p
-        my_function.mainfct.argtypes = [ctypes.c_char_p]
- 
-        fulllist = FullList.from_address(my_function.mainfct(s))
-        newlist = CustomList.from_address(fulllist.nl)
-
-        node_list_uniq_cm = []
-
-        # .decode('utf-8') better way ?
-        if newlist != None :
-            tmp_node = CustomNode.from_address(newlist.data)
-            newdict = {'type': tmp_node.type.decode('utf-8'),'leaf': tmp_node.leaf, 'root': tmp_node.root, 'cost': tmp_node.cost, 'prob': tmp_node.prob, 'CM': tmp_node.CM}
-            if( newdict['leaf'] == 1 ):
-                self.leaf_cnt = self.leaf_cnt + 1
-            newtuple = (tmp_node.title.decode('utf-8'), newdict)
-            self.node_list.append(newtuple)
-
-            if( newdict['type'] == 'CntMs' ):
-                node_list_uniq_cm.append(tmp_node.variable.decode('utf-8'))
-            else:
-                node_list_uniq_cm.append(newtuple[0])
-
-
-            while newlist.next != None:
-                newlist = CustomList.from_address(newlist.next)
-                tmp_node = CustomNode.from_address(newlist.data)
-                newdict = {'type': tmp_node.type.decode('utf-8'),'leaf': tmp_node.leaf, 'root': tmp_node.root, 'cost': tmp_node.cost, 'prob': tmp_node.prob, 'CM': tmp_node.CM}
-                if( newdict['leaf'] == 1 ):
-                    self.leaf_cnt = self.leaf_cnt + 1
-                newtuple = (tmp_node.title.decode('utf-8'), newdict)
-                self.node_list.append(newtuple)
-
-                if( newdict['type'] == 'CntMs' ):
-                    node_list_uniq_cm.append(tmp_node.variable.decode('utf-8'))
-                else:
-                    node_list_uniq_cm.append(newtuple[0])
-
-        newEdgeList = CustomList.from_address(fulllist.el)
-
-        if newEdgeList != None :
-            tmp_node = EdgeNode.from_address(newEdgeList.data)
-            newtuple = (tmp_node.parent.decode('utf-8'),tmp_node.child.decode('utf-8'))
-            self.edge_list.append(newtuple)
-
-            while newEdgeList.next != None:
-                newEdgeList = CustomList.from_address(newEdgeList.next)
-                tmp_node = EdgeNode.from_address(newEdgeList.data)
-                newtuple = (tmp_node.parent.decode('utf-8'),tmp_node.child.decode('utf-8'))
-                self.edge_list.append(newtuple)
-
-        newFormula = FormulaNode.from_address(fulllist.fo)
-
-        if newFormula != None :
-            newdata = newFormula.data.decode('utf-8')
-            self.formula.append(newdata)
-
-            while newFormula.next != None:
-                newFormula = FormulaNode.from_address(newFormula.next)
-                newdata = newFormula.data.decode('utf-8')
-                self.formula.append(newdata)
-
-        str_formula = ""
-        for e in self.formula:
-            str_formula = str_formula + e
-
-        # STR TO CNF SYMPY
-        print(str_formula)
-
-        glob = {}
-        exec('from sympy.core import Symbol', glob) # ok for I, E, S, N, C, O, or Q
-        tmp_formula = to_cnf(parse_expr(str_formula, global_dict=glob))
-        self.str_formula = str_formula#str(tmp_formula)
-
-
-        self.sat_solver(tmp_formula, node_list_uniq_cm)
-
-
-        my_function.freeList(newlist)
-        #my_function.freeEList(newEdgeList)
-        #my_function.freeForm(newFormula)
-        time.sleep(2)
-        #self.data.emit(node_list, edge_list)
-        self.finished.emit()
-        #self.plot
-
-    def sat_solver(self, formula, list_var):
-        print(list_var)
-
-        if formula == None:
-            return
-
-        dict_var = {}
-        dict_index = {}
-        i = 1
-        for v in list_var:
-            dict_var[v] = i
-            dict_index[i] = v
-            i = i + 1
-
-
-        list_and = formula.args
-        g = Glucose3()
-
-        for x in list_and:
-            l = []
-            list_or = x.args
-            if not list_or:
-                val = str(x)
-                l.append(dict_var[val])
-            else:
-                for var in list_or:
-                    list_not = var.args
-                    if not list_not:
-                        val = str(var)
-                        l.append(dict_var[val])
-                    else:
-                        val = str(list_not[0])
-                        l.append(dict_var[val])
-            g.add_clause(l)
-
-        print(g.solve())
-        model = g.get_model()
-        print(model)
-
-        result = []
-        for n in model:
-            if(n < 0):
-                result.append("Not("+dict_index[-n]+")")
-            else:
-                result.append(dict_index[n])
-
-        print(result)
-        
-
-        #for m in g.enum_models():
-            #print(m)
-    
-
-class ParserWorker(QObject):
-    finished = pyqtSignal(int)
-
-    def run(self):
-
-        self.node_list= []
-
-        dirname = os.path.dirname(__file__)
-        so_file = os.path.join(dirname, 'testlib.so')
-        my_function = ctypes.CDLL(so_file)
-
-        strTest = self.fullText
-        new_s = strTest.split("RELATIONS")
-        print(new_s)
-        new_s2 = new_s[1].split("COUNTERMEASURES")
-        print(new_s2)
-        new_s3 = new_s2[1].split("PROPERTIES")
-        print(new_s3)
-
-        if(len(new_s3) <= 1):
-            print("Boolean mode")
-            s = ctypes.create_string_buffer(new_s2[0].encode('utf-8'))
-            s2 = ctypes.create_string_buffer(new_s3[0].encode('utf-8'))
-
-            my_function.parser.restype = ctypes.c_int
-            my_function.parser.argtypes = [ctypes.c_char_p]
-            ret = my_function.parser(s, "", s2)
-        else:
-            print(new_s2[0])
-            print(new_s3[0])
-            print(new_s3[1])
-
-            # sanitize and check input
-            s = ctypes.create_string_buffer(new_s2[0].encode('utf-8'))
-            s2 = ctypes.create_string_buffer(new_s3[0].encode('utf-8'))
-            s3 = ctypes.create_string_buffer(new_s3[1].encode('utf-8'))
-
-            my_function.parser.restype = ctypes.c_int
-            my_function.parser.argtypes = [ctypes.c_char_p]
-            ret = my_function.parser(s, s3, s2)
-
-        time.sleep(2)
-        self.finished.emit(ret)
-
-        if ret == 0 :
-            print("NICE WE GOT HERE")
-            pass
-        else:
-            print("ERROR IN PARSER")
-            print("Code : " + str(ret))
-            pass
-
 
 class Window(QDialog):
     def __init__(self, parent=None):
@@ -286,26 +46,54 @@ class Window(QDialog):
         self.pathFile = QtWidgets.QTextEdit(self)
         self.pathFile.setFixedSize(self.width, 30)
         self.tracesFound = QtWidgets.QTextEdit(self)
-        self.tracesFound.setFixedSize(self.width, 60)
+        self.tracesFound.setFixedSize(1400, 60)
+
+        base_layout = QVBoxLayout()
 
         layout = QHBoxLayout()
+        base_layout.addLayout(layout)
 
+        #Vlayout_toolbar = QVBoxLayout()
         Vlayout_left = QVBoxLayout()
         Vlayout_right= QVBoxLayout()
+        #layout.addLayout(Vlayout_toolbar)
         layout.addLayout(Vlayout_left)
         layout.addLayout(Vlayout_right)
         Vlayout_left.addWidget(self.canvas)
         Vlayout_left.addWidget(self.button)   
 
         Vlayout_left.addWidget(self.pathFile)  
-        Vlayout_left.addWidget(self.tracesFound)
+        ##Vlayout_left.addWidget(self.tracesFound)
+
+        # Create pyqt toolbar
+        #toolBar = QToolBar()
+        #toolBar.setOrientation(Qt.Vertical)
+        #Vlayout_toolbar.addWidget(toolBar)
+
+        # Add buttons to toolbar
+        '''
+        toolButton = QToolButton()
+        toolButton.setText("CNF Formula")
+        toolButton.setCheckable(True)
+        toolButton.setAutoExclusive(True)
+        toolBar.addWidget(toolButton)
+        toolButton = QToolButton()
+        toolButton.setText("Complete Formula")
+        toolButton.setCheckable(True)
+        toolButton.setAutoExclusive(True)
+        toolBar.addWidget(toolButton)
+        '''
+
+        result_layout = QHBoxLayout()
+        result_layout.addWidget(self.tracesFound)
+        base_layout.addLayout(result_layout)
 
         self.grammarText = QtWidgets.QTextEdit(self)
         self.grammarText.setFixedWidth(400)
         Vlayout_right.addWidget(self.grammarText)
         Vlayout_right.addWidget(self.buttonParse)
 
-        self.setLayout(layout)
+        self.setLayout(base_layout)
         # TODO ENLEVER :
         #self.getfiles()
         '''
@@ -347,13 +135,13 @@ class Window(QDialog):
         """
 
         # TODO
-        #str,cost = randomTree.TreeGen(5, 3)
+        str,str1,str2 = randomTree.TreeGen(4, 3, 1)
 
         # TODO
-        self.grammarText.setText(str)
+        self.grammarText.setText(str + "\n" + str1 + "\n" + str2)
         self.parser()        
 
-    def get_canvas(self, ln, le, leaf_cnt):
+    def get_canvas(self, ln, le):
 
         # example stackoverflow
 
@@ -364,11 +152,9 @@ class Window(QDialog):
         g.add_nodes_from(ln)
         print(ln)
         print(le)
-        labels = {n: n for n in g}
 
         types = [(u, d['type']) for (u, d) in g.nodes(data=True)]
         counter_list = [u for (u, d) in g.nodes(data=True) if d['type'] == 'CntMs']
-        labels_counter = {u: u for (u, d) in g.nodes(data=True) if d['type'] == 'CntMs'}
        
         types_dict= {}
 
@@ -404,32 +190,6 @@ class Window(QDialog):
                     labels_logic[name] = d['type']
                     logic_edge.append(edge)
 
-
-                    '''
-                    name_nor = u + '_' + "CMLOGIC"
-                    node_nor = (name_nor, {'type': 'logic', 'parent': u, 'CM': 0})
-                    logic_nodes.append(node_nor)
-
-                    name_not = u + '_' + "NOT"
-                    node_not = (name_not, {'type': 'cmlogic', 'parent': name_nor, 'CM': 0})
-                    logic_nodes.append(node_not)
-
-                    name = u + '_' + "LOGIC"
-                    node = (name, {'type': 'logic', 'parent': name_not, 'CM': 0})
-                    logic_nodes.append(node)
-
-                    edge = (u, name_nor)
-                    labels_logic[name_nor] = "NOR"
-                    logic_edge.append(edge)
-
-                    edge = (name_nor, name_not)
-                    labels_logic[name_not] = "NOT"
-                    logic_edge.append(edge)
-
-                    edge = (name_not, name)
-                    labels_logic[name] = d['type']
-                    logic_edge.append(edge)
-                    '''
                 else:
                     nodes_not_leaf.append(u)
                     name = u + '_' + "LOGIC"
@@ -474,11 +234,7 @@ class Window(QDialog):
 
         # CM entre noeud et noeud logic
         for (u, d) in g.nodes(data=True):
-            print(u,d)    
-            #if(d['type'] == 'logic'):
-            #    new_pos = list(pos[u])
-            #    new_pos[0] = pos[d['parent']][0]
-             #   pos[u] = tuple(new_pos)
+            print(u,d)
 
     
 
@@ -494,12 +250,10 @@ class Window(QDialog):
         # Title can be html
         for (n, d) in ln:
             title_str = n + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob'])
-            if d['CM'] == 1:
-                nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str, group="test")
-            elif d['type'] == 'CntMs':
-                split_t = n.split("_")
-                print(n)
-                nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=split_t[0] + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob']), group="cm")
+            #if d['CM'] == 1:
+            #    nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str, group="test")
+            if d['type'] == 'CntMs':
+                nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=d['variable'], shape='box', title=d['variable'] + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob']), group="cm")
             elif (d['leaf'] == 1):
                 nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str, group="leaf")
                 # htmlTitle("Go wild <'span style='display: inline-block; animation: be-tacky 5s ease-in-out alternate infinite; margin: 5px;'>!<'/span>")
@@ -518,6 +272,8 @@ class Window(QDialog):
         #nt.from_nx(g)
         # https://networkx.org/documentation/stable/_modules/networkx/drawing/nx_agraph.html#pygraphviz_layout
         #nt.show_buttons()
+
+        #https://visjs.github.io/vis-network/docs/network/nodes.html
   
         settings_file = os.path.join(dirname, 'pyvis_param.json')
         with open(settings_file, 'r') as file:
@@ -528,10 +284,10 @@ class Window(QDialog):
         print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
     # action called by the import button
-    def plot(self, node_list, edge_list, leaf_cnt):
+    def plot(self, node_list, edge_list):
         # clearing old figure
         self.figure.clear()
-        self.get_canvas(node_list, edge_list, leaf_cnt)    
+        self.get_canvas(node_list, edge_list)    
         #self.canvas.setContextMenuPolicy(Qt.NoContextMenu)
         html_file = os.path.join(dirname, 'nx.html')
         local_url = QUrl.fromLocalFile(html_file)
@@ -570,10 +326,9 @@ class Window(QDialog):
     def cleaning(self):
         new_nl = self.worker.node_list
         new_el = self.worker.edge_list
-        leaf_cnt = self.worker.leaf_cnt
         self.tracesFound.setText(self.worker.str_formula)
         self.worker.deleteLater
-        self.plot(new_nl, new_el, leaf_cnt)
+        self.plot(new_nl, new_el)
         print(new_nl)
 
     def parser(self):
