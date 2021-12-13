@@ -27,7 +27,6 @@
         {
             "Action": "A2",
             "Type":"AND",
-            "CM": [],
             "Child" : [
                 {
                     "Action": "b",
@@ -45,8 +44,7 @@
                     "Action": "c",
                     "Type":"LEAF",
                     "Cost":2,
-                    "Prob":1.0,
-                    "CM": []
+                    "Prob":1.0
                 }
             ]
         },
@@ -64,8 +62,7 @@
                     "Action": "d",
                     "Type":"LEAF",
                     "Cost":3,
-                    "Prob":1.0,
-                    "CM": []
+                    "Prob":1.0
                 },
                 {
                     "Action": "e",
@@ -85,8 +82,7 @@
             "Action": "f",
             "Type":"LEAF",
             "Cost":4,
-            "Prob":0.8,
-            "CM": []
+            "Prob":0.8
         }
     ]
 }

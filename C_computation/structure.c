@@ -61,18 +61,20 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
          if(CMformula == 1){
             // ADD CM to formula
             if (cnt == 0){
-               Formula *not = formula("NOT");
                Formula *left = formula("LEFT");
-               not->next = left;
+               Formula *not = formula("NOT");
+               Formula *left2 = formula("LEFT");
+               left->next = not;
+               not->next = left2;
                if((*form) == NULL){
-                  (*form) = not;
+                  (*form) = left;
                }
                else{
                   Formula *runner = *(form);
                   while(runner->next != NULL){
                      runner = runner->next;
                   }
-                  runner->next = not;
+                  runner->next = left;
                }
             }
             Formula *newVar = malloc(sizeof(Formula));
@@ -228,6 +230,17 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
       else{
          node->cost = and_cost + totCMcost;
          node->prob = and_prob;
+      }
+   }
+
+   if(CMformula == 1){
+      if(CM != NULL){
+      Formula *right = formula("RIGHT");
+      Formula *runner = *(form);
+      while(runner->next != NULL){
+         runner = runner->next;
+      }
+      runner->next = right;  
       }
    }
    //printf("[Node] Title : %s\n",node->title);
