@@ -232,7 +232,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
          node->prob = and_prob;
       }
    }
-
+   // Close parenthesis of CM
    if(CMformula == 1){
       if(CM != NULL){
       Formula *right = formula("RIGHT");

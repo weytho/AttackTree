@@ -51,7 +51,7 @@ def nodeGeneration(Relations, CounterMeasures, Properties, node, depth, maxdepth
             Relations,CounterMeasures,Properties,first = nodeGeneration(Relations,CounterMeasures,Properties,child[i],depth+1,maxdepth,branching_factor,first)
     return Relations,CounterMeasures,Properties,first
 
-# complexity 1 : only relations
+# complexity 1 : relations + Countermeasures + Properties
 # complexity 2 : 
 # 
 def TreeGen(maxdepth, branching_factor, complexity):
@@ -63,7 +63,7 @@ def TreeGen(maxdepth, branching_factor, complexity):
     if complexity == 1:
         Relations,CounterMeasures,Properties,first = nodeGeneration(Relations,CounterMeasures,Properties,"node",0,maxdepth, branching_factor,0)
     if complexity == 2:
-        Relations,CounterMeasures,Properties,first = nodeGeneration2(Relations,CounterMeasures,Properties,"node",0,maxdepth, branching_factor,0)
+        Relations,CounterMeasures,Properties,first = nodeGeneration(Relations,CounterMeasures,Properties,"node",0,maxdepth, branching_factor,0)
     return Relations,CounterMeasures,Properties
 
 maxdepth = 3
