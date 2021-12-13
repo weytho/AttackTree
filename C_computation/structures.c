@@ -160,6 +160,9 @@ Formula * formula(char* type){
    else if(!strncmp("OR",type,3)){
       new->data = " | ";
    }
+   else if(!strncmp("NOT",type,4)){
+      new->data = " ~ ";
+   }
    else{
       new->data = " & ";
    }
