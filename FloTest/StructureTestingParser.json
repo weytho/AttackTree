@@ -3,10 +3,10 @@
   "Type":"AND",
   "CM":[
     {
-      "CMtitle":"CM1_A"
+      "CMtitle":"CM1"
     },
     {
-      "CMtitle":"CM2_A"
+      "CMtitle":"CM2"
     }
   ],
   "Child":[
@@ -15,10 +15,10 @@
       "Type":"OR",
       "CM":[
         {
-          "CMtitle":"CM1_B"
+          "CMtitle":"CM1"
         },
         {
-          "CMtitle":"CM2_B"
+          "CMtitle":"CM2"
         }
       ],
       "Child":[
@@ -39,7 +39,7 @@
               "Type":"LEAF",
               "CM":[
                 {
-                  "CMtitle":"CM3_J"
+                  "CMtitle":"CM3"
                 }
               ]
             }
@@ -52,7 +52,7 @@
       "Type":"AND",
       "CM":[
         {
-          "CMtitle":"CM2_C"
+          "CMtitle":"CM2"
         }
       ],
       "Child":[
@@ -73,7 +73,7 @@
               "Type":"LEAF",
               "CM":[
                 {
-                  "CMtitle":"CM3_J"
+                  "CMtitle":"CM3"
                 }
               ]
             }

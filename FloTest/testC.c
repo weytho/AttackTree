@@ -49,7 +49,9 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
          if (CMnode == NULL){
             printf("[Node] Malloc error\n");
          }
-         strcpy(CMnode->title, json_object_get_string(CMtitle));
+         char buf[101];
+         snprintf(buf, sizeof(buf), "%s_%s", json_object_get_string(CMtitle), json_object_get_string(action));
+         strcpy(CMnode->title, buf);
          strcpy(CMnode->type, "CntMs");
          CMnode->cost = json_object_get_int(CMcost);
          CMnode->leaf = 1;
@@ -328,9 +330,9 @@ json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mod
             json_object_object_add(parent, "CM", counter);
             while (CM_list != NULL) {
                json_object *tmp_root_cm = json_object_new_object();
-               char buf[101];
-               snprintf(buf, sizeof(buf), "%s_%s", CM_list->CMtitle, Nn->Name);
-               json_object_object_add(tmp_root_cm, "CMtitle", json_object_new_string(buf));
+               //char buf[101];
+               //snprintf(buf, sizeof(buf), "%s_%s", CM_list->CMtitle, Nn->Name);
+               json_object_object_add(tmp_root_cm, "CMtitle", json_object_new_string(CM_list->CMtitle));
                json_object_array_add(counter, tmp_root_cm);
                CM_list = CM_list->next;
             }

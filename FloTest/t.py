@@ -135,7 +135,12 @@ class Worker(QObject):
 
         glob = {}
         exec('from sympy.core import Symbol', glob) # ok for I, E, S, N, C, O, or Q
-        self.str_formula = str(to_cnf(parse_expr(str_formula, global_dict=glob)))
+        tmp_formula = to_cnf(parse_expr(str_formula, global_dict=glob))
+        self.str_formula = str(tmp_formula)
+
+
+        self.sat_solver(tmp_formula, self.node_list)
+
 
         my_function.freeList(newlist)
         #my_function.freeEList(newEdgeList)
@@ -144,6 +149,61 @@ class Worker(QObject):
         #self.data.emit(node_list, edge_list)
         self.finished.emit()
         #self.plot
+
+    def sat_solver(self, formula, node_list):
+
+        list_var = [u for (u, _) in node_list]
+        print(list_var)
+
+        if formula == None:
+            return
+
+        dict_var = {}
+        dict_index = {}
+        i = 1
+        for v in list_var:
+            dict_var[v] = i
+            dict_index[i] = v
+            i = i + 1
+
+
+        list_and = formula.args
+        g = Glucose3()
+
+        for x in list_and:
+            l = []
+            list_or = x.args
+            if not list_or:
+                val = str(x)
+                l.append(dict_var[val])
+            else:
+                for var in list_or:
+                    list_not = var.args
+                    if not list_not:
+                        val = str(var)
+                        l.append(dict_var[val])
+                    else:
+                        val = str(list_not[0])
+                        l.append(dict_var[val])
+            g.add_clause(l)
+
+        print(g.solve())
+        model = g.get_model()
+        print(model)
+
+        result = []
+        for n in model:
+            if(n < 0):
+                result.append("Not("+dict_index[-n]+")")
+            else:
+                result.append(dict_index[n])
+
+        print(result)
+        
+
+        #for m in g.enum_models():
+            #print(m)
+    
 
 class ParserWorker(QObject):
     finished = pyqtSignal(int)
@@ -320,6 +380,24 @@ class Window(QDialog):
                     node_nor = (name_nor, {'type': 'logic', 'parent': u, 'CM': 0})
                     logic_nodes.append(node_nor)
 
+                    name = u + '_' + "LOGIC"
+                    node = (name, {'type': 'logic', 'parent': u, 'CM': 0})
+                    logic_nodes.append(node)
+
+                    edge = (u, name_nor)
+                    labels_logic[name_nor] = "CM"
+                    logic_edge.append(edge)
+
+                    edge = (u, name)
+                    labels_logic[name] = d['type']
+                    logic_edge.append(edge)
+
+
+                    '''
+                    name_nor = u + '_' + "CMLOGIC"
+                    node_nor = (name_nor, {'type': 'logic', 'parent': u, 'CM': 0})
+                    logic_nodes.append(node_nor)
+
                     name_not = u + '_' + "NOT"
                     node_not = (name_not, {'type': 'cmlogic', 'parent': name_nor, 'CM': 0})
                     logic_nodes.append(node_not)
@@ -339,6 +417,7 @@ class Window(QDialog):
                     edge = (name_not, name)
                     labels_logic[name] = d['type']
                     logic_edge.append(edge)
+                    '''
                 else:
                     nodes_not_leaf.append(u)
                     name = u + '_' + "LOGIC"
@@ -364,11 +443,11 @@ class Window(QDialog):
         # attention aux CM !!
 
         for (u, v) in le:
-            if v not in counter_list:
-                edge = (u + '_' + "LOGIC", v)
+            if v in counter_list:
+                edge = (u + '_' + "CMLOGIC", v)
                 new_le.append(edge)
             else:
-                edge = (u + '_' + "CMLOGIC", v)
+                edge = (u + '_' + "LOGIC", v)
                 new_le.append(edge)
 
         g.add_nodes_from(logic_nodes)
@@ -384,10 +463,10 @@ class Window(QDialog):
         # CM entre noeud et noeud logic
         for (u, d) in g.nodes(data=True):
             print(u,d)    
-            if(d['type'] == 'logic'):
-                new_pos = list(pos[u])
-                new_pos[0] = pos[d['parent']][0]
-                pos[u] = tuple(new_pos)
+            #if(d['type'] == 'logic'):
+            #    new_pos = list(pos[u])
+            #    new_pos[0] = pos[d['parent']][0]
+             #   pos[u] = tuple(new_pos)
 
     
 
