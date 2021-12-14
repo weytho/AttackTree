@@ -179,7 +179,7 @@ class Window(QDialog):
                     nodes_not_leaf.append(u)
 
                     name_nor = u + '_' + "CMLOGIC"
-                    node_nor = (name_nor, {'type': 'logic', 'parent': u, 'CM': 0})
+                    node_nor = (name_nor, {'type': 'cmlogic', 'parent': u, 'CM': 0})
                     logic_nodes.append(node_nor)
 
                     name = u + '_' + "LOGIC"
@@ -206,7 +206,7 @@ class Window(QDialog):
             elif d['CM'] == 1:
                 
                 name_nor = u + '_' + "CMLOGIC"
-                node_nor = (name_nor, {'type': 'logic', 'parent': u, 'CM': 0})
+                node_nor = (name_nor, {'type': 'cmlogic', 'parent': u, 'CM': 0})
                 logic_nodes.append(node_nor)
 
                 logic_leaf.append(name_nor)
@@ -265,13 +265,13 @@ class Window(QDialog):
                 nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str)
 
         for (n, d) in logic_nodes:
-            nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=labels_logic[n], shape='box', group="logic")
-
+            nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=labels_logic[n], shape='box', group="logic")     
+            
         for (n, d) in new_le:
             nt.add_edge(n, d)
 
         for (n, d) in logic_edge:
-            nt.add_edge(n, d)
+            nt.add_edge(n, d, color="#000000", width=4)
 
         #nt.from_nx(g)
         # https://networkx.org/documentation/stable/_modules/networkx/drawing/nx_agraph.html#pygraphviz_layout

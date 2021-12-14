@@ -229,6 +229,18 @@ int is_in_flatList(BasicList *list, char* name){
    return 0;
 }
 
+int is_in_pointer_list(BasicList *list, DLL_List *current){
+   BasicList * runner = list;
+
+   while (runner != NULL) {
+      if (runner->data == current){
+         return 1;
+      }
+      runner = runner->next;
+   }
+   return 0;
+}
+
 DLL_List * get_from_flatList(BasicList *list, char* name){
    BasicList * runner = list;
    while (runner != NULL) {
@@ -271,6 +283,8 @@ DoubleBList * flatten_tree_uniq(DLL_List *list, DoubleBList* results){
    DLL_List * next = NULL;
    while (current != NULL) {
       //printFlatList(baseList);
+      //printf("CUT11\n");
+      //printFlatList(results->good);
       if (is_in_flatList(results->good, current->n->title) == 0){
          //printf("CUT11\n");
          BasicList * tmp = createNode_flatList(current);
@@ -281,11 +295,13 @@ DoubleBList * flatten_tree_uniq(DLL_List *list, DoubleBList* results){
          children = current->children;
          next = current->next;
 
+         //printf(" BAD ! %s, %p\n", current->n->title, current);
+
          if(results->bad == NULL){
             results->bad = createNode_flatList(current);
          } else {
             //  TODO garder list de pointer au lieu de comparer titles
-            if( current != get_from_flatList(results->good, current->n->title) && current != get_from_flatList(results->bad, current->n->title)) {
+            if(get_from_flatList(results->good, current->n->title) != current && !is_in_pointer_list(results->bad, current)) {
                BasicList * tmp = createNode_flatList(current);
                results->bad = push_flatlist(results->bad, tmp);
             }
@@ -323,7 +339,7 @@ void free_flat_list(BasicList *list)
          parent = tmp;
       }
       current->data->parents = NULL;
-
+      //printf(" GOOD ! %p\n", current->data);
       free(current->data);
       current->data = NULL;
       free(current);
@@ -353,9 +369,9 @@ BasicList * init_flatten(DLL_List *list){
    while (runner != NULL) {
       current = runner;
       runner = current->next;
-      if(current->data != NULL){
-         free(current->data);
-      }
+
+      //printf(" REMOVE ! %p\n", current->data);
+      free(current->data);
       current->data = NULL;
       free(current);
       current = NULL;

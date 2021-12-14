@@ -532,6 +532,14 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
                   
                   tmp_dll = getFromList(whole_list, ptr2);
 
+                  if(strcmp(tmp_dll->n->title, dll_node->n->title) == 0){
+                     free(RawText);
+                     free(ptr_copy);
+                     DLL_free_from_top(whole_list);
+                     printf("3\n");
+                     return 3;
+                  }
+
                   if(parent_is_in == 1 && tmp_dll->children != NULL){
                      int r = cycle_check(dll_node, tmp_dll->n->title);
                      if(r != 0){
@@ -624,12 +632,24 @@ int main (int argc, char * argv[]) {
 	//freeNode(n);
 	//freeList(l);
 
-   char a[]= " node -SAND-> {node0,node1,node2} \
-node0 -AND-> {node00,node01} \
-node1 -SAND-> {node10,node11,node12,node00} \
-node12 -AND-> {node120,node121,node122,node01} \
-node120 -AND-> {node1200,node1201} \
-node2 -SAND-> {node20,node21,node12} ";
+   char a[]= " node -AND-> {node0,node1,node2} \
+node0 -OR-> {node00,node01,node02} \
+node00 -AND-> {node000,node001,node002} \
+node000 -SAND-> {node0000,node0001} \
+node001 -OR-> {node0010,node0011,node0012,node000} \
+node0011 -OR-> {node00110,node00111,node00112,node000} \
+node01 -SAND-> {node010,node011,node012} \
+node1 -AND-> {node10,node11} \
+node10 -SAND-> {node100,node101,node102,node000} \
+node102 -AND-> {node1020,node1021} \
+node1021 -AND-> {node10210,node10211,node10212,node02} \
+node11 -OR-> {node110,node111,node100} \
+node2 -SAND-> {node20,node21,node22,node0010} \
+node20 -AND-> {node200,node201,node202,node00110} \
+node201 -OR-> {node2010,node2011,node200} \
+node21 -OR-> {node210,node211,node212,node111} \
+node22 -SAND-> {node220,node221} \
+node221 -OR-> {node2210,node2211,node2212,node00}";
    char b[]= " CM1 (node20,node2) \
 CM2 (node,node2) \
 CM3 (node120,node20) \

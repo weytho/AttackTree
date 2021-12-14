@@ -91,6 +91,7 @@ class Worker(QObject):
         glob = {}
         exec('from sympy.core import Symbol', glob) # ok for I, E, S, N, C, O, or Q
         tmp_formula = to_cnf(parse_expr(str_formula, global_dict=glob))
+        print(tmp_formula)
         self.str_formula = str_formula#str(tmp_formula)
 
 
@@ -106,7 +107,7 @@ class Worker(QObject):
         #self.plot
 
     def sat_solver(self, formula, list_var):
-        print("SAT SOLVER !!!")
+        print("####################### SAT SOLVER !!! #########################")
         print(list_var)
 
         if formula == None:
