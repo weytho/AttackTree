@@ -110,7 +110,6 @@ int isInList(DLL_List *head_list, char * name){
    DLL_List * current = head_list;
    while (current != NULL) {
       if (strcmp(current->n->title, name) == 0){
-         printf("GOOD !\n");
          return 1;
       }
       if (isInList(current->children, name) == 1){
@@ -211,9 +210,17 @@ struct basic_List {
       BasicList *next;
 };
 
+typedef struct double_basic_List DoubleBList;
+struct double_basic_List {
+      BasicList *good;
+      BasicList *bad;
+};
+
 int is_in_flatList(BasicList *list, char* name){
    BasicList * runner = list;
+
    while (runner != NULL) {
+
       if (strcmp(runner->data->n->title, name) == 0){
          return 1;
       }
@@ -253,32 +260,43 @@ BasicList * push_flatlist(BasicList *list, BasicList* topush){
    return topush;
 }
 
-BasicList * flatten_tree_uniq(DLL_List *list, BasicList *baseList){
+DoubleBList * flatten_tree_uniq(DLL_List *list, DoubleBList* results){
    if( list == NULL ){
-      return baseList;
+      //results->bad = duplList;
+      //results->good = baseList;
+      return results;
    }
    DLL_List * current = list;
    DLL_List * children = NULL;
    DLL_List * next = NULL;
    while (current != NULL) {
-      printFlatList(baseList);
-      printf("CUT\n");
-      if (is_in_flatList(baseList, current->n->title) == 0){
+      //printFlatList(baseList);
+      if (is_in_flatList(results->good, current->n->title) == 0){
+         //printf("CUT11\n");
          BasicList * tmp = createNode_flatList(current);
-         baseList = push_flatlist(baseList, tmp);
+         results->good = push_flatlist(results->good, tmp);
          children = current->children;
          next = current->next;
       } else {
          children = current->children;
          next = current->next;
-         if( current != get_from_flatList(baseList, current->n->title) ) {
-            free(current);
+
+         if(results->bad == NULL){
+            results->bad = createNode_flatList(current);
+         } else {
+            //  TODO garder list de pointer au lieu de comparer titles
+            if( current != get_from_flatList(results->good, current->n->title) && current != get_from_flatList(results->bad, current->n->title)) {
+               BasicList * tmp = createNode_flatList(current);
+               results->bad = push_flatlist(results->bad, tmp);
+            }
          }
+
       }
-      baseList = flatten_tree_uniq(children, baseList);
+      results = flatten_tree_uniq(children, results);
       current = next;
    }
-   return baseList;
+
+   return results;
 }
 
 void free_flat_list(BasicList *list)
@@ -315,10 +333,38 @@ void free_flat_list(BasicList *list)
 
 BasicList * init_flatten(DLL_List *list){
    BasicList * flatList = createNode_flatList(list);
-   BasicList * complete = flatten_tree_uniq(list->children, flatList);
-   printFlatList(complete);
-   free_flat_list(complete);
-   return complete;
+   BasicList * final;
+
+   DoubleBList *res = malloc(sizeof(DoubleBList));
+   res->good = flatList;
+   res->bad = NULL;
+   
+   res = flatten_tree_uniq(list->children, res);
+   printFlatList(res->good);
+   free_flat_list(res->good);
+
+   if (res->bad == NULL){
+      final = res->good;
+      free(res);
+      return final;
+   }
+   BasicList * runner = res->bad;
+   BasicList * current = NULL;
+   while (runner != NULL) {
+      current = runner;
+      runner = current->next;
+      if(current->data != NULL){
+         free(current->data);
+      }
+      current->data = NULL;
+      free(current);
+      current = NULL;
+   
+   }
+
+   final = res->good;
+   free(res);
+   return final;
 }
 
 void DLL_free_from_top(DLL_List *list){
@@ -355,17 +401,17 @@ void set_properties(DLL_List * list, HashTable * h){
 
    if (new_current2 == NULL) {
       // check for properties
-      printf("NICE1111 !%s! \n", current->n->title);
+      //printf("NICE1111 !%s! \n", current->n->title);
       int i = NameIndex(h, current->n->title);//current->n->title);
-      printf("%d\n", i);
-      displayH(h);
+      //printf("%d\n", i);
+      //displayH(h);
       NodeP * Nn = getH(h, i);
       if(Nn != NULL){
-         printf("NICE !! %d, %f\n", Nn->cost, Nn->prob);
+         //printf("NICE !! %d, %f\n", Nn->cost, Nn->prob);
          current->n->cost = Nn->cost;
          current->n->prob = Nn->prob;
          deleteH(h, Nn);
-         displayH(h);
+         //displayH(h);
       }
 
    }
@@ -374,7 +420,7 @@ void set_properties(DLL_List * list, HashTable * h){
 void set_properties_total(DLL_List * list, HashTable * h){
    DLL_List * current = list;
    if(current != NULL){
-      printf("NICE000 !! \n");
+      //printf("NICE000 !! \n");
       set_properties(current, h);
       current = current->children;
       while (current != NULL) {
@@ -507,21 +553,20 @@ HashTable * parse_countermeasures(char * counter_text){
          char *n_ptr_copy = malloc(size2 * sizeof(char));
          memcpy(n_ptr_copy, new_ptr, size2);
 
-         printf("here we have : %s\n", new_ptr);
+         //printf("here we have : %s\n", new_ptr);
          ptr_cm = strtok_r(n_ptr_copy, delim10, &saveptr7);
 
-         printf("here4444444444444 we have : %s\n", ptr_cm);
+         //printf("here4444444444444 we have : %s\n", ptr_cm);
          new_ptr = strtok_r(NULL, delim10, &saveptr7);
          int i = -1;
 
          while(new_ptr != NULL){
 
-            printf("here2 we have : %s\n", new_ptr);
             i = NameIndex(ht_CM, new_ptr);
-            printf("index %d\n",i);
+
             NodeP * Nn = getH(ht_CM, i);
             if(Nn != NULL){
-               printf("HEHEHEHEHEHEHEHEHEH CM ! \n");
+               //printf("HEHEHEHEHEHEHEHEHEH CM ! \n");
                if(Nn->CMlist != NULL){
                   NodeCM * tmp = Nn->CMlist;
                   NodeCM * node = malloc(sizeof(NodeCM));
@@ -538,7 +583,7 @@ HashTable * parse_countermeasures(char * counter_text){
                   Nn->CMlist = node;
                }
             } else {
-               printf("AHAHAHAHAHAHAHAHA CM ! \n");
+               //printf("AHAHAHAHAHAHAHAHA CM ! \n");
                Nn = malloc(sizeof(NodeP));
                memcpy(Nn->Name, new_ptr, sizeof(Nn->Name));
                NodeCM * node = malloc(sizeof(NodeCM));
@@ -546,7 +591,7 @@ HashTable * parse_countermeasures(char * counter_text){
                node->next = NULL;
                Nn->CMlist = node;
                insertH(ht_CM, Nn);
-               displayH(ht_CM);
+               //displayH(ht_CM);
             }
 
             new_ptr = strtok_r(NULL, delim10, &saveptr7);

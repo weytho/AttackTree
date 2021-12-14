@@ -15,7 +15,7 @@ import networkx as nx
 from PyQt5.QtCore import QThread, QUrl, Qt
 import os
 from pyvis.network import Network
-import randomTree
+from randomTree import *
 from sympy import *
 from sympy.parsing.sympy_parser import parse_expr
 import json
@@ -135,7 +135,11 @@ class Window(QDialog):
         """
 
         # TODO
-        str,str1,str2 = randomTree.TreeGen(4, 3, 1)
+        str,str1,str2 = TreeGen(3, 3, 2)
+
+        print("GOT FROM RANDOM TREE")
+
+        print(str + "\n" + str1 + "\n" + str2)
 
         # TODO
         self.grammarText.setText(str + "\n" + str1 + "\n" + str2)

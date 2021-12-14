@@ -381,7 +381,7 @@ json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mod
       int i = NameIndex(ht_CM, tree->n->title);//current->n->title);
       NodeP * Nn = getH(ht_CM, i);
       if(Nn != NULL){
-         printf("NIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n");
+
          NodeCM * CM_list = Nn->CMlist;
          if( CM_list != NULL ){
             json_object *counter = json_object_new_array();
@@ -396,7 +396,7 @@ json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mod
             }
          }
          //deleteH(ht_CM, Nn);
-         displayH(ht_CM);
+         //displayH(ht_CM);
       }
    }
 
@@ -624,13 +624,28 @@ int main (int argc, char * argv[]) {
 	//freeNode(n);
 	//freeList(l);
 
-   char a[]= " A-AND->{B,C} \
-   C-AND->{F,G,H} \
-   B-OR->{D,E,H} \
-   H-OR->{I,J}";
-   char b[]= "";
-   char c[]= "";
+   char a[]= " node -SAND-> {node0,node1,node2} \
+node0 -AND-> {node00,node01} \
+node1 -SAND-> {node10,node11,node12,node00} \
+node12 -AND-> {node120,node121,node122,node01} \
+node120 -AND-> {node1200,node1201} \
+node2 -SAND-> {node20,node21,node12} ";
+   char b[]= " CM1 (node20,node2) \
+CM2 (node,node2) \
+CM3 (node120,node20) \
+CM4 (node21,node01) \
+CM5 (node20,node10) ";
+   char c[]= " node00:{cost = 4,prob = 1.0} \
+node01:{cost = 2,prob = 1.0} \
+node10:{cost = 1,prob = 1.0} \
+node11:{cost = 6,prob = 1.0} \
+node1200:{cost = 8,prob = 1.0} \
+node1201:{cost = 8,prob = 1.0} \
+node121:{cost = 7,prob = 1.0} \
+node122:{cost = 9,prob = 1.0} \
+node20:{cost = 1,prob = 1.0}  \
+node21:{cost = 4,prob = 1.0} ";
 
-   int r = parser(a, b, c);
+   int r = parser(a, " ", " ");
 	return 0;
 }
