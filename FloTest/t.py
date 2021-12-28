@@ -134,7 +134,19 @@ class Window(QDialog):
             CM3 (J)
         """
 
+        str = """
+        RELATIONS
+        A -AND-> {B,C,D}
+        C -AND-> {E,F}
+        D -AND-> {~E}
+
+        COUNTERMEASURES
+
+        PROPERTIES
+        """
+
         # TODO
+
         str,str1,str2 = TreeGen(3, 3, 2)
 
         print("GOT FROM RANDOM TREE")

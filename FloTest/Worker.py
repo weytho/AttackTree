@@ -40,7 +40,7 @@ class Worker(QObject):
 
             if( newdict['type'] == 'CntMs' ):
                 node_list_uniq_cm.append(newdict['variable'])
-            else:
+            elif( newdict['leaf'] == 1 ):
                 node_list_uniq_cm.append(newtuple[0])
 
 
@@ -54,7 +54,7 @@ class Worker(QObject):
 
                 if( newdict['type'] == 'CntMs' ):
                     node_list_uniq_cm.append(newdict['variable'])
-                else:
+                elif( newdict['leaf'] == 1 ):
                     node_list_uniq_cm.append(newtuple[0])
 
         newEdgeList = CustomList.from_address(fulllist.el)
@@ -109,6 +109,7 @@ class Worker(QObject):
     def sat_solver(self, formula, list_var):
         print("####################### SAT SOLVER !!! #########################")
         print(list_var)
+        print(formula)
 
         if formula == None:
             return
@@ -121,40 +122,77 @@ class Worker(QObject):
             dict_index[i] = v
             i = i + 1
 
+        print(dict_var)
+        print(dict_index)
 
-        list_and = formula.args
         g = Glucose3()
 
-        for x in list_and:
+        if(type(formula) is And):
+            list_and = formula.args
+
+            for x in list_and:
+                l = []
+                if(type(x) is Or):
+                    list_or = x.args
+
+                    for y in list_or:
+                        if(type(y) is Not):
+                            val = str(y.args[0])
+                            l.append(-dict_var[val])
+                        else:
+                            val = str(y)
+                            l.append(dict_var[val])
+
+                elif(type(x) is Not):
+                    val = str(x.args[0])
+                    l.append(-dict_var[val])
+
+                else:
+                    val = str(x)
+                    l.append(dict_var[val])
+
+                print(l)
+                g.add_clause(l)
+
+        elif(type(formula) is Or):
             l = []
-            list_or = x.args
-            if not list_or:
-                val = str(x)
-                l.append(dict_var[val])
-            else:
-                for var in list_or:
-                    list_not = var.args
-                    if not list_not:
-                        val = str(var)
-                        l.append(dict_var[val])
-                    else:
-                        val = str(list_not[0])
-                        l.append(dict_var[val])
+            list_or = formula.args
+
+            for x in list_or:
+                if(type(x) is Not):
+                    val = str(x.args[0])
+                    l.append(-dict_var[val])
+                else:
+                    val = str(x)
+                    l.append(dict_var[val])
+
+            print(l)
             g.add_clause(l)
 
-        print(g.solve())
-        model = g.get_model()
-        print(model)
+        elif(type(formula) is Not):
+            l = []
+            val = str(formula.args[0])
+            l.append(-dict_var[val])
 
-        result = []
-        for n in model:
-            if(n < 0):
-                result.append("Not("+dict_index[-n]+")")
-            else:
-                result.append(dict_index[n])
+            print(l)
+            g.add_clause(l)
 
-        print(result)
+        b = g.solve()
+        print(b)
 
-        #for m in g.enum_models():
-            #print(m)
+        if(b):
+            model = g.get_model()
+            print(model)
+
+            result = []
+            for n in model:
+                if(n < 0):
+                    result.append("Not("+dict_index[-n]+")")
+                else:
+                    result.append(dict_index[n])
+
+            print(result)
+
+            #for m in g.enum_models():
+                #print(m)
     
