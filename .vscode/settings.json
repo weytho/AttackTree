@@ -4,6 +4,8 @@
         "json.h": "c",
         "typeinfo": "c",
         "stdlib.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "compare": "c",
+        "type_traits": "c"
     }
 }
