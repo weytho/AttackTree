@@ -1,6 +1,7 @@
 
 // -------- NODES
 
+/*! \brief Basic Structure of the Tree Node */
 typedef struct s_Node Node;
 struct s_Node {
    char  title[50];

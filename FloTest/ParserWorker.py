@@ -1,3 +1,8 @@
+##
+# @file
+# Class ParserWorker
+# used to send the text representation of an attack tree to the C parser
+#
 import time
 from PyQt5.QtCore import QObject, pyqtSignal
 import ctypes
@@ -6,7 +11,7 @@ from pysat.solvers import Glucose3
 from sympy import *
 from sympy.parsing.sympy_parser import parse_expr
 # From folder 
-from Struct import *
+#from Struct import *
 
 class ParserWorker(QObject):
     finished = pyqtSignal(int)

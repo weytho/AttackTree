@@ -1,8 +1,14 @@
+##
+# @file
+# Random Tree Generation
+#
 import math
 import sys
 import random
 
+##
 # simple generation of random tree
+#
 def nodeGeneration(Relations, CounterMeasures, Properties, node, depth, maxdepth, branching_factor):
 
     rng = random.randint(0,maxdepth)

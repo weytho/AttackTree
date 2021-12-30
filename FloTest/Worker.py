@@ -1,3 +1,8 @@
+##
+# @file
+# Retrieve the ctype Structure representing the tree
+# Retrieve the tree boolean formula
+# Use a Sat-Solver to solve the formula
 import time
 from PyQt5.QtCore import QObject, pyqtSignal
 import ctypes
@@ -41,8 +46,10 @@ class Worker(QObject):
             if( newdict['type'] == 'CntMs' ):
                 node_list_uniq_cm.append(newdict['variable'])
             elif( newdict['leaf'] == 1 ):
-                node_list_uniq_cm.append(newtuple[0])
-
+                if(newtuple[0][0] == '~'):
+                    node_list_uniq_cm.append(newtuple[0][1:])
+                else:
+                    node_list_uniq_cm.append(newtuple[0])
 
             while newlist.next != None:
                 newlist = CustomList.from_address(newlist.next)
@@ -55,7 +62,10 @@ class Worker(QObject):
                 if( newdict['type'] == 'CntMs' ):
                     node_list_uniq_cm.append(newdict['variable'])
                 elif( newdict['leaf'] == 1 ):
-                    node_list_uniq_cm.append(newtuple[0])
+                    if(newtuple[0][0] == '~'):
+                        node_list_uniq_cm.append(newtuple[0][1:])
+                    else:
+                        node_list_uniq_cm.append(newtuple[0])
 
         newEdgeList = CustomList.from_address(fulllist.el)
 

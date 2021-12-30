@@ -1,34 +1,14 @@
 {
   "Action":"A",
-  "Type":"AND",
+  "Type":"OR",
   "Child":[
     {
-      "Action":"B",
+      "Action":"~B",
       "Type":"LEAF"
     },
     {
       "Action":"C",
-      "Type":"AND",
-      "Child":[
-        {
-          "Action":"E",
-          "Type":"LEAF"
-        },
-        {
-          "Action":"F",
-          "Type":"LEAF"
-        }
-      ]
-    },
-    {
-      "Action":"D",
-      "Type":"AND",
-      "Child":[
-        {
-          "Action":"~E",
-          "Type":"LEAF"
-        }
-      ]
+      "Type":"LEAF"
     }
   ]
 }

@@ -1,7 +1,11 @@
-from random import random
+##
+# @file
+# Main file of the python GUI interface
+# Create GUI using PyQt5
+
 import sys
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QMessageBox, QToolBar, QToolButton
+from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 # gcc -shared -Wl,-soname,testlib -o testlib.so -fPIC testlib.c
 # pyuic5 -o main_window_ui.py ui/main_window.ui
@@ -10,14 +14,11 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView
 # https://stackoverflow.com/questions/56424297/how-to-draw-a-digraph-in-a-org-chart-fashion
 # https://stackoverflow.com/questions/38661635/ctypes-struct-returned-from-library
 import matplotlib.pyplot as plt
-from networkx.drawing.nx_agraph import graphviz_layout, pygraphviz_layout
 import networkx as nx
 from PyQt5.QtCore import QThread, QUrl, Qt
 import os
 from pyvis.network import Network
 from randomTree import *
-from sympy import *
-from sympy.parsing.sympy_parser import parse_expr
 import json
 # From Folder
 from Worker import *

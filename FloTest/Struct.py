@@ -1,3 +1,8 @@
+##
+# @file
+# Ctypes structures used by the python Worker
+# used to retrieve and manipulate C structures
+
 import ctypes
 
 class CustomNode(ctypes.Structure):
