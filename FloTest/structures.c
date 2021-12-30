@@ -1,4 +1,6 @@
-
+/**
+*  @file
+*/
 // -------- NODES
 
 /*! \brief Basic Structure of the Tree Node */
