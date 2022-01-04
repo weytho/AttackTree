@@ -1,5 +1,6 @@
 /**
 *  @file
+*  C HashTable with functions 
 */
 #include <stdio.h>
 #include <string.h>
@@ -20,6 +21,9 @@ struct NodeProperty {
    NodeCM * CMlist;
 };
 
+/**
+*  Main hastable structure 
+*/
 typedef struct HashTable HashTable;
 struct HashTable {
    int size;
@@ -28,6 +32,12 @@ struct HashTable {
    NodeP * NodeArray;
 };
 
+/**
+*  hastable constructor
+*  argument----
+*  The size of the initial HashTable 
+*  The system can resize by growing the size but try tom aim at the good size directly.
+*/
 HashTable * newHastable(int size) {
    if (size <=0){
       return NULL;
@@ -48,10 +58,16 @@ HashTable * newHastable(int size) {
    }
 }
 
+/**
+*  Hash the key wih the size of the table 
+*/
 int hashCodeH(HashTable *h, int key) {
    return key % h->size;
 }
 
+/**
+*  Returns an integer value of the name of the NodeP 
+*/
 int NodePKey(NodeP *n) {
    if (n->Name == NULL){
       printf("No name initialized for NodeP\n");
@@ -66,6 +82,9 @@ int NodePKey(NodeP *n) {
    return sum;
 }
 
+/**
+*  Returns the index of the NodeP in the HashTable
+*/
 int NodeIndex(HashTable *h, NodeP *n) {
    //get the hash 
    int key = NodePKey(n);
@@ -92,6 +111,9 @@ int NodeIndex(HashTable *h, NodeP *n) {
    return -1;        
 }
 
+/**
+*  Returns an integer value of the Name 
+*/
 int NamePKey(char * Name) {
    int cnt = 0;
    int sum = 0;
@@ -102,6 +124,9 @@ int NamePKey(char * Name) {
    return sum;
 }
 
+/**
+*  Returns the index of the Name in the HashTable
+*/
 int NameIndex(HashTable *h, char * Name) {
    //get the hash 
    int key = NamePKey(Name);
@@ -128,8 +153,9 @@ int NameIndex(HashTable *h, char * Name) {
    return -1;        
 }
 
-
-
+/**
+*  Returns the NodeP at the index in the HashTable
+*/
 NodeP * getH(HashTable *h, int index){
    if (index < 0 || index > h->size-1){
       return NULL;
@@ -137,6 +163,10 @@ NodeP * getH(HashTable *h, int index){
    return &(h->NodeArray[index]);
 }
 
+/**
+*  Returns a new HashTable with double the size of the previous one
+*  This function is used by the insertH function when an item is added to an halffull HashTable
+*/
 HashTable * resize(HashTable *h){
    HashTable * newH = newHastable(h->size*2);
    for(int i=0; i<h->size; i++){
@@ -148,6 +178,10 @@ HashTable * resize(HashTable *h){
    return newH;
 }
 
+/**
+*  Inserts a new NodeP n to the HashTable 
+*  If the Hash=table  is halffull, the size is doubled
+*/
 void insertH(HashTable *h, NodeP *n) {
    if(h->numberElem+1 > h->size/2){
       *h = *resize(h);
@@ -172,6 +206,9 @@ void insertH(HashTable *h, NodeP *n) {
    h->numberElem +=1;
 }
 
+/**
+*  Finds and deletes a NodeP in the Hashtable if it exists
+*/
 int deleteH(HashTable *h, NodeP *n) {
 
    //get the hash 
@@ -202,6 +239,9 @@ int deleteH(HashTable *h, NodeP *n) {
    return -1;        
 }
 
+/**
+*  Simple HashTable displayer
+*/
 void displayH(HashTable *h) {
    printf("Nbr elements : %d\n",h->numberElem);
    for(int i = 0; i<h->size; i++) {
@@ -210,12 +250,18 @@ void displayH(HashTable *h) {
    printf("\n");
 }
 
+/**
+*  Simple HashTable displayer
+*/
 void displayN(HashTable *h) {
    for(int i = 0; i<h->size; i++) {
       printf(" %s\n",h->NodeArray[i].Name);
    }
 }
 
+/**
+*  free method for HashTable
+*/
 void freeH(HashTable *h){
    free(h->NodeArray);
    free(h->hashArray);

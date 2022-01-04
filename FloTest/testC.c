@@ -21,6 +21,19 @@ struct full_List {
    Formula *fo;
 };
 
+/**
+*  This function is in charge of reading the tree from a Json format as described in the documentation. 
+*  It goes through the Json file recursively to read the nodes and iterate on their childrens. 
+*  arguments-----
+*  parsed_json : the json parsed 
+*  list : The list of nodes
+*  edges : The list of edges
+*  form : The list representng the formula of the leaves
+*  parent : The parent of the actual node (to create the edges)
+*  root : 1 if the node is the root of the tree
+*  CMfomrula : just a flag for the formula should be set to 1
+*/
+
 CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edges, Formula **form, Node *parent, int root, int CMformula){
 
    // READ THE JSON //
