@@ -1,0 +1,11 @@
+RELATIONS
+    D3-OR-> {F3, R, S}
+    F3 -AND-> {F12}
+    R -AND-> {F12}
+    S -OR-> {F13}
+COUNTERMEASURES
+    CM1 (F13, F12)
+PROPERTIES
+    F12 : {cost = 10, prob = 1.0}
+    F13 : {cost = 1, prob = 2.5}
+    CM1 : {cost = 2}

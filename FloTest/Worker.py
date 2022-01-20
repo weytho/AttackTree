@@ -44,7 +44,8 @@ class Worker(QObject):
             self.node_list.append(newtuple)
 
             if( newdict['type'] == 'CntMs' ):
-                node_list_uniq_cm.append(newdict['variable'])
+                if newdict['variable'] not in node_list_uniq_cm:
+                    node_list_uniq_cm.append(newdict['variable'])
             elif( newdict['leaf'] == 1 ):
                 if(newtuple[0][0] == '~'):
                     node_list_uniq_cm.append(newtuple[0][1:])
@@ -60,7 +61,8 @@ class Worker(QObject):
                 self.node_list.append(newtuple)
 
                 if( newdict['type'] == 'CntMs' ):
-                    node_list_uniq_cm.append(newdict['variable'])
+                    if newdict['variable'] not in node_list_uniq_cm:
+                        node_list_uniq_cm.append(newdict['variable'])
                 elif( newdict['leaf'] == 1 ):
                     if(newtuple[0][0] == '~'):
                         node_list_uniq_cm.append(newtuple[0][1:])
@@ -96,17 +98,15 @@ class Worker(QObject):
             str_formula = str_formula + e
 
         # STR TO CNF SYMPY
-        print(str_formula)
 
         glob = {}
         exec('from sympy.core import Symbol', glob) # ok for I, E, S, N, C, O, or Q
         tmp_formula = to_cnf(parse_expr(str_formula, global_dict=glob))
-        print(tmp_formula)
-        self.str_formula = str_formula#str(tmp_formula)
 
+        self.str_formula = str_formula
+        self.str_cnf = str(tmp_formula)
 
         self.sat_solver(tmp_formula, node_list_uniq_cm)
-
 
         my_function.freeList(newlist)
         #my_function.freeEList(newEdgeList)
@@ -119,7 +119,7 @@ class Worker(QObject):
     def sat_solver(self, formula, list_var):
         print("####################### SAT SOLVER !!! #########################")
         print(list_var)
-        print(formula)
+        #print(formula)
 
         if formula == None:
             return
@@ -132,8 +132,8 @@ class Worker(QObject):
             dict_index[i] = v
             i = i + 1
 
-        print(dict_var)
-        print(dict_index)
+        #print(dict_var)
+        #print(dict_index)
 
         g = Glucose3()
 
@@ -161,7 +161,7 @@ class Worker(QObject):
                     val = str(x)
                     l.append(dict_var[val])
 
-                print(l)
+                #print(l)
                 g.add_clause(l)
 
         elif(type(formula) is Or):
@@ -176,7 +176,7 @@ class Worker(QObject):
                     val = str(x)
                     l.append(dict_var[val])
 
-            print(l)
+            #print(l)
             g.add_clause(l)
 
         elif(type(formula) is Not):
@@ -184,7 +184,7 @@ class Worker(QObject):
             val = str(formula.args[0])
             l.append(-dict_var[val])
 
-            print(l)
+            #print(l)
             g.add_clause(l)
 
         b = g.solve()
@@ -203,6 +203,14 @@ class Worker(QObject):
 
             print(result)
 
-            #for m in g.enum_models():
-                #print(m)
+            self.var_array = list_var
+            self.sol_array = []
+
+            # TODO LIMIT TO 20 FOR PERFORMANCE ISSUE
+            cnt = 0
+            for m in g.enum_models():
+                if cnt >= 20 :
+                    break
+                self.sol_array.append(m)
+                cnt += 1
     
