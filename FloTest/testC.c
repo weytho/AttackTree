@@ -306,7 +306,7 @@ FList * mainfct(char * path) {
 	List *list = NULL;
    Formula *form = NULL;
 
-   CostProb *ret = JsonReader(parsed_json, &list, &edges, &form, NULL, 1, 1);
+   CostProb *ret = JsonReader(parsed_json, &list, &edges, &form, NULL, 1, 0);
 
 	if(edges == NULL)
 	{

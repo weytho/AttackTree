@@ -418,29 +418,32 @@ class Window(QDialog):
     def outputSolution(self):
         if self.curr_formula is not None :
             index = self.sol_spin.value()
-            self.tracesFound.setText(' '.join(map(str, self.var_array)) + "\n" + ' '.join(map(str, self.sol_array[index])))
-            self.tracesFound.repaint()
+            if index > -1 :
+                self.tracesFound.setText(' '.join(map(str, self.var_array)) + "\n" + ' '.join(map(str, self.sol_array[index])))
+                self.tracesFound.repaint()
+                list = []
+                old_nodes = copy.deepcopy(self.current_network.nodes)
+                for i, v in enumerate(self.sol_array[index]) :
+                    if v >= 0 :
+                        list.append(self.var_array[i])
 
-            list = []
-            old_nodes = copy.deepcopy(self.current_network.nodes)
-            for i, v in enumerate(self.sol_array[index]) :
-                if v >= 0 :
-                    list.append(self.var_array[i])
+                for n in self.current_network.nodes :
+                    if n['id'] in list :
+                        n['group'] = 'model'
+                        for e in self.current_network.edges :
+                            if e['to'] == n['id']:
+                                self.recur_path(e['from'])
 
-            for n in self.current_network.nodes :
-                if n['id'] in list :
-                    n['group'] = 'model'
-                    for e in self.current_network.edges :
-                        if e['to'] == n['id']:
-                            self.recur_path(e['from'])
+                self.current_network.save_graph('nx_with_sol.html')
 
-            self.current_network.save_graph('nx_with_sol.html')
+                self.current_network.nodes = old_nodes
 
-            self.current_network.nodes = old_nodes
-
-            html_file = os.path.join(dirname, 'nx_with_sol.html')
-            local_url = QUrl.fromLocalFile(html_file)
-            self.canvas.load(local_url)
+                html_file = os.path.join(dirname, 'nx_with_sol.html')
+                local_url = QUrl.fromLocalFile(html_file)
+                self.canvas.load(local_url)
+            else :
+                self.tracesFound.setText("No Solution Found")
+                self.tracesFound.repaint()
 
     def recur_path(self, current):
         for n in self.current_network.nodes :

@@ -12,6 +12,7 @@ from sympy import *
 from sympy.parsing.sympy_parser import parse_expr
 # From folder 
 from Struct import *
+from collections import OrderedDict
 
 class Worker(QObject):
     finished = pyqtSignal()
@@ -44,8 +45,9 @@ class Worker(QObject):
             self.node_list.append(newtuple)
 
             if( newdict['type'] == 'CntMs' ):
-                if newdict['variable'] not in node_list_uniq_cm:
-                    node_list_uniq_cm.append(newdict['variable'])
+                #if newdict['variable'] not in node_list_uniq_cm:
+                #    node_list_uniq_cm.append(newdict['variable'])
+                pass
             elif( newdict['leaf'] == 1 ):
                 if(newtuple[0][0] == '~'):
                     node_list_uniq_cm.append(newtuple[0][1:])
@@ -61,8 +63,9 @@ class Worker(QObject):
                 self.node_list.append(newtuple)
 
                 if( newdict['type'] == 'CntMs' ):
-                    if newdict['variable'] not in node_list_uniq_cm:
-                        node_list_uniq_cm.append(newdict['variable'])
+                    #if newdict['variable'] not in node_list_uniq_cm:
+                    #    node_list_uniq_cm.append(newdict['variable'])
+                    pass
                 elif( newdict['leaf'] == 1 ):
                     if(newtuple[0][0] == '~'):
                         node_list_uniq_cm.append(newtuple[0][1:])
@@ -118,7 +121,9 @@ class Worker(QObject):
 
     def sat_solver(self, formula, list_var):
         print("####################### SAT SOLVER !!! #########################")
-        print(list_var)
+        #print(list_var)
+
+        list_var = list(OrderedDict.fromkeys(list_var))
         #print(formula)
 
         if formula == None:
@@ -189,6 +194,8 @@ class Worker(QObject):
 
         b = g.solve()
         print(b)
+        self.var_array = list_var
+        self.sol_array = []
 
         if(b):
             model = g.get_model()
@@ -202,9 +209,6 @@ class Worker(QObject):
                     result.append(dict_index[n])
 
             print(result)
-
-            self.var_array = list_var
-            self.sol_array = []
 
             # TODO LIMIT TO 20 FOR PERFORMANCE ISSUE
             cnt = 0
