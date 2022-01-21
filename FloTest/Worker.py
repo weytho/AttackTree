@@ -60,7 +60,8 @@ class Worker(QObject):
                 newdict = {'type': tmp_node.type.decode('utf-8'),'leaf': tmp_node.leaf, 'root': tmp_node.root, 'cost': tmp_node.cost, 'prob': tmp_node.prob, 'CM': tmp_node.CM, 'variable': tmp_node.variable.decode('utf-8')}
 
                 newtuple = (tmp_node.title.decode('utf-8'), newdict)
-                self.node_list.append(newtuple)
+                if newtuple not in self.node_list:
+                    self.node_list.append(newtuple)
 
                 if( newdict['type'] == 'CntMs' ):
                     #if newdict['variable'] not in node_list_uniq_cm:
@@ -83,7 +84,9 @@ class Worker(QObject):
                 newEdgeList = CustomList.from_address(newEdgeList.next)
                 tmp_node = EdgeNode.from_address(newEdgeList.data)
                 newtuple = (tmp_node.parent.decode('utf-8'),tmp_node.child.decode('utf-8'))
-                self.edge_list.append(newtuple)
+                
+                if newtuple not in self.edge_list:
+                    self.edge_list.append(newtuple)
 
         newFormula = FormulaNode.from_address(fulllist.fo)
 
@@ -108,6 +111,8 @@ class Worker(QObject):
 
         self.str_formula = str_formula
         self.str_cnf = str(tmp_formula)
+        node_list_uniq_cm = list(OrderedDict.fromkeys(node_list_uniq_cm))
+        self.uniq_node_list = node_list_uniq_cm
 
         self.sat_solver(tmp_formula, node_list_uniq_cm)
 
@@ -119,11 +124,17 @@ class Worker(QObject):
         self.finished.emit()
         #self.plot
 
-    def sat_solver(self, formula, list_var):
+    def start_with_assumptions(self):
+        glob = {}
+        exec('from sympy.core import Symbol', glob) # ok for I, E, S, N, C, O, or Q
+        tmp_formula = to_cnf(parse_expr(self.str_formula, global_dict=glob))
+
+        self.sat_solver(tmp_formula, self.uniq_node_list, self.assumptions)
+        self.finished.emit()
+
+    def sat_solver(self, formula, list_var, assumptions=[]):
         print("####################### SAT SOLVER !!! #########################")
         #print(list_var)
-
-        list_var = list(OrderedDict.fromkeys(list_var))
         #print(formula)
 
         if formula == None:
@@ -192,12 +203,13 @@ class Worker(QObject):
             #print(l)
             g.add_clause(l)
 
-        b = g.solve()
+        b = g.solve(assumptions=assumptions)
         print(b)
         self.var_array = list_var
         self.sol_array = []
 
         if(b):
+            # TODO ATTENTION PAS ASSUMPTIONS SUR LE MODEL
             model = g.get_model()
             print(model)
 
@@ -212,7 +224,7 @@ class Worker(QObject):
 
             # TODO LIMIT TO 20 FOR PERFORMANCE ISSUE
             cnt = 0
-            for m in g.enum_models():
+            for m in g.enum_models(assumptions=assumptions):
                 if cnt >= 20 :
                     break
                 self.sol_array.append(m)

@@ -23,7 +23,7 @@ import copy
 dirname = os.path.dirname(__file__)
 
 from PyQt5.QtWidgets import (
-    QApplication, QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QLabel, QSpinBox, QWidget
+    QApplication, QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QLabel, QSpinBox, QWidget, QGridLayout
 )
 
 class Window(QDialog):
@@ -73,7 +73,7 @@ class Window(QDialog):
         # Create pyqt toolbar
         toolBar = QToolBar()
         toolBar.setOrientation(Qt.Vertical)
-        #toolBar.setFixedWidth(170)
+        toolBar.setFixedWidth(170)
         
         toolBar.addSeparator()
         section_output = QLabel("Output Format")
@@ -107,7 +107,7 @@ class Window(QDialog):
         toolButton.setCheckable(False)
         toolButton.setAutoExclusive(True)
         toolButton.clicked.connect(self.outputSolution)
-        toolButton.setFixedWidth(100)
+        toolButton.setFixedWidth(110)
         sol_layout.addWidget(toolButton)
         self.sol_button = toolButton
 
@@ -132,6 +132,13 @@ class Window(QDialog):
         toolBar.addWidget(toolButton)
         self.rndtree_button = toolButton
 
+        toolBar.addSeparator()
+        toolButton = QToolButton()
+        toolButton.setText("Fix Input")
+        toolButton.clicked.connect(self.outputUsingAssumptions)
+        toolBar.addWidget(toolButton)
+        self.ouputAssumption_button = toolButton
+
         Vlayout_toolbar.addWidget(toolBar)        
 
         result_layout = QHBoxLayout()
@@ -152,6 +159,7 @@ class Window(QDialog):
         self.curr_formula = None
         self.curr_cnf = None
         self.sol_array = None
+        self.uniq_node_list = None
         
         str = """
         RELATIONS        self.parser_thread.finished.connect(
@@ -242,11 +250,14 @@ class Window(QDialog):
                     nodes_not_leaf.append(u)
 
                     name_nor = u + '_' + "CMLOGIC"
-                    node_nor = (name_nor, {'type': 'cmlogic', 'parent': u, 'CM': 0})
+                    node_nor = (name_nor, {'type': 'cmlogic', 'parent': u, 'CM': 0, 'inputNbr': -1})
                     logic_nodes.append(node_nor)
 
                     name = u + '_' + "LOGIC"
-                    node = (name, {'type': 'logic', 'parent': u, 'CM': 0})
+                    if d['type'] == 'OR' :
+                        node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -1})
+                    else:
+                        node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': 0})
                     logic_nodes.append(node)
 
                     edge = (u, name_nor)
@@ -260,16 +271,19 @@ class Window(QDialog):
                 else:
                     nodes_not_leaf.append(u)
                     name = u + '_' + "LOGIC"
-                    node = (name, {'type': 'logic', 'parent': u, 'CM': 0})
+                    if d['type'] == 'OR' :
+                        node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -1})
+                    else:
+                        node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': 0})
                     logic_nodes.append(node)
                     # if has no CM
                     edge = (u, name)
                     labels_logic[name] = d['type']
                     logic_edge.append(edge)
+
             elif d['CM'] == 1:
-                
                 name_nor = u + '_' + "CMLOGIC"
-                node_nor = (name_nor, {'type': 'cmlogic', 'parent': u, 'CM': 0})
+                node_nor = (name_nor, {'type': 'cmlogic', 'parent': u, 'CM': 0, 'inputNbr': -1})
                 logic_nodes.append(node_nor)
 
                 logic_leaf.append(name_nor)
@@ -279,15 +293,25 @@ class Window(QDialog):
                 logic_edge.append(edge)
 
 
+        print("NENENNENENENENENENEENENENNENENEENENENENENENE")
+        print("NENENNENENENENENENEENENENNENENEENENENENENENE")
+        print("NENENNENENENENENENEENENENNENENEENENENENENENE")
+        print("NENENNENENENENENENEENENENNENENEENENENENENENE")
+        print("NENENNENENENENENENEENENENNENENEENENENENENENE")
+
         # attention aux CM !!
 
         for (u, v) in le:
             if v in counter_list:
                 edge = (u + '_' + "CMLOGIC", v)
-                new_le.append(edge)
             else:
                 edge = (u + '_' + "LOGIC", v)
-                new_le.append(edge)
+            for (u, d) in logic_nodes:
+                if u == edge[0]:
+                    if d['inputNbr'] >= 0 :
+                        d['inputNbr'] = d['inputNbr'] + 1
+                    break
+            new_le.append(edge)
 
         g.add_nodes_from(logic_nodes)
         g.add_edges_from(logic_edge)
@@ -345,10 +369,16 @@ class Window(QDialog):
         settings_file = os.path.join(dirname, 'pyvis_param.json')
         with open(settings_file, 'r') as file:
             data_options = json.load(file)
-        nt.set_options("var options = " + json.dumps(data_options))
+
+        vis_str = "var options = " + json.dumps(data_options)
+        
+        # + "\n" + "network.on( 'click', function(properties) { var ids = properties.nodes; var clickedNodes = nodes.get(ids); console.log('clicked nodes:', clickedNodes); });"
+
+        nt.set_options(vis_str)
         nt.save_graph('nx.html')
 
         self.current_network = nt
+        self.current_digraph = g
         
         print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
@@ -384,7 +414,7 @@ class Window(QDialog):
         self.thread.started.connect(self.worker.run)
         #self.worker.finished.connect(lambda: print(self.worker.finished))
         self.worker.finished.connect(self.thread.quit)
-        self.worker.finished.connect(self.cleaning)
+        self.worker.finished.connect(lambda: self.cleaning(0))
         self.thread.finished.connect(self.thread.deleteLater)
         # Step 6: Start the thread
         self.thread.start()
@@ -427,12 +457,17 @@ class Window(QDialog):
                     if v >= 0 :
                         list.append(self.var_array[i])
 
+                path_count_set = {}
+
+                #print(self.current_network.nodes)
+                #print(self.current_digraph.nodes)
+
                 for n in self.current_network.nodes :
                     if n['id'] in list :
                         n['group'] = 'model'
                         for e in self.current_network.edges :
                             if e['to'] == n['id']:
-                                self.recur_path(e['from'])
+                                self.recur_path(e, path_count_set)
 
                 self.current_network.save_graph('nx_with_sol.html')
 
@@ -445,13 +480,34 @@ class Window(QDialog):
                 self.tracesFound.setText("No Solution Found")
                 self.tracesFound.repaint()
 
-    def recur_path(self, current):
+    def recur_path(self, current_edge, path_count_set):
+        current = current_edge['from']
         for n in self.current_network.nodes :
             if n['id'] == current :
-                n['group'] = 'model'
-                for e in self.current_network.edges :
-                    if e['to'] == n['id']:
-                        self.recur_path(e['from'])
+
+                for (u, d) in self.current_digraph.nodes(data=True) :
+                    if u == current :
+                        if d['type'] == 'logic' or d['type'] == 'cmlogic' :
+                            if current in path_count_set :
+                                path_count_set[current].add(current_edge['to'])
+                            else:
+                                path_count_set[current] = {current_edge['to']}
+
+                            if d['inputNbr'] < 0 or d['inputNbr'] == len(path_count_set[current]) :
+                                if 'group' not in n or n['group'] != 'model':
+                                    n['group'] = 'model'
+                                    for e in self.current_network.edges :
+                                        if e['to'] == n['id']:
+                                            self.recur_path(e, path_count_set)
+                        else :
+                            if 'group' not in n or n['group'] != 'model':
+                                n['group'] = 'model'
+                                for e in self.current_network.edges :
+                                    if e['to'] == n['id']:
+                                        self.recur_path(e, path_count_set)
+                        break
+                break
+        #print(path_count_set)
 
     def outputClear(self):
         self.tracesFound.setText("")
@@ -467,12 +523,74 @@ class Window(QDialog):
         self.grammarText.repaint()
         self.parser()
 
-    def cleaning(self):
-        new_nl = self.worker.node_list
-        new_el = self.worker.edge_list
-        self.tracesFound.setText(self.worker.str_formula)
-        self.curr_formula = self.worker.str_formula
-        self.curr_cnf = self.worker.str_cnf
+    def outputUsingAssumptions(self):
+        widget = QDialog()
+        self.popup_assumpt = widget
+        layout = QGridLayout()
+        Vlayout = QVBoxLayout()
+        buttonConfirm = QPushButton('Confirm')
+        buttonConfirm.clicked.connect(self.computeUsingAssumptions)
+
+        buttons = {}
+        i = 0
+        j = 0
+        if self.uniq_node_list is None :
+            return
+
+        for val in self.uniq_node_list:
+
+            buttons[(i, j)] = QPushButton(val)
+            buttons[(i, j)].setCheckable(True)
+            buttons[(i, j)].setAutoExclusive(False)
+            buttons[(i, j)].setStyleSheet("QPushButton:checked { background-color: lightgreen }")
+            layout.addWidget(buttons[(i, j)], i, j)
+
+            j += 1
+            if j >= 10 :
+                j = 0
+                i += 1
+
+        Vlayout.addLayout(layout)
+        self.grid_fix_input = buttons
+        Vlayout.addWidget(buttonConfirm)
+        widget.setLayout(Vlayout)
+        widget.exec_()
+
+    def computeUsingAssumptions(self):
+
+        self.thread = QThread()
+        self.worker = Worker()
+
+        self.worker.str_formula = self.curr_formula
+        self.worker.uniq_node_list = self.uniq_node_list
+        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        print(self.uniq_node_list)
+        print(self.grid_fix_input)
+
+        self.worker.assumptions = []
+
+        for (i, j), button in self.grid_fix_input.items():
+            print(i, j, button)
+            if button.isChecked() :
+                self.worker.assumptions.append(i * 10 + j + 1)
+
+        #self.worker.assumptions = [1, 2, 3]
+
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.start_with_assumptions)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(lambda: self.cleaning(1))
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.thread.start()
+
+        self.ouputAssumption_button.setEnabled(False)
+        self.thread.finished.connect(
+            lambda: self.ouputAssumption_button.setEnabled(True)
+        )
+        self.popup_assumpt.close()
+
+
+    def cleaning(self, bool_plot=0):
 
         self.sol_array = self.worker.sol_array
         self.var_array = self.worker.var_array
@@ -481,9 +599,18 @@ class Window(QDialog):
         self.sol_spin.setMaximum(len(self.sol_array) - 1)
         self.sol_button.setText("Solve (max=" + str(len(self.sol_array)) + ")")
 
+        if bool_plot == 0 :
+            self.tracesFound.setText(self.worker.str_formula)
+            self.curr_formula = self.worker.str_formula
+            self.curr_cnf = self.worker.str_cnf
+            self.uniq_node_list = self.worker.uniq_node_list
+
+            new_nl = self.worker.node_list
+            new_el = self.worker.edge_list
+            self.plot(new_nl, new_el)
+            print(new_nl)
+
         self.worker.deleteLater
-        self.plot(new_nl, new_el)
-        print(new_nl)
 
     def parser(self):
         self.parser_thread = QThread()
