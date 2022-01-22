@@ -21,6 +21,7 @@ from Struct import *
 import copy
 
 dirname = os.path.dirname(__file__)
+os.chdir(dirname)
 
 from PyQt5.QtWidgets import (
     QApplication, QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QLabel, QSpinBox, QWidget, QGridLayout
@@ -366,7 +367,7 @@ class Window(QDialog):
 
         #https://visjs.github.io/vis-network/docs/network/nodes.html
   
-        settings_file = os.path.join(dirname, 'pyvis_param.json')
+        settings_file = os.path.join(dirname, 'settings/pyvis_param.json')
         with open(settings_file, 'r') as file:
             data_options = json.load(file)
 
@@ -375,7 +376,7 @@ class Window(QDialog):
         # + "\n" + "network.on( 'click', function(properties) { var ids = properties.nodes; var clickedNodes = nodes.get(ids); console.log('clicked nodes:', clickedNodes); });"
 
         nt.set_options(vis_str)
-        nt.save_graph('nx.html')
+        nt.save_graph('res/nx.html')
 
         self.current_network = nt
         self.current_digraph = g
@@ -388,7 +389,7 @@ class Window(QDialog):
         self.figure.clear()
         self.get_canvas(node_list, edge_list)    
         #self.canvas.setContextMenuPolicy(Qt.NoContextMenu)
-        html_file = os.path.join(dirname, 'nx.html')
+        html_file = os.path.join(dirname, 'res/nx.html')
         local_url = QUrl.fromLocalFile(html_file)
         self.canvas.load(local_url)
 
@@ -397,7 +398,7 @@ class Window(QDialog):
 
     # file explorer
     def getfileJSON(self):
-        fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Single File', QtCore.QDir.currentPath() , '*.json')
+        fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Single File', QtCore.QDir.currentPath() + '/res' , '*.json')
         if not fileName :
             return
 
@@ -426,7 +427,7 @@ class Window(QDialog):
         )
 
     def getfileGrammar(self):
-        fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Single File', QtCore.QDir.currentPath() , '*.txt')
+        fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Single File', QtCore.QDir.currentPath() + '/res' , '*.txt')
         if not fileName :
             return
 
@@ -469,11 +470,11 @@ class Window(QDialog):
                             if e['to'] == n['id']:
                                 self.recur_path(e, path_count_set)
 
-                self.current_network.save_graph('nx_with_sol.html')
+                self.current_network.save_graph('res/nx_with_sol.html')
 
                 self.current_network.nodes = old_nodes
 
-                html_file = os.path.join(dirname, 'nx_with_sol.html')
+                html_file = os.path.join(dirname, 'res/nx_with_sol.html')
                 local_url = QUrl.fromLocalFile(html_file)
                 self.canvas.load(local_url)
             else :
@@ -512,7 +513,7 @@ class Window(QDialog):
     def outputClear(self):
         self.tracesFound.setText("")
         self.tracesFound.repaint()
-        html_file = os.path.join(dirname, 'nx.html')
+        html_file = os.path.join(dirname, 'res/nx.html')
         local_url = QUrl.fromLocalFile(html_file)
         self.canvas.load(local_url)
 

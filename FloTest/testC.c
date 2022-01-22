@@ -433,7 +433,7 @@ json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mod
 void create_Json_file(DLL_List * wholeTree, int boolean_mode, HashTable *ht_CM){
 
    printf(" NAME FINAL IS %s\n", wholeTree->n->title);
-   const char *filename = "StructureTestingParser.json";
+   const char *filename = "res/StructureTestingParser.json";
    json_object *root = json_object_new_object();
 
    // Clean file
