@@ -19,6 +19,7 @@ from Worker import *
 from ParserWorker import *
 from Struct import *
 import copy
+from functools import partial
 
 dirname = os.path.dirname(__file__)
 os.chdir(dirname)
@@ -171,6 +172,7 @@ class Window(QDialog):
         self.curr_cnf = None
         self.sol_array = None
         self.uniq_node_list = None
+        self.uniq_node_list_cm = None
         
         str = """
         RELATIONS
@@ -516,6 +518,7 @@ class Window(QDialog):
         widget = QDialog()
         self.popup_assumpt = widget
         layout = QGridLayout()
+        layout_cm = QGridLayout()
         Vlayout = QVBoxLayout()
         buttonConfirm = QPushButton('Confirm')
         buttonConfirm.clicked.connect(self.computeUsingAssumptions)
@@ -527,23 +530,101 @@ class Window(QDialog):
             return
 
         for val in self.uniq_node_list:
+            buttons[(i, j)] = [QPushButton(val), 0]
+            buttons[(i, j)][0].setCheckable(True)
+            buttons[(i, j)][0].setAutoExclusive(False)
+            buttons[(i, j)][0].clicked.connect(
+                partial(self.changeState, (i, j), 0)
+            )
+            layout.addWidget(buttons[(i, j)][0], i, j)
+            j += 1
+            if j >= 10 :
+                j = 0
+                i += 1
 
-            buttons[(i, j)] = QPushButton(val)
-            buttons[(i, j)].setCheckable(True)
-            buttons[(i, j)].setAutoExclusive(False)
-            buttons[(i, j)].setStyleSheet("QPushButton:checked { background-color: lightgreen }")
-            layout.addWidget(buttons[(i, j)], i, j)
+        buttons_cm = {}
+        i = 0
+        j = 0
+        if self.uniq_node_list_cm is None :
+            return
 
+        for val in self.uniq_node_list_cm:
+            buttons_cm[(i, j)] = [QPushButton(val), 0]
+            buttons_cm[(i, j)][0].setCheckable(True)
+            buttons_cm[(i, j)][0].setAutoExclusive(False)
+            buttons_cm[(i, j)][0].clicked.connect(
+                partial(self.changeState, (i, j), 1)
+            )
+            layout_cm.addWidget(buttons_cm[(i, j)][0], i, j)
             j += 1
             if j >= 10 :
                 j = 0
                 i += 1
 
         Vlayout.addLayout(layout)
+        Vlayout.addLayout(layout_cm)
         self.grid_fix_input = buttons
+        self.grid_fix_input_cm = buttons_cm
         Vlayout.addWidget(buttonConfirm)
         widget.setLayout(Vlayout)
         widget.exec_()
+
+    def changeState(self, coord, type):
+        if type == 0:
+            button = self.grid_fix_input[coord][0]
+            self.grid_fix_input[coord][1] = (self.grid_fix_input[coord][1] + 1) % 3
+            state = self.grid_fix_input[coord][1]
+        else:
+            button = self.grid_fix_input_cm[coord][0]
+            self.grid_fix_input_cm[coord][1] = (self.grid_fix_input_cm[coord][1] + 1) % 3
+            state = self.grid_fix_input_cm[coord][1]
+
+        if state == 0:
+            button.setStyleSheet("")
+            button.setChecked(False)
+        elif state == 1:
+            button.setStyleSheet("QPushButton { background-color: lightgreen }")
+            button.setChecked(False)
+        else:
+            button.setStyleSheet("QPushButton { background-color: red }")
+            button.setChecked(False)
+
+        if type == 1:
+            self.changeStateCounter(state, coord)
+
+    def changeStateCounter(self, state, coord):
+
+        cm_name = self.grid_fix_input_cm[coord][0].text()
+        list_to_toggle = []
+
+        for (u, v, _) in self.current_digraph.edges(data=True):
+            l = v.split("_", 1)
+            if l[0] == cm_name:
+                list_to_toggle.append(u.rsplit('_', 1)[0])
+
+        print(list_to_toggle)
+
+        for n in list_to_toggle:
+            # TODO Voir quoi faire pour
+            # les neouds qui ne sont pas des leafs !!
+            index = self.uniq_node_list.index(n)
+            j = index % 10
+            i = (index - j) // 10
+            current = self.grid_fix_input[(i, j)]
+
+            if state == 0:
+                current[1] = 0
+                current[0].setStyleSheet("")
+                current[0].setChecked(False)
+            elif state == 2:
+                current[1] = 1
+                current[0].setStyleSheet("QPushButton { background-color: lightgreen }")
+                current[0].setChecked(False)
+            else:
+                current[1] = 2
+                current[0].setStyleSheet("QPushButton { background-color: red }")
+                current[0].setChecked(False)
+
 
     def computeUsingAssumptions(self):
 
@@ -558,9 +639,12 @@ class Window(QDialog):
 
         self.worker.assumptions = []
 
-        for (i, j), button in self.grid_fix_input.items():
-            if button.isChecked() :
-                self.worker.assumptions.append(i * 10 + j + 1)
+        for (i, j), [button, state] in self.grid_fix_input.items():
+            if state != 0 :
+                if state == 2:
+                    self.worker.assumptions.append(-(i * 10 + j + 1))
+                else:
+                    self.worker.assumptions.append(i * 10 + j + 1)
 
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.start_with_assumptions)
@@ -580,9 +664,11 @@ class Window(QDialog):
             self.msg = QDialog()
             layout = QVBoxLayout(self.msg)
             list = QListWidget()
-            self.msg .setWindowTitle("Networkx Nodes")
+            self.msg.setWindowTitle("Networkx Nodes")
             for (u, d) in self.current_digraph.nodes(data=True):
-                QListWidgetItem(str((u, d)), list)
+                i = QListWidgetItem(str((u, d)))
+                i.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled|Qt.ItemIsEditable)
+                list.addItem(i)
             layout.addWidget(list)
             self.msg.setLayout(layout)
             self.msg.resize(700,500)
@@ -593,9 +679,11 @@ class Window(QDialog):
             self.msg = QDialog()
             layout = QVBoxLayout(self.msg)
             list = QListWidget()
-            self.msg .setWindowTitle("Networkx Edges")
+            self.msg.setWindowTitle("Networkx Edges")
             for (u, v, d) in self.current_digraph.edges(data=True):
-                QListWidgetItem(str((u, v, d)), list)
+                i = QListWidgetItem(str((u, v, d)))
+                i.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled|Qt.ItemIsEditable)
+                list.addItem(i)
             layout.addWidget(list)
             self.msg.setLayout(layout)
             self.msg.resize(500,500)
@@ -615,6 +703,7 @@ class Window(QDialog):
             self.curr_formula = self.worker.str_formula
             self.curr_cnf = self.worker.str_cnf
             self.uniq_node_list = self.worker.uniq_node_list
+            self.uniq_node_list_cm = self.worker.uniq_node_list_cm
 
             new_nl = self.worker.node_list
             new_el = self.worker.edge_list

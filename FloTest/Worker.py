@@ -34,6 +34,7 @@ class Worker(QObject):
         fulllist = FullList.from_address(my_function.mainfct(s))
         newlist = CustomList.from_address(fulllist.nl)
 
+        node_list_uniq = []
         node_list_uniq_cm = []
 
         # .decode('utf-8') better way ?
@@ -45,14 +46,13 @@ class Worker(QObject):
             self.node_list.append(newtuple)
 
             if( newdict['type'] == 'CntMs' ):
-                #if newdict['variable'] not in node_list_uniq_cm:
-                #    node_list_uniq_cm.append(newdict['variable'])
-                pass
+                if newdict['variable'] not in node_list_uniq_cm:
+                    node_list_uniq_cm.append(newdict['variable'])
             elif( newdict['leaf'] == 1 ):
                 if(newtuple[0][0] == '~'):
-                    node_list_uniq_cm.append(newtuple[0][1:])
+                    node_list_uniq.append(newtuple[0][1:])
                 else:
-                    node_list_uniq_cm.append(newtuple[0])
+                    node_list_uniq.append(newtuple[0])
 
             while newlist.next != None:
                 newlist = CustomList.from_address(newlist.next)
@@ -64,14 +64,13 @@ class Worker(QObject):
                     self.node_list.append(newtuple)
 
                 if( newdict['type'] == 'CntMs' ):
-                    #if newdict['variable'] not in node_list_uniq_cm:
-                    #    node_list_uniq_cm.append(newdict['variable'])
-                    pass
+                    if newdict['variable'] not in node_list_uniq_cm:
+                        node_list_uniq_cm.append(newdict['variable'])
                 elif( newdict['leaf'] == 1 ):
                     if(newtuple[0][0] == '~'):
-                        node_list_uniq_cm.append(newtuple[0][1:])
+                        node_list_uniq.append(newtuple[0][1:])
                     else:
-                        node_list_uniq_cm.append(newtuple[0])
+                        node_list_uniq.append(newtuple[0])
 
         newEdgeList = CustomList.from_address(fulllist.el)
 
@@ -111,10 +110,11 @@ class Worker(QObject):
 
         self.str_formula = str_formula
         self.str_cnf = str(tmp_formula)
-        node_list_uniq_cm = list(OrderedDict.fromkeys(node_list_uniq_cm))
-        self.uniq_node_list = node_list_uniq_cm
+        node_list_uniq = list(OrderedDict.fromkeys(node_list_uniq))
+        self.uniq_node_list = node_list_uniq
+        self.uniq_node_list_cm = node_list_uniq_cm
 
-        self.sat_solver(tmp_formula, node_list_uniq_cm)
+        self.sat_solver(tmp_formula, node_list_uniq)
 
         my_function.freeList(newlist)
         #my_function.freeEList(newEdgeList)
