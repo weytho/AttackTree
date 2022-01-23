@@ -26,11 +26,11 @@ class ParserWorker(QObject):
 
         strTest = self.fullText
         new_s = strTest.split("RELATIONS")
-        print(new_s)
+        #print(new_s)
         new_s2 = new_s[1].split("COUNTERMEASURES")
-        print(new_s2)
+        #print(new_s2)
         new_s3 = new_s2[1].split("PROPERTIES")
-        print(new_s3)
+        #print(new_s3)
 
         if(len(new_s3) <= 1):
             print("Boolean mode")
@@ -41,9 +41,9 @@ class ParserWorker(QObject):
             my_function.parser.argtypes = [ctypes.c_char_p]
             ret = my_function.parser(s, "", s2)
         else:
-            print(new_s2[0])
-            print(new_s3[0])
-            print(new_s3[1])
+            #print(new_s2[0])
+            #print(new_s3[0])
+            #print(new_s3[1])
 
             # sanitize and check input
             s = ctypes.create_string_buffer(new_s2[0].encode('utf-8'))

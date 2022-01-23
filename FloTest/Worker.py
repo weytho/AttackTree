@@ -211,7 +211,7 @@ class Worker(QObject):
         if(b):
             # TODO ATTENTION PAS ASSUMPTIONS SUR LE MODEL
             model = g.get_model()
-            print(model)
+            #print(model)
 
             result = []
             for n in model:
@@ -220,7 +220,7 @@ class Worker(QObject):
                 else:
                     result.append(dict_index[n])
 
-            print(result)
+            #print(result)
 
             # TODO LIMIT TO 20 FOR PERFORMANCE ISSUE
             cnt = 0

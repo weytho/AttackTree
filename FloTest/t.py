@@ -24,7 +24,7 @@ dirname = os.path.dirname(__file__)
 os.chdir(dirname)
 
 from PyQt5.QtWidgets import (
-    QApplication, QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QLabel, QSpinBox, QWidget, QGridLayout
+    QApplication, QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QLabel, QSpinBox, QWidget, QGridLayout, QListWidget, QListWidgetItem
 )
 
 class Window(QDialog):
@@ -140,6 +140,16 @@ class Window(QDialog):
         toolBar.addWidget(toolButton)
         self.ouputAssumption_button = toolButton
 
+        toolBar.addSeparator()
+        toolButton = QToolButton()
+        toolButton.setText("nx nodes")
+        toolButton.clicked.connect(self.show_nx_nodes)
+        toolBar.addWidget(toolButton)
+        toolButton = QToolButton()
+        toolButton.setText("nx edges")
+        toolButton.clicked.connect(self.show_nx_edges)
+        toolBar.addWidget(toolButton)
+
         Vlayout_toolbar.addWidget(toolBar)        
 
         result_layout = QHBoxLayout()
@@ -163,9 +173,7 @@ class Window(QDialog):
         self.uniq_node_list = None
         
         str = """
-        RELATIONS        self.parser_thread.finished.connect(
-            lambda: self.buttonParse.setEnabled(True)
-        )
+        RELATIONS
             D3-OR-> {F3, R, S}
             F3 -AND-> {F12}
             R -AND-> {F12}
@@ -226,8 +234,8 @@ class Window(QDialog):
         g = nx.DiGraph()
         
         g.add_nodes_from(ln)
-        print(ln)
-        print(le)
+        #print(ln)
+        #print(le)
 
         types = [(u, d['type']) for (u, d) in g.nodes(data=True)]
         counter_list = [u for (u, d) in g.nodes(data=True) if d['type'] == 'CntMs']
@@ -293,13 +301,6 @@ class Window(QDialog):
                 labels_logic[name_nor] = "CM"
                 logic_edge.append(edge)
 
-
-        print("NENENNENENENENENENEENENENNENENEENENENENENENE")
-        print("NENENNENENENENENENEENENENNENENEENENENENENENE")
-        print("NENENNENENENENENENEENENENNENENEENENENENENENE")
-        print("NENENNENENENENENENEENENENNENENEENENENENENENE")
-        print("NENENNENENENENENENEENENENNENENEENENENENENENE")
-
         # attention aux CM !!
 
         for (u, v) in le:
@@ -321,22 +322,17 @@ class Window(QDialog):
         pos = nx.nx_agraph.graphviz_layout(g, prog='dot', args='-Gnodesep=0.2 -Gsize=10,6\! -Gdpi=100 -Gratio=fill')
 
         # RESIZE figure
-
         # TODO CA AVANCE
-
         # CM entre noeud et noeud logic
+        '''
         for (u, d) in g.nodes(data=True):
             print(u,d)
-
-    
-
         print("@@@@@@@@@@@@@ NODES @@@@@@@@@@@@@")
         for (u, v, d) in g.edges(data=True):
             print(u, v, d)
-
         print("######### EDGES #############")
         print(le)
-        
+        '''
         nt = Network(height="100%", width="100%")#('600px', '1000px') 
         
         # Title can be html
@@ -372,9 +368,6 @@ class Window(QDialog):
             data_options = json.load(file)
 
         vis_str = "var options = " + json.dumps(data_options)
-        
-        # + "\n" + "network.on( 'click', function(properties) { var ids = properties.nodes; var clickedNodes = nodes.get(ids); console.log('clicked nodes:', clickedNodes); });"
-
         nt.set_options(vis_str)
         nt.save_graph('res/nx.html')
 
@@ -459,10 +452,6 @@ class Window(QDialog):
                         list.append(self.var_array[i])
 
                 path_count_set = {}
-
-                #print(self.current_network.nodes)
-                #print(self.current_digraph.nodes)
-
                 for n in self.current_network.nodes :
                     if n['id'] in list :
                         n['group'] = 'model'
@@ -471,7 +460,6 @@ class Window(QDialog):
                                 self.recur_path(e, path_count_set)
 
                 self.current_network.save_graph('res/nx_with_sol.html')
-
                 self.current_network.nodes = old_nodes
 
                 html_file = os.path.join(dirname, 'res/nx_with_sol.html')
@@ -564,18 +552,15 @@ class Window(QDialog):
 
         self.worker.str_formula = self.curr_formula
         self.worker.uniq_node_list = self.uniq_node_list
-        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-        print(self.uniq_node_list)
-        print(self.grid_fix_input)
+        print("Compute With Assumptions")
+        #print(self.uniq_node_list)
+        #print(self.grid_fix_input)
 
         self.worker.assumptions = []
 
         for (i, j), button in self.grid_fix_input.items():
-            print(i, j, button)
             if button.isChecked() :
                 self.worker.assumptions.append(i * 10 + j + 1)
-
-        #self.worker.assumptions = [1, 2, 3]
 
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.start_with_assumptions)
@@ -590,6 +575,31 @@ class Window(QDialog):
         )
         self.popup_assumpt.close()
 
+    def show_nx_nodes(self):
+        if hasattr(self, 'current_digraph'):
+            self.msg = QDialog()
+            layout = QVBoxLayout(self.msg)
+            list = QListWidget()
+            self.msg .setWindowTitle("Networkx Nodes")
+            for (u, d) in self.current_digraph.nodes(data=True):
+                QListWidgetItem(str((u, d)), list)
+            layout.addWidget(list)
+            self.msg.setLayout(layout)
+            self.msg.resize(700,500)
+            self.msg.show()
+
+    def show_nx_edges(self):
+        if hasattr(self, 'current_digraph'):
+            self.msg = QDialog()
+            layout = QVBoxLayout(self.msg)
+            list = QListWidget()
+            self.msg .setWindowTitle("Networkx Edges")
+            for (u, v, d) in self.current_digraph.edges(data=True):
+                QListWidgetItem(str((u, v, d)), list)
+            layout.addWidget(list)
+            self.msg.setLayout(layout)
+            self.msg.resize(500,500)
+            self.msg.show()
 
     def cleaning(self, bool_plot=0):
 
@@ -609,7 +619,6 @@ class Window(QDialog):
             new_nl = self.worker.node_list
             new_el = self.worker.edge_list
             self.plot(new_nl, new_el)
-            print(new_nl)
 
         self.worker.deleteLater
 
@@ -648,7 +657,7 @@ class Window(QDialog):
         else:
             msg.setText("This is the main text!")
         msg.setIcon(QMessageBox.Critical)
-        msg.exec_()       
+        msg.exec_()
 
 # driver code
 if __name__ == '__main__':

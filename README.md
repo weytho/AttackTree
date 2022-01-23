@@ -1,15 +1,15 @@
 # AttackTree
 
 # Doxygen
-doxygen -g attacktree.conf
-doxygen attacktree.conf
+doxygen -g settings/attacktree.conf
+doxygen settings/attacktree.conf
 
 # Install & Run
 
 sudo apt install libjson-c-dev
 
 gcc -shared -Wl,-soname,testlib -o testlib.so -fPIC testC.c -ljson-c
-/bin/python3 /home/flo/Desktop/Github/AttackTree/testThread.py
+/bin/python3 /home/flo/Desktop/Github/AttackTree/t.py
 
 # https://stackoverflow.com/questions/38661635/ctypes-struct-returned-from-library
 
