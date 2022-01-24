@@ -19,7 +19,21 @@ struct full_List {
    List *nl;
    EList *el;
    Formula *fo;
+   Formula *fo_cm;
 };
+
+
+void freeList(List *l) {
+	list_free(l);
+}
+
+void freeEList(EList *l) {
+	elist_free(l);
+}
+
+void freeForm(Formula *l) {
+	form_free(l);
+}
 
 /**
 *  This function is in charge of reading the tree from a Json format as described in the documentation. 
@@ -286,7 +300,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
 }
 
 
-FList * mainfct(char * path) {
+FList * mainfct(char * path, int with_cm) {
 	//path = "/home/flo/Desktop/Github/AttackTree/FloTest/StructureGraph.json";
 	printf("Path to file is : %s \n", path);
 
@@ -307,6 +321,15 @@ FList * mainfct(char * path) {
    Formula *form = NULL;
 
    CostProb *ret = JsonReader(parsed_json, &list, &edges, &form, NULL, 1, 0);
+
+   freeList(list);
+   freeEList(edges);
+
+   edges = NULL;
+	list = NULL;
+   Formula *form_with_cm = NULL;
+
+   ret = JsonReader(parsed_json, &list, &edges, &form_with_cm, NULL, 1, 1);
 
 	if(edges == NULL)
 	{
@@ -352,6 +375,7 @@ FList * mainfct(char * path) {
    init.el = edges;
    init.nl = list;
    init.fo = form;
+   init.fo_cm = form_with_cm;
 
    fl = malloc(sizeof(FList));
    if (fl == NULL){
@@ -364,18 +388,6 @@ FList * mainfct(char * path) {
    printf("Esp  is %f\n",ret->esp);
 
    return fl;
-}
-
-void freeList(List *l) {
-	list_free(l);
-}
-
-void freeEList(EList *l) {
-	elist_free(l);
-}
-
-void freeForm(Formula *l) {
-	form_free(l);
 }
 
 json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mode, HashTable *ht_CM){

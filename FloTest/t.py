@@ -517,6 +517,7 @@ class Window(QDialog):
     def outputUsingAssumptions(self):
         widget = QDialog()
         self.popup_assumpt = widget
+        self.mandatory_cm_counter = 0
         layout = QGridLayout()
         layout_cm = QGridLayout()
         Vlayout = QVBoxLayout()
@@ -607,32 +608,46 @@ class Window(QDialog):
         for n in list_to_toggle:
             # TODO Voir quoi faire pour
             # les neouds qui ne sont pas des leafs !!
-            index = self.uniq_node_list.index(n)
-            j = index % 10
-            i = (index - j) // 10
-            current = self.grid_fix_input[(i, j)]
+            if n in self.uniq_node_list:
+                index = self.uniq_node_list.index(n)
+                j = index % 10
+                i = (index - j) // 10
+                current = self.grid_fix_input[(i, j)]
 
-            if state == 0:
-                current[1] = 0
-                current[0].setStyleSheet("")
-                current[0].setChecked(False)
-            elif state == 2:
-                current[1] = 1
-                current[0].setStyleSheet("QPushButton { background-color: lightgreen }")
-                current[0].setChecked(False)
+                if state == 0:
+                    current[1] = 0
+                    current[0].setStyleSheet("")
+                    current[0].setChecked(False)
+                elif state == 2:
+                    current[1] = 1
+                    current[0].setStyleSheet("QPushButton { background-color: lightgreen }")
+                    current[0].setChecked(False)
+                else:
+                    current[1] = 2
+                    current[0].setStyleSheet("QPushButton { background-color: red }")
+                    current[0].setChecked(False)
             else:
-                current[1] = 2
-                current[0].setStyleSheet("QPushButton { background-color: red }")
-                current[0].setChecked(False)
-
+                print("parent node is not a leaf")
+                if state == 0:
+                    self.mandatory_cm_counter -= 1
+                elif state == 2:
+                    pass
+                else:
+                    self.mandatory_cm_counter += 1
 
     def computeUsingAssumptions(self):
+
+        print(self.mandatory_cm_counter)
 
         self.thread = QThread()
         self.worker = Worker()
 
-        self.worker.str_formula = self.curr_formula
-        self.worker.uniq_node_list = self.uniq_node_list
+        if self.mandatory_cm_counter > 0:
+            self.worker.str_formula = self.curr_formula_cm
+            self.worker.uniq_node_list = self.uniq_node_list + self.uniq_node_list_cm
+        else:
+            self.worker.str_formula = self.curr_formula
+            self.worker.uniq_node_list = self.uniq_node_list
         print("Compute With Assumptions")
         #print(self.uniq_node_list)
         #print(self.grid_fix_input)
@@ -645,6 +660,19 @@ class Window(QDialog):
                     self.worker.assumptions.append(-(i * 10 + j + 1))
                 else:
                     self.worker.assumptions.append(i * 10 + j + 1)
+
+        if self.mandatory_cm_counter > 0:
+            last = i * 10 + j + 1
+            for (i, j), [button, state] in self.grid_fix_input_cm.items():
+                if state == 1 :
+                    self.worker.assumptions.append(i * 10 + j + 1 + last)
+                else:
+                    self.worker.assumptions.append(-(i * 10 + j + 1 + last))
+
+        print("HHHHHHHH")
+        print(self.worker.str_formula)
+        print(self.worker.uniq_node_list)
+        print(self.worker.assumptions)
 
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.start_with_assumptions)
@@ -702,6 +730,10 @@ class Window(QDialog):
             self.tracesFound.setText(self.worker.str_formula)
             self.curr_formula = self.worker.str_formula
             self.curr_cnf = self.worker.str_cnf
+            self.curr_formula_cm = self.worker.str_formula_cm
+            print("DDHDHDHDHDHD")
+            print(self.curr_formula_cm )
+            self.curr_cnf_cm = self.worker.str_cnf_cm
             self.uniq_node_list = self.worker.uniq_node_list
             self.uniq_node_list_cm = self.worker.uniq_node_list_cm
 

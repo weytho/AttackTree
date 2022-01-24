@@ -30,4 +30,5 @@ class CustomList(ctypes.Structure):
 class FullList(ctypes.Structure):
     _fields_ = [('nl', ctypes.c_void_p),
         ('el', ctypes.c_void_p),
-        ('fo', ctypes.c_void_p)]
+        ('fo', ctypes.c_void_p),
+        ('fo_cm', ctypes.c_void_p)]

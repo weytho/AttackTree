@@ -22,6 +22,7 @@ class Worker(QObject):
         self.node_list= []
         self.edge_list = []
         self.formula = []
+        self.formula_cm = []
         dirname = os.path.dirname(__file__)
         so_file = os.path.join(dirname, 'testlib.so')
         my_function = ctypes.CDLL(so_file)
@@ -31,7 +32,7 @@ class Worker(QObject):
         my_function.mainfct.restype = ctypes.c_void_p
         my_function.mainfct.argtypes = [ctypes.c_char_p]
  
-        fulllist = FullList.from_address(my_function.mainfct(s))
+        fulllist = FullList.from_address(my_function.mainfct(s, 0))
         newlist = CustomList.from_address(fulllist.nl)
 
         node_list_uniq = []
@@ -102,14 +103,32 @@ class Worker(QObject):
         for e in self.formula:
             str_formula = str_formula + e
 
+        newFormula_cm = FormulaNode.from_address(fulllist.fo_cm)
+
+        if newFormula_cm != None :
+            newdata = newFormula_cm.data.decode('utf-8')
+            self.formula_cm.append(newdata)
+
+            while newFormula_cm.next != None:
+                newFormula_cm = FormulaNode.from_address(newFormula_cm.next)
+                newdata = newFormula_cm.data.decode('utf-8')
+                self.formula_cm.append(newdata)
+
+        str_formula_cm = ""
+        for e in self.formula_cm:
+            str_formula_cm = str_formula_cm + e
+
         # STR TO CNF SYMPY
 
         glob = {}
         exec('from sympy.core import Symbol', glob) # ok for I, E, S, N, C, O, or Q
         tmp_formula = to_cnf(parse_expr(str_formula, global_dict=glob))
+        tmp_formula_cm = to_cnf(parse_expr(str_formula_cm, global_dict=glob))
 
         self.str_formula = str_formula
+        self.str_formula_cm = str_formula_cm
         self.str_cnf = str(tmp_formula)
+        self.str_cnf_cm = str(tmp_formula_cm)
         node_list_uniq = list(OrderedDict.fromkeys(node_list_uniq))
         self.uniq_node_list = node_list_uniq
         self.uniq_node_list_cm = node_list_uniq_cm
@@ -134,8 +153,8 @@ class Worker(QObject):
 
     def sat_solver(self, formula, list_var, assumptions=[]):
         print("####################### SAT SOLVER !!! #########################")
-        #print(list_var)
-        #print(formula)
+        print(list_var)
+        print(formula)
 
         if formula == None:
             return
