@@ -67,6 +67,14 @@
             "color":{
                 "background": "#FF0000"
             }
+        },
+        "model_leaf": {
+            "font": {
+                "color": "#FFFFFF"
+            },
+            "color":{
+                "background": "#FF0000"
+            }
         }
     }
 }
