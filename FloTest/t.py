@@ -453,13 +453,26 @@ class Window(QDialog):
                     if v >= 0 :
                         list.append(self.var_array[i])
 
+                disabled_node = set()
+
                 path_count_set = {}
                 for n in self.current_network.nodes :
-                    if n['id'] in list :
-                        n['group'] = 'model'
+                    if 'group' in n and n['group'] == 'cm' and n['label'] in list:
+                        n['group'] = 'model_leaf'
+                        l = n['id'].split("_", 1)
+                        disabled_node.add(l[1])
                         for e in self.current_network.edges :
                             if e['to'] == n['id']:
-                                self.recur_path(e, path_count_set)
+                                for n2 in self.current_network.nodes :
+                                    if n2['id'] == e['from']:
+                                        n2['group'] = 'model'
+
+                for n in self.current_network.nodes :
+                    if n['id'] in list:
+                        n['group'] = 'model_leaf'
+                        for e in self.current_network.edges :
+                            if e['to'] == n['id']:
+                                self.recur_path(e, path_count_set, disabled_node)
 
                 self.current_network.save_graph('res/nx_with_sol.html')
                 self.current_network.nodes = old_nodes
@@ -471,7 +484,7 @@ class Window(QDialog):
                 self.tracesFound.setText("No Solution Found")
                 self.tracesFound.repaint()
 
-    def recur_path(self, current_edge, path_count_set):
+    def recur_path(self, current_edge, path_count_set, disabled_node):
         current = current_edge['from']
         for n in self.current_network.nodes :
             if n['id'] == current :
@@ -489,13 +502,13 @@ class Window(QDialog):
                                     n['group'] = 'model'
                                     for e in self.current_network.edges :
                                         if e['to'] == n['id']:
-                                            self.recur_path(e, path_count_set)
+                                            self.recur_path(e, path_count_set, disabled_node)
                         else :
-                            if 'group' not in n or n['group'] != 'model':
+                            if n['id'] not in disabled_node and ('group' not in n or n['group'] != 'model'):
                                 n['group'] = 'model'
                                 for e in self.current_network.edges :
                                     if e['to'] == n['id']:
-                                        self.recur_path(e, path_count_set)
+                                        self.recur_path(e, path_count_set, disabled_node)
                         break
                 break
         #print(path_count_set)
@@ -607,7 +620,7 @@ class Window(QDialog):
 
         for n in list_to_toggle:
             # TODO Voir quoi faire pour
-            # les neouds qui ne sont pas des leafs !!
+            # les noeuds qui ne sont pas des leafs !!
             if n in self.uniq_node_list:
                 index = self.uniq_node_list.index(n)
                 j = index % 10
@@ -628,12 +641,12 @@ class Window(QDialog):
                     current[0].setChecked(False)
             else:
                 print("parent node is not a leaf")
-                if state == 0:
-                    self.mandatory_cm_counter -= 1
-                elif state == 2:
-                    pass
-                else:
-                    self.mandatory_cm_counter += 1
+            if state == 0:
+                self.mandatory_cm_counter -= 1
+            elif state == 2:
+                pass
+            else:
+                self.mandatory_cm_counter += 1
 
     def computeUsingAssumptions(self):
 
@@ -669,10 +682,10 @@ class Window(QDialog):
                 else:
                     self.worker.assumptions.append(-(i * 10 + j + 1 + last))
 
-        print("HHHHHHHH")
-        print(self.worker.str_formula)
-        print(self.worker.uniq_node_list)
-        print(self.worker.assumptions)
+        #print("HHHHHHHH")
+        #print(self.worker.str_formula)
+        #print(self.worker.uniq_node_list)
+        #print(self.worker.assumptions)
 
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.start_with_assumptions)
