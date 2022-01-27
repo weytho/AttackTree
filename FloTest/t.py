@@ -28,7 +28,11 @@ from PyQt5.QtWidgets import (
     QApplication, QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QLabel, QSpinBox, QWidget, QGridLayout, QListWidget, QListWidgetItem
 )
 
+## Window Class
+#
+#  Main GUI interface of the application
 class Window(QDialog):
+    ## The constructor.
     def __init__(self, parent=None):
         super().__init__()
         self.figure = plt.figure()
@@ -69,8 +73,7 @@ class Window(QDialog):
         Vlayout_left.addWidget(self.canvas)
         Vlayout_left.addWidget(self.buttonImportJson)   
 
-        Vlayout_left.addWidget(self.pathFile)  
-        ##Vlayout_left.addWidget(self.tracesFound)
+        Vlayout_left.addWidget(self.pathFile)
 
         # Create pyqt toolbar
         toolBar = QToolBar()
@@ -165,76 +168,25 @@ class Window(QDialog):
 
         self.setLayout(base_layout)
 
-        # TODO ENLEVER :
-        #self.getfiles()
-
         self.curr_formula = None
         self.curr_cnf = None
         self.sol_array = None
         self.uniq_node_list = None
-        self.uniq_node_list_cm = None
-        
-        str = """
-        RELATIONS
-            D3-OR-> {F3, R, S}
-            F3 -AND-> {F12}
-            R -AND-> {F12}
-            S -OR-> {F13}
-        COUNTERMEASURES
-            CM1 (F13, F12)
-        """
+        self.uniq_node_list_cm = None       
 
-        str = """
-        RELATIONS
-            A-AND->{B,C}
-            C-AND->{F,H}
-            B-OR->{E,H}
-            H-OR->{I,J}
-        COUNTERMEASURES
-            CM1 (A, B)
-            CM2 (A, C, B)
-            CM3 (J)
-        """
-
-        str = """
-        RELATIONS
-        A -AND-> {B,C,D}
-        C -AND-> {E,F}
-        D -AND-> {~E}
-
-        COUNTERMEASURES
-
-        PROPERTIES
-        """
-
-        str = """
-        RELATIONS
-        node -AND-> {node0,node1}
-        COUNTERMEASURES
-        CM1 (node0,node0)
-        PROPERTIES
-        """
-
-        # TODO
-
-        str,str1,str2 = TreeGen(3, 3, 2)
-
-        print("GOT FROM RANDOM TREE")
-
-        print(str + "\n" + str1 + "\n" + str2)
-
-        # TODO
-        self.grammarText.setText(str + "\n" + str1 + "\n" + str2)
-        self.parser()        
-
+    ## Creation of the Digraph using Networkx and Pyvis :
+    #   Create graph from given information by adding logic nodes,
+    #   Get the layout from Networkx and send it to a Pyvis network,
+    #   Use settings for Pyvis from a JSON file and save the graph
+    #   to a HTML file
+    #  @param self The object pointer.
+    #  @param ln List of the Nodes of the JSON file
+    #  @param le List of the Edges of the JSON file
     def get_canvas(self, ln, le):
-
-        # example stackoverflow
 
         print("###########################################")
 
         g = nx.DiGraph()
-        
         g.add_nodes_from(ln)
         #print(ln)
         #print(le)
@@ -326,16 +278,8 @@ class Window(QDialog):
         # RESIZE figure
         # TODO CA AVANCE
         # CM entre noeud et noeud logic
-        '''
-        for (u, d) in g.nodes(data=True):
-            print(u,d)
-        print("@@@@@@@@@@@@@ NODES @@@@@@@@@@@@@")
-        for (u, v, d) in g.edges(data=True):
-            print(u, v, d)
-        print("######### EDGES #############")
-        print(le)
-        '''
-        nt = Network(height="100%", width="100%")#('600px', '1000px') 
+
+        nt = Network(height="100%", width="100%")
         
         # Title can be html
         for (n, d) in ln:
@@ -358,12 +302,6 @@ class Window(QDialog):
 
         for (n, d) in logic_edge:
             nt.add_edge(n, d, color="#000000", width=4)
-
-        #nt.from_nx(g)
-        # https://networkx.org/documentation/stable/_modules/networkx/drawing/nx_agraph.html#pygraphviz_layout
-        #nt.show_buttons()
-
-        #https://visjs.github.io/vis-network/docs/network/nodes.html
   
         settings_file = os.path.join(dirname, 'settings/pyvis_param.json')
         with open(settings_file, 'r') as file:
@@ -378,7 +316,12 @@ class Window(QDialog):
         
         print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
-    # action called by the import button
+    ## Action called at the end of the import process :
+    #   Clear the figure of the GUI, launch the html graph creation from
+    #   the nodes and edges, retrieves the html and loads it on the canvas
+    #  @param self The object pointer.
+    #  @param node_list List of the Nodes of the JSON file
+    #  @param node_list List of the Edges of the JSON file
     def plot(self, node_list, edge_list):
         # clearing old figure
         self.figure.clear()
@@ -387,32 +330,30 @@ class Window(QDialog):
         html_file = os.path.join(dirname, 'res/nx.html')
         local_url = QUrl.fromLocalFile(html_file)
         self.canvas.load(local_url)
-
         #self.canvas.draw()
         print("pressed")
 
-    # file explorer
+    ## Action called by the import JSON button :
+    #   Use a file explorer to choose the JSON file to import
+    #   Create a new thread for the Worker class
+    #  @param self The object pointer.
     def getfileJSON(self):
         fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Single File', QtCore.QDir.currentPath() + '/res' , '*.json')
         if not fileName :
             return
 
         self.pathFile.setText(fileName)
-        # Step 2: Create a QThread object
         self.thread = QThread()
-        # Step 3: Create a worker object
         self.worker = Worker()
 
         self.worker.pathFile = fileName
-        # Step 4: Move worker to the thread
         self.worker.moveToThread(self.thread)
-        # Step 5: Connect signals and slots
+
         self.thread.started.connect(self.worker.run)
-        #self.worker.finished.connect(lambda: print(self.worker.finished))
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(lambda: self.cleaning(0))
         self.thread.finished.connect(self.thread.deleteLater)
-        # Step 6: Start the thread
+
         self.thread.start()
 
         # Final resets
@@ -421,6 +362,10 @@ class Window(QDialog):
             lambda: self.buttonImportJson.setEnabled(True)
         )
 
+    ## Action called by the import Grammar button :
+    #   Use a file explorer to choose the TXT file to import
+    #   Set the text in the corresponding QTextEdit
+    #  @param self The object pointer.
     def getfileGrammar(self):
         fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Single File', QtCore.QDir.currentPath() + '/res' , '*.txt')
         if not fileName :
@@ -431,11 +376,17 @@ class Window(QDialog):
             self.grammarText.setText(f.read())
         self.buttonImportGrammar.setEnabled(True)
 
+    ## Action called by the CNF Formula button :
+    #   Set the output formula to its CNF form
+    #  @param self The object pointer.
     def outputCNFformula(self):
         if self.curr_cnf is not None :
             self.tracesFound.setText(self.curr_cnf)
             self.tracesFound.repaint()
 
+    ## Action called by the Complete Formula button :
+    #   Set the output formula to its Complete form
+    #  @param self The object pointer.
     def outputCompleteformula(self):
         if self.curr_formula is not None :
             self.tracesFound.setText(self.curr_formula)
@@ -511,8 +462,10 @@ class Window(QDialog):
                                         self.recur_path(e, path_count_set, disabled_node)
                         break
                 break
-        #print(path_count_set)
 
+    ## Action called by the Clear button :
+    #   Clear the output and reload the graph from the HTML file
+    #  @param self The object pointer.
     def outputClear(self):
         self.tracesFound.setText("")
         self.tracesFound.repaint()
@@ -641,6 +594,7 @@ class Window(QDialog):
                     current[0].setChecked(False)
             else:
                 print("parent node is not a leaf")
+                
             if state == 0:
                 self.mandatory_cm_counter -= 1
             elif state == 2:
@@ -662,8 +616,6 @@ class Window(QDialog):
             self.worker.str_formula = self.curr_formula
             self.worker.uniq_node_list = self.uniq_node_list
         print("Compute With Assumptions")
-        #print(self.uniq_node_list)
-        #print(self.grid_fix_input)
 
         self.worker.assumptions = []
 
@@ -681,11 +633,6 @@ class Window(QDialog):
                     self.worker.assumptions.append(i * 10 + j + 1 + last)
                 else:
                     self.worker.assumptions.append(-(i * 10 + j + 1 + last))
-
-        #print("HHHHHHHH")
-        #print(self.worker.str_formula)
-        #print(self.worker.uniq_node_list)
-        #print(self.worker.assumptions)
 
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.start_with_assumptions)
@@ -744,15 +691,11 @@ class Window(QDialog):
             self.curr_formula = self.worker.str_formula
             self.curr_cnf = self.worker.str_cnf
             self.curr_formula_cm = self.worker.str_formula_cm
-            print("DDHDHDHDHDHD")
-            print(self.curr_formula_cm )
             self.curr_cnf_cm = self.worker.str_cnf_cm
             self.uniq_node_list = self.worker.uniq_node_list
             self.uniq_node_list_cm = self.worker.uniq_node_list_cm
 
-            new_nl = self.worker.node_list
-            new_el = self.worker.edge_list
-            self.plot(new_nl, new_el)
+            self.plot(self.worker.node_list, self.worker.edge_list)
 
         self.worker.deleteLater
 
@@ -777,6 +720,10 @@ class Window(QDialog):
         self.buttonParse.setEnabled(True)
         self.rndtree_button.setEnabled(True)
 
+    ## Show Error Pop-up QMessageBox :
+    #   Message of a detected error and its type
+    #  @param self The object pointer.
+    #  @param error The id of the error.
     def show_popup(self, error_id):
         if( error_id == 0):
             return
@@ -793,7 +740,7 @@ class Window(QDialog):
         msg.setIcon(QMessageBox.Critical)
         msg.exec_()
 
-# driver code
+## driver code
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     win = Window()
