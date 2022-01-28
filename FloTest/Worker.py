@@ -13,6 +13,7 @@ from sympy.parsing.sympy_parser import parse_expr
 # From folder 
 from Struct import *
 from collections import OrderedDict
+from tseitin import *
 
 class Worker(QObject):
     finished = pyqtSignal()
@@ -122,8 +123,18 @@ class Worker(QObject):
 
         glob = {}
         exec('from sympy.core import Symbol', glob) # ok for I, E, S, N, C, O, or Q
-        tmp_formula = to_cnf(parse_expr(str_formula, global_dict=glob))
-        tmp_formula_cm = to_cnf(parse_expr(str_formula_cm, global_dict=glob))
+
+        parsed_formula = parse_expr(str_formula, global_dict=glob)
+        parsed_formula_cm = parse_expr(str_formula_cm, global_dict=glob)
+
+        if self.useTseitin:
+            tmp_formula, set_var, index_expr = tseitin(parsed_formula)
+            node_list_uniq = list(set_var) + [str(l) for l in index_expr]
+            tmp_formula_cm, set_var_cm, index_expr_cm = tseitin(parsed_formula)
+            node_list_uniq_cm = list(set_var_cm) + [str(l) for l in index_expr_cm]
+        else:
+            tmp_formula = to_cnf(parsed_formula)
+            tmp_formula_cm = to_cnf(parsed_formula_cm)
 
         self.str_formula = str_formula
         self.str_formula_cm = str_formula_cm

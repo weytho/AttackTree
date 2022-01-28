@@ -99,6 +99,7 @@ class Window(QDialog):
         toolButton.setText("Complete Formula")
         toolButton.setCheckable(True)
         toolButton.setAutoExclusive(True)
+        toolButton.toggle()
         toolButton.clicked.connect(self.outputCompleteformula)
         toolBar.addWidget(toolButton)
         self.complete_button = toolButton
@@ -154,6 +155,34 @@ class Window(QDialog):
         toolButton.clicked.connect(self.show_nx_edges)
         toolBar.addWidget(toolButton)
 
+        toolBar.addSeparator()
+        section_output = QLabel("CNF Transform")
+        section_output.setAlignment(Qt.AlignHCenter)
+        section_output.setStyleSheet("font-weight: bold")
+        toolBar.addWidget(section_output)
+
+        # Add buttons to toolbar
+        cnf_form = QWidget()
+        cnf_layout = QVBoxLayout()
+        cnf_form.setLayout(cnf_layout)
+
+        toolButton = QToolButton()
+        toolButton.setText("Tseitin")
+        toolButton.setCheckable(True)
+        toolButton.setAutoExclusive(True)
+        toolButton.clicked.connect(lambda: self.setCNFTransform(True))
+        cnf_layout.addWidget(toolButton)
+
+        toolButton = QToolButton()
+        toolButton.setText("Quine-McCluskey")
+        toolButton.setCheckable(True)
+        toolButton.setAutoExclusive(True)
+        toolButton.toggle()
+        toolButton.clicked.connect(lambda: self.setCNFTransform(False))
+        cnf_layout.addWidget(toolButton)
+
+        toolBar.addWidget(cnf_form)
+
         Vlayout_toolbar.addWidget(toolBar)        
 
         result_layout = QHBoxLayout()
@@ -172,7 +201,8 @@ class Window(QDialog):
         self.curr_cnf = None
         self.sol_array = None
         self.uniq_node_list = None
-        self.uniq_node_list_cm = None       
+        self.uniq_node_list_cm = None   
+        self.useTseitin = False    
 
     ## Creation of the Digraph using Networkx and Pyvis :
     #   Create graph from given information by adding logic nodes,
@@ -347,6 +377,7 @@ class Window(QDialog):
         self.worker = Worker()
 
         self.worker.pathFile = fileName
+        self.worker.useTseitin = self.useTseitin
         self.worker.moveToThread(self.thread)
 
         self.thread.started.connect(self.worker.run)
@@ -677,6 +708,9 @@ class Window(QDialog):
             self.msg.resize(500,500)
             self.msg.show()
 
+    def setCNFTransform(self, bool):
+        self.useTseitin = bool
+
     def cleaning(self, bool_plot=0):
 
         self.sol_array = self.worker.sol_array
@@ -735,6 +769,8 @@ class Window(QDialog):
             msg.setText("Redefinition of relation !")
         elif(error_id == 3):
             msg.setText("Loop detected in tree !")
+        elif(error_id == 4):
+            msg.setText("Multiple Roots !")
         else:
             msg.setText("This is the main text!")
         msg.setIcon(QMessageBox.Critical)

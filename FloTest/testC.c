@@ -625,6 +625,12 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
    printf("ENNNNNNNND\n");
    printDLL_total(whole_list);
 
+   if(whole_list->next != NULL){
+      DLL_free_from_top(whole_list);
+      printf("4\n");
+      return 4;
+   }
+
    // ADD properties
 
    if( boolean_mode == 0 ){
