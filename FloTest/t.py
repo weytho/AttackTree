@@ -138,6 +138,25 @@ class Window(QDialog):
         toolBar.addWidget(toolButton)
         self.rndtree_button = toolButton
 
+        random_tree = QWidget()
+        rnd_layout = QHBoxLayout()
+        random_tree.setLayout(rnd_layout)
+
+        toolSpin = QSpinBox()
+        toolSpin.setValue(3)
+        rnd_layout.addWidget(toolSpin)
+        self.rnd_spin_1 = toolSpin
+        toolSpin = QSpinBox()
+        toolSpin.setValue(3)
+        rnd_layout.addWidget(toolSpin)
+        self.rnd_spin_2 = toolSpin
+        toolSpin = QSpinBox()
+        toolSpin.setValue(2)
+        rnd_layout.addWidget(toolSpin)
+        self.rnd_spin_3 = toolSpin
+
+        toolBar.addWidget(random_tree)
+
         toolBar.addSeparator()
         toolButton = QToolButton()
         toolButton.setText("Fix Input")
@@ -423,6 +442,11 @@ class Window(QDialog):
             self.tracesFound.setText(self.curr_formula)
             self.tracesFound.repaint()
 
+    ## Action called by the Solve button :
+    #   Get the index of the solution from the QSpinBox
+    #   Create a new graph HTML with the nodes taken from
+    #   the solution and put them in a specific group to highlight them
+    #  @param self The object pointer.  
     def outputSolution(self):
         if self.curr_formula is not None :
             index = self.sol_spin.value()
@@ -466,6 +490,14 @@ class Window(QDialog):
                 self.tracesFound.setText("No Solution Found")
                 self.tracesFound.repaint()
 
+    ## Recursive iteration on the nodes :
+    #   Recursively goes up in the tree by iterating on the edges
+    #   Set node taken in a style group to color them
+    #  @param self The object pointer.
+    #  @param current_edge Current edge to evaluate.
+    #  @param path_count_set Dictionary of nodes found with a counter 
+    #           to enable them if needed or block the recursion.
+    #  @param disabled_node Set of nodes which can be used.   
     def recur_path(self, current_edge, path_count_set, disabled_node):
         current = current_edge['from']
         for n in self.current_network.nodes :
@@ -504,13 +536,22 @@ class Window(QDialog):
         local_url = QUrl.fromLocalFile(html_file)
         self.canvas.load(local_url)
 
+    ## Action called by the Random Tree button :
+    #   Get the values from the three QSpinBox below the button
+    #   Set the grammar text with the generated strings
+    #   Parse the grammar
+    #  @param self The object pointer.
     def getRandomTree(self):
-        str,str1,str2 = TreeGen(3, 3, 2)
+        str,str1,str2 = TreeGen(self.rnd_spin_1.value(), self.rnd_spin_2.value(), self.rnd_spin_3.value())
         self.rndtree_button.setEnabled(False)
         self.grammarText.setText(str + "\n" + str1 + "\n" + str2)
         self.grammarText.repaint()
         self.parser()
 
+    ## Action called by the Fix Input button : \n
+    #   Create QGridLayout pop-up to help the user toggle nodes and CMs \n
+    #   Recompute the solutions for this graph with the new assumptions
+    #  @param self The object pointer.
     def outputUsingAssumptions(self):
         widget = QDialog()
         self.popup_assumpt = widget
@@ -567,6 +608,11 @@ class Window(QDialog):
         widget.setLayout(Vlayout)
         widget.exec_()
 
+    ## Change State of QGridLayout Elements \n
+    #   States possible are : undefined, true, false
+    #  @param self The object pointer.
+    #  @param coord The coordinates of the element in the grid.
+    #  @param type Type of the element : CM or leaf.
     def changeState(self, coord, type):
         if type == 0:
             button = self.grid_fix_input[coord][0]
@@ -590,8 +636,12 @@ class Window(QDialog):
         if type == 1:
             self.changeStateCounter(state, coord)
 
+    ## Change State of CM element and changes the depending leaf nodes of the grid accordingly \n
+    #   Keep counter of the number of nodes affected to see if a recomputation is needed
+    #  @param self The object pointer.
+    #  @param state State of the current CM node.
+    #  @param coord The coordinates of the element in the grid.
     def changeStateCounter(self, state, coord):
-
         cm_name = self.grid_fix_input_cm[coord][0].text()
         list_to_toggle = []
 
@@ -633,8 +683,10 @@ class Window(QDialog):
             else:
                 self.mandatory_cm_counter += 1
 
+    ## Recompute the tree solutions using the assumptions if needed : \n
+    #  Launch a new Worker with the assumptions list
+    #  @param self The object pointer.
     def computeUsingAssumptions(self):
-
         print(self.mandatory_cm_counter)
 
         self.thread = QThread()
@@ -678,6 +730,9 @@ class Window(QDialog):
         )
         self.popup_assumpt.close()
 
+    ## Action called by the nx nodes button :
+    #   Print the nodes in a pop-up QListWidget
+    #  @param self The object pointer.
     def show_nx_nodes(self):
         if hasattr(self, 'current_digraph'):
             self.msg = QDialog()
@@ -693,6 +748,9 @@ class Window(QDialog):
             self.msg.resize(700,500)
             self.msg.show()
 
+    ## Action called by the nx edges button :
+    #   Print the edges in a pop-up QListWidget
+    #  @param self The object pointer.
     def show_nx_edges(self):
         if hasattr(self, 'current_digraph'):
             self.msg = QDialog()
@@ -708,11 +766,17 @@ class Window(QDialog):
             self.msg.resize(500,500)
             self.msg.show()
 
+    ## Action called by two CNF transform buttons :
+    #   Set the type of CNF transformation used by the Worker
+    #  @param self The object pointer.
+    #  @param bool The boolean value of Tseitin encoding usage.
     def setCNFTransform(self, bool):
         self.useTseitin = bool
 
+    ## Get the Worker results and update them in the Window before deleting :
+    #  @param self The object pointer.
+    #  @param bool_plot Boolean value used to print formula and plot graph.
     def cleaning(self, bool_plot=0):
-
         self.sol_array = self.worker.sol_array
         self.var_array = self.worker.var_array
 
@@ -733,6 +797,9 @@ class Window(QDialog):
 
         self.worker.deleteLater
 
+    ## Action called by the parser button :
+    #   Create a ParserWorker thread to create a tree from the grammar given in the GUI
+    #  @param self The object pointer.
     def parser(self):
         self.parser_thread = QThread()
         self.parser_worker = ParserWorker()
@@ -750,6 +817,8 @@ class Window(QDialog):
             lambda: self.enable_parser()
         )
 
+    ## Enable buttons when processing is over
+    #  @param self The object pointer.
     def enable_parser(self):
         self.buttonParse.setEnabled(True)
         self.rndtree_button.setEnabled(True)

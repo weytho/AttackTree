@@ -4,6 +4,8 @@
 doxygen -g settings/attacktree.conf
 doxygen settings/attacktree.conf
 
+# then make in the latex folder
+
 # Install & Run
 
 sudo apt install libjson-c-dev
