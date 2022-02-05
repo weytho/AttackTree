@@ -1,0 +1,11 @@
+RELATIONS
+NODE -OR-> {A,B}
+A -SAND-> {C,D}
+B -AND-> {D,E,F}
+COUNTERMEASURES
+CM1 (E)
+PROPERTIES
+C:{cost = 1, prob = 1.0}
+D:{cost = 1, prob = 1.0}
+E:{cost = 1, prob = 1.0}
+F:{cost = 1, prob = 1.0}

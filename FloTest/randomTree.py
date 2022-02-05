@@ -10,14 +10,13 @@ import random
 # recursive tree generator 1
 # This recursive generator will generate a simple tree using the grammar 
 # The maxdepth and branchingfactor arguments will forge the global shape of the tree
-# arguments : ----------------------
-# Relations : the string of relations
-# CounterMeasures : the string of CounterMeasures
-# Properties : the string of Properties
-# node : the string naming the parent of the node (used to gerenate its own name)
-# depth : the actual depth of the recursive calls
-# maxdepth : the maximum depth of the tree
-# branching_factor : the maximu branching factor of each node
+# @param Relations : the string of relations
+# @param CounterMeasures : the string of CounterMeasures
+# @param Properties : the string of Properties
+# @param node : the string naming the parent of the node (used to gerenate its own name)
+# @param depth : the actual depth of the recursive calls
+# @param maxdepth : the maximum depth of the tree
+# @param branching_factor : the maximu branching factor of each node
 def nodeGeneration(Relations, CounterMeasures, Properties, node, depth, maxdepth, branching_factor):
 
     rng = random.randint(0,maxdepth)
@@ -66,14 +65,13 @@ def nodeGeneration(Relations, CounterMeasures, Properties, node, depth, maxdepth
 # The maxdepth and branchingfactor arguments will forge the global shape of the tree
 # The generation is more complex and can generate shared childrens between the nodes
 # (this function does not produce countermeasures)
-# arguments : ----------------------
-# NodeList : the list of nodes of the tree
-# Relations : the string of relations
-# Properties : the string of Properties
-# node : the string naming the parent of the node (used to gerenate its own name)
-# depth : the actual depth of the recursive calls
-# maxdepth : the maximum depth of the tree
-# branching_factor : the maximum branching factor of each node
+# @param NodeList : the list of nodes of the tree
+# @param Relations : the string of relations
+# @param Properties : the string of Properties
+# @param node : the string naming the parent of the node (used to gerenate its own name)
+# @param depth : the actual depth of the recursive calls
+# @param maxdepth : the maximum depth of the tree
+# @param branching_factor : the maximum branching factor of each node
 def nodeGeneration2(NodeList, Relations, Properties, node, depth, maxdepth, branching_factor):
 
     rng = random.randint(0,maxdepth)
@@ -123,9 +121,8 @@ def nodeGeneration2(NodeList, Relations, Properties, node, depth, maxdepth, bran
 ##
 # recursive countermeasure generator 2
 # This recursive countermeasure generator will generate shared countermeasures with the list of node of the already generated tree 
-# arguments : ----------------------
-# NodeList : list of nodes of the generated tree
-# CounterMeasures : the string of CounterMeasures
+# @param NodeList : list of nodes of the generated tree
+# @param CounterMeasures : the string of CounterMeasures
 def CMGeneration2(NodeList, CounterMeasures):
     l = len(NodeList)
     if l == 0:
@@ -163,14 +160,13 @@ def CMGeneration2(NodeList, CounterMeasures):
 # The generation is more complex and can generate shared childrens between the nodes
 # The generated tree can be inconsistent
 # (this function does not produce countermeasures)
-# arguments : ----------------------
-# NodeList : the list of nodes of the tree
-# Relations : the string of relations
-# Properties : the string of Properties
-# node : the string naming the parent of the node (used to gerenate its own name)
-# depth : the actual depth of the recursive calls
-# maxdepth : the maximum depth of the tree
-# branching_factor : the maximum branching factor of each node
+# @param NodeList : the list of nodes of the tree
+# @param Relations : the string of relations
+# @param Properties : the string of Properties
+# @param node : the string naming the parent of the node (used to gerenate its own name)
+# @param depth : the actual depth of the recursive calls
+# @param maxdepth : the maximum depth of the tree
+# @param branching_factor : the maximum branching factor of each node
 def nodeGeneration3(NodeList, Relations, Properties, node, depth, maxdepth, branching_factor):
 
     rng = random.randint(0,maxdepth)
@@ -215,9 +211,8 @@ def nodeGeneration3(NodeList, Relations, Properties, node, depth, maxdepth, bran
 ##
 # recursive countermeasure generator 3
 # This recursive countermeasure generator will generate shared countermeasures with the list of node of the already generated tree 
-# arguments : ----------------------
-# NodeList : list of nodes of the generated tree
-# CounterMeasures : the string of CounterMeasures
+# @param NodeList : list of nodes of the generated tree
+# @param CounterMeasures : the string of CounterMeasures
 def CMGeneration3(NodeList, CounterMeasures):
     l = len(NodeList)
     if l == 0:
@@ -239,12 +234,11 @@ def CMGeneration3(NodeList, CounterMeasures):
 
 ##
 # Main function to call to generate a random tree with the grammar
-# arguments : ----------------------
-# maxdepth : the maximum depth of he tree
-# branching_factor : the branching factor of each node
-# complexity = 1 : relations + Countermeasures + Properties
-# complexity = 2 : 1 + shared child + shared CM
-# complexity = 3 : 2 + probably inconsistent tree
+# @param maxdepth : the maximum depth of he tree
+# @param branching_factor : the branching factor of each node
+# @param complexity = 1 : relations + Countermeasures + Properties
+# @param complexity = 2 : 1 + shared child + shared CM
+# @param complexity = 3 : 2 + probably inconsistent tree
 def TreeGen(maxdepth, branching_factor, complexity):
     maxdepth = max(1,maxdepth)
     branching_factor = max(2,branching_factor)
