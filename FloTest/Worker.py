@@ -164,9 +164,9 @@ class Worker(QObject):
 
     def sat_solver(self, formula, list_var, assumptions=[]):
         print("####################### SAT SOLVER !!! #########################")
-        print(list_var)
         print(formula)
-
+        print(list_var)
+        
         if formula == None:
             return
 
