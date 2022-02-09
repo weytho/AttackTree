@@ -18,6 +18,7 @@ import json
 from Worker import *
 from ParserWorker import *
 from Struct import *
+from Comparison import *
 import copy
 from functools import partial
 
@@ -822,6 +823,18 @@ class Window(QDialog):
         self.comp.setLayout(Vlayout)
         self.comp.resize(700,500)
         self.comp.show()
+
+        self.call_compare()
+
+    def call_compare(self):
+        comparator = Comparison()
+        file1, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Single File', QtCore.QDir.currentPath() + '/res' , '*.json')
+        if not file1 :
+            return
+        file2, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Single File', QtCore.QDir.currentPath() + '/res' , '*.json')
+        if not file2 :
+            return
+        comparator.tree_comparions(file1, file2)
 
     ## Get the Worker results and update them in the Window before deleting :
     #  @param self The object pointer.
