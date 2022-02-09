@@ -44,9 +44,10 @@ void freeForm(Formula *l) {
 *  edges : The list of edges
 *  form : The list representng the formula of the leaves
 *  parent : The parent of the actual node (to create the edges)
-*  root : 1 if the node is the root of the tree
-*  CMfomrula : just a flag for the formula should be set to 1
+*  root : 1 if the node is the root of the tree, should be always set to 1
+*  CMfomrula : 1 to add the CM leaf to the boolean formula
 */
+
 
 CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edges, Formula **form, Node *parent, int root, int CMformula){
 
