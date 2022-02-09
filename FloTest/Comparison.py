@@ -28,6 +28,8 @@ class Comparison():
         worker2 = Worker()
         worker2.pathFile = fileName2
         worker2.useTseitin = false
+        self.worker1 = worker1
+        self.worker2 = worker2
 
         thread1 = QThread()
         thread2 = QThread()
@@ -36,28 +38,31 @@ class Comparison():
 
         thread1.started.connect(worker1.run)
         worker1.finished.connect(thread1.quit)
-        worker1.finished.connect(lambda: self.clean_Worker(worker1,1))
+        worker1.finished.connect(lambda: self.clean_Worker(1))
         thread1.finished.connect(thread1.deleteLater)
         thread2.started.connect(worker2.run)
         worker2.finished.connect(thread2.quit)
-        worker2.finished.connect(lambda: self.clean_Worker(worker2,2))
+        worker2.finished.connect(lambda: self.clean_Worker(2))
         thread2.finished.connect(thread2.deleteLater)
+        self.t1 = thread1
+        self.t2 = thread2
 
-        thread1.start()
-        thread2.start()
+        self.t1.start()
+        self.t2.start()
         print("[CMP] 2 threads launched")
 
-    def clean_Worker(self,worker,nbr):
+    def clean_Worker(self,nbr):
+        print("[CMP] cleaning")
         if nbr==1:
-            self.formula1 = worker.str_formula
-            self.cnf1 = worker.str_cnf
-            self.sol_array1 = worker.sol_array
-            self.var_array1 = worker.var_array
+            self.formula1 = self.worker1.str_formula
+            self.cnf1 = self.worker1.str_cnf
+            self.sol_array1 = self.worker1.sol_array
+            self.var_array1 = self.worker1.var_array
         if nbr==2:
-            self.formula2 = worker.str_formula
-            self.cnf2 = worker.str_cnf
-            self.sol_array2 = worker.sol_array
-            self.var_array2 = worker.var_array
+            self.formula2 = self.worker2.str_formula
+            self.cnf2 = self.worker2.str_cnf
+            self.sol_array2 = self.worker2.sol_array
+            self.var_array2 = self.worker2.var_array
         ### UPDATE WINDOW WITH ARGUMENT TODO ###
 
     def compare(self):
