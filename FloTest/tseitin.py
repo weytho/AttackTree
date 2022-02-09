@@ -5,71 +5,71 @@ import time
 
 def sat_solver(formula, list_var, assumptions=[]):
 
-        if formula == None:
-            return
+    if formula == None:
+        return
 
-        dict_var = {}
-        i = 1
-        for v in list_var:
-            dict_var[v] = i
-            i = i + 1
+    dict_var = {}
+    i = 1
+    for v in list_var:
+        dict_var[v] = i
+        i = i + 1
 
-        g = Glucose3()
+    g = Glucose3()
 
-        if(type(formula) is And):
-            list_and = formula.args
+    if(type(formula) is And):
+        list_and = formula.args
 
-            for x in list_and:
-                l = []
-                if(type(x) is Or):
-                    list_or = x.args
-
-                    for y in list_or:
-                        if(type(y) is Not):
-                            val = str(y.args[0])
-                            l.append(-dict_var[val])
-                        else:
-                            val = str(y)
-                            l.append(dict_var[val])
-
-                elif(type(x) is Not):
-                    val = str(x.args[0])
-                    l.append(-dict_var[val])
-
-                else:
-                    val = str(x)
-                    l.append(dict_var[val])
-
-                g.add_clause(l)
-
-        elif(type(formula) is Or):
+        for x in list_and:
             l = []
-            list_or = formula.args
+            if(type(x) is Or):
+                list_or = x.args
 
-            for x in list_or:
-                if(type(x) is Not):
-                    val = str(x.args[0])
-                    l.append(-dict_var[val])
-                else:
-                    val = str(x)
-                    l.append(dict_var[val])
+                for y in list_or:
+                    if(type(y) is Not):
+                        val = str(y.args[0])
+                        l.append(-dict_var[val])
+                    else:
+                        val = str(y)
+                        l.append(dict_var[val])
+
+            elif(type(x) is Not):
+                val = str(x.args[0])
+                l.append(-dict_var[val])
+
+            else:
+                val = str(x)
+                l.append(dict_var[val])
+
             g.add_clause(l)
 
-        elif(type(formula) is Not):
-            l = []
-            val = str(formula.args[0])
-            l.append(-dict_var[val])
-            g.add_clause(l)
+    elif(type(formula) is Or):
+        l = []
+        list_or = formula.args
 
-        b = g.solve(assumptions=assumptions)
-        print(b)
+        for x in list_or:
+            if(type(x) is Not):
+                val = str(x.args[0])
+                l.append(-dict_var[val])
+            else:
+                val = str(x)
+                l.append(dict_var[val])
+        g.add_clause(l)
 
-        if(b):
-            model = g.get_model()
-            print(model)
-            for m in g.enum_models(assumptions=assumptions):
-                pass
-                #print(m)
+    elif(type(formula) is Not):
+        l = []
+        val = str(formula.args[0])
+        l.append(-dict_var[val])
+        g.add_clause(l)
+
+    b = g.solve(assumptions=assumptions)
+    print(b)
+
+    if(b):
+        model = g.get_model()
+        print(model)
+        for m in g.enum_models(assumptions=assumptions):
+            pass
+            #print(m)
     
 
 def recur_formula(formula, list_subformulas, dict_subs, var_cnt, set_var):

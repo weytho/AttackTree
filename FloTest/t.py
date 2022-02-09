@@ -66,7 +66,7 @@ class Window(QDialog):
 
         Vlayout_toolbar = QVBoxLayout()
         Vlayout_left = QVBoxLayout()
-        Vlayout_right= QVBoxLayout()
+        Vlayout_right = QVBoxLayout()
         layout.addLayout(Vlayout_toolbar)
         layout.addLayout(Vlayout_left)
         layout.addLayout(Vlayout_right)
@@ -201,6 +201,12 @@ class Window(QDialog):
         cnf_layout.addWidget(toolButton)
 
         toolBar.addWidget(cnf_form)
+
+        toolBar.addSeparator()
+        toolButton = QToolButton()
+        toolButton.setText("Comparison")
+        toolButton.clicked.connect(self.compareTrees)
+        toolBar.addWidget(toolButton)
 
         Vlayout_toolbar.addWidget(toolBar)        
 
@@ -772,6 +778,50 @@ class Window(QDialog):
     #  @param bool The boolean value of Tseitin encoding usage.
     def setCNFTransform(self, bool):
         self.useTseitin = bool
+
+    def compareTrees(self):
+        self.comp = QDialog()
+
+        layout = QHBoxLayout()
+
+        Vlayout = QVBoxLayout()
+
+        VlayoutFirst = QVBoxLayout()
+        VlayoutSecond = QVBoxLayout()
+
+        path1 = QtWidgets.QTextEdit()
+        path1.setFixedHeight(30)
+        path2 = QtWidgets.QTextEdit()
+        path2.setFixedHeight(30)
+
+        first = QWebEngineView()
+        second = QWebEngineView()
+
+        VlayoutFirst.addWidget(first)
+        VlayoutFirst.addWidget(path1)
+
+        VlayoutSecond.addWidget(second)
+        VlayoutSecond.addWidget(path2)
+
+        tree1 = QWidget()
+        tree1.setLayout(VlayoutFirst)
+        tree2 = QWidget()
+        tree2.setLayout(VlayoutSecond)
+
+        layout.addWidget(tree1)
+        layout.addWidget(tree2)
+
+        tot_compare = QWidget()
+        tot_compare.setLayout(layout)
+
+        Vlayout.addWidget(tot_compare)
+        full_form = QtWidgets.QTextEdit()
+        full_form.setFixedHeight(30)
+        Vlayout.addWidget(full_form)
+
+        self.comp.setLayout(Vlayout)
+        self.comp.resize(700,500)
+        self.comp.show()
 
     ## Get the Worker results and update them in the Window before deleting :
     #  @param self The object pointer.
