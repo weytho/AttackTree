@@ -97,24 +97,32 @@ class Comparison():
         worker3.formula = self.formula3
         worker3.var_array1 = self.var_array1
         worker3.var_array2 = self.var_array2
-        self.worker3 = worker3
         thread3 = QThread()
         thread3.started.connect(worker3.run)
         worker3.finished.connect(thread3.quit)
         worker3.finished.connect(lambda: self.clean_cmpWorker())
         thread3.finished.connect(thread3.deleteLater)
+        self.worker3 = worker3
         self.t3 = thread3
         self.t3.start()
 
     def clean_cmpWorker(self):
         ## TODO
-        print("CMPWORKER")
         self.cnf3 = self.worker3.cnf
         self.var_array3 = self.worker3.var_array
         self.sol_array3 = self.worker3.sol_array
+        print(self.sol_array3)
         # Show on screen
+        if len(self.sol_array3[0]) > 0:
+            self.solutions.setText(' '.join(map(str, self.var_array3)) + "\n" + ' '.join(map(str, self.sol_array3[0])))
+        else:
+            self.solutions.setText("No Solution Found")
+        self.solutions.repaint()
         self.concated_formula_text.setText(self.cnf3)
         self.worker3.deleteLater
+
+        self.window.raise_()
+        self.window.activateWindow()
 
     def subplot(self, node_list, edge_list, web, name):
         self.get_canvas(node_list, edge_list, name)    
@@ -246,14 +254,15 @@ class cmpWorker(QObject):
         glob = {}
         exec('from sympy.core import Symbol', glob) # ok for I, E, S, N, C, O, or Q
         parsed_formula = parse_expr(self.formula, global_dict=glob)
-        self.cnf = str(to_cnf(parsed_formula))
+        cnf_formula = to_cnf(parsed_formula)
+        self.cnf = str(cnf_formula)
         # Create varlist from previous ones
         self.list_var = self.var_array1
         for var in self.var_array2:
             if var not in self.list_var:
                 self.list_var.append(var)
 
-        self.sat_solver(self.formula, self.list_var)
+        self.sat_solver(cnf_formula, self.list_var)
         self.finished.emit()
 
     def sat_solver(self, formula, list_var, assumptions=[]):
@@ -327,6 +336,8 @@ class cmpWorker(QObject):
             #print(l)
             g.add_clause(l)
 
+        #print(g)
+
         b = g.solve(assumptions=assumptions)
         print(b)
         self.var_array = list_var
@@ -335,7 +346,7 @@ class cmpWorker(QObject):
         if(b):
             # TODO ATTENTION PAS ASSUMPTIONS SUR LE MODEL
             model = g.get_model()
-            #print(model)
+            print(model)
 
             result = []
             for n in model:
@@ -344,7 +355,7 @@ class cmpWorker(QObject):
                 else:
                     result.append(dict_index[n])
 
-            #print(result)
+            print(result)
 
             # TODO LIMIT TO 20 FOR PERFORMANCE ISSUE
             cnt = 0
@@ -353,6 +364,8 @@ class cmpWorker(QObject):
                     break
                 self.sol_array.append(m)
                 cnt += 1
+
+            #print(self.sol_array)
 
 
 

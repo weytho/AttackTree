@@ -206,7 +206,7 @@ class Window(QDialog):
         toolBar.addSeparator()
         toolButton = QToolButton()
         toolButton.setText("Comparison")
-        toolButton.clicked.connect(self.compareTrees)
+        toolButton.clicked.connect(lambda: self.compareTrees())
         toolBar.addWidget(toolButton)
 
         Vlayout_toolbar.addWidget(toolBar)        
@@ -782,6 +782,7 @@ class Window(QDialog):
 
     def compareTrees(self):
         self.comp = QDialog()
+        self.comp.setWindowTitle("Left Tree Implies Right Tree")
 
         layout = QHBoxLayout()
 
@@ -823,30 +824,35 @@ class Window(QDialog):
         tot_compare.setLayout(layout)
 
         Vlayout.addWidget(tot_compare)
+        full_sol = QtWidgets.QTextEdit()
+        full_sol.setFixedHeight(40)
+        Vlayout.addWidget(full_sol)
         full_form = QtWidgets.QTextEdit()
-        full_form.setFixedHeight(30)
+        full_form.setFixedHeight(40)
         Vlayout.addWidget(full_form)
 
+        self.call_compare(form1, form2, full_form, first, second, path1, path2, full_sol)
+
         self.comp.setLayout(Vlayout)
-        self.comp.resize(700,500)
+        self.comp.resize(1400,800)
         self.comp.show()
 
-        self.call_compare(form1, form2, full_form, first, second, path1, path2)
-
-    def call_compare(self, form1, form2, form3, web1, web2, path1, path2):
+    def call_compare(self, form1, form2, form3, web1, web2, path1, path2, solutions):
         comparator = Comparison()
         comparator.concated_formula_text = form3
         comparator.webengine1 = web1
         comparator.webengine2 = web2
-        file1, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Single File', QtCore.QDir.currentPath() + '/res' , '*.json')
+        comparator.solutions = solutions
+        file1, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'File : Antecedent', QtCore.QDir.currentPath() + '/res' , '*.json')
         if not file1 :
             return
         path1.setText(file1)
-        file2, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Single File', QtCore.QDir.currentPath() + '/res' , '*.json')
+        file2, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'File : Consequent', QtCore.QDir.currentPath() + '/res' , '*.json')
         if not file2 :
             return
         path2.setText(file2)
         comparator.tree_comparison(file1, file2, form1, form2)
+        comparator.window = self.comp
 
     ## Get the Worker results and update them in the Window before deleting :
     #  @param self The object pointer.

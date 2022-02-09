@@ -241,7 +241,7 @@ class Worker(QObject):
         if(b):
             # TODO ATTENTION PAS ASSUMPTIONS SUR LE MODEL
             model = g.get_model()
-            #print(model)
+            print(model)
 
             result = []
             for n in model:
