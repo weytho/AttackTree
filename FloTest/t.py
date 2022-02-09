@@ -795,14 +795,21 @@ class Window(QDialog):
         path2 = QtWidgets.QTextEdit()
         path2.setFixedHeight(30)
 
+        form1 = QtWidgets.QTextEdit()
+        form1.setFixedHeight(30)
+        form2 = QtWidgets.QTextEdit()
+        form2.setFixedHeight(30)
+
         first = QWebEngineView()
         second = QWebEngineView()
 
         VlayoutFirst.addWidget(first)
         VlayoutFirst.addWidget(path1)
+        VlayoutFirst.addWidget(form1)
 
         VlayoutSecond.addWidget(second)
         VlayoutSecond.addWidget(path2)
+        VlayoutSecond.addWidget(form2)
 
         tree1 = QWidget()
         tree1.setLayout(VlayoutFirst)
@@ -824,17 +831,22 @@ class Window(QDialog):
         self.comp.resize(700,500)
         self.comp.show()
 
-        self.call_compare()
+        self.call_compare(form1, form2, full_form, first, second, path1, path2)
 
-    def call_compare(self):
+    def call_compare(self, form1, form2, form3, web1, web2, path1, path2):
         comparator = Comparison()
+        comparator.concated_formula_text = form3
+        comparator.webengine1 = web1
+        comparator.webengine2 = web2
         file1, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Single File', QtCore.QDir.currentPath() + '/res' , '*.json')
         if not file1 :
             return
+        path1.setText(file1)
         file2, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Single File', QtCore.QDir.currentPath() + '/res' , '*.json')
         if not file2 :
             return
-        comparator.tree_comparions(file1, file2)
+        path2.setText(file2)
+        comparator.tree_comparison(file1, file2, form1, form2)
 
     ## Get the Worker results and update them in the Window before deleting :
     #  @param self The object pointer.
