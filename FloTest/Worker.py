@@ -149,7 +149,7 @@ class Worker(QObject):
         my_function.freeList(newlist)
         #my_function.freeEList(newEdgeList)
         #my_function.freeForm(newFormula)
-        time.sleep(2)
+        #time.sleep(2)
         #self.data.emit(node_list, edge_list)
         self.finished.emit()
         #self.plot
