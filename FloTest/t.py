@@ -4,7 +4,7 @@
 # Create GUI using PyQt5
 
 import sys
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtWidgets import QMessageBox, QToolBar, QToolButton
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 import matplotlib.pyplot as plt
@@ -21,6 +21,7 @@ from Struct import *
 from Comparison import *
 import copy
 from functools import partial
+import csv
 
 dirname = os.path.dirname(__file__)
 os.chdir(dirname)
@@ -458,7 +459,20 @@ class Window(QDialog):
         if self.curr_formula is not None :
             index = self.sol_spin.value()
             if index > -1 :
-                self.tracesFound.setText(' '.join(map(str, self.var_array)) + "\n" + ' '.join(map(str, self.sol_array[index])))
+                self.tracesFound.setText("")
+                cursor = self.tracesFound.textCursor()
+                cursor.insertTable(2, len(self.var_array))
+                for header in self.var_array:
+                    cursor.insertText(header)
+                    cursor.movePosition(QtGui.QTextCursor.NextCell)
+                for row in self.sol_array[index]:
+                    if row >= 0:
+                        cursor.insertText("True")
+                    else:
+                        cursor.insertText("False")
+                    cursor.movePosition(QtGui.QTextCursor.NextCell)
+
+                #self.tracesFound.setText(' '.join(map(str, self.var_array)) + "\n" + ' '.join(map(str, self.sol_array[index])))
                 self.tracesFound.repaint()
                 list = []
                 old_nodes = copy.deepcopy(self.current_network.nodes)
@@ -860,6 +874,24 @@ class Window(QDialog):
     def cleaning(self, bool_plot=0):
         self.sol_array = self.worker.sol_array
         self.var_array = self.worker.var_array
+
+        boolean_array = []
+        for l1 in self.sol_array:
+            l = []
+            for l2 in l1:
+                if l2 >= 0:
+                    l.append("True")
+                else:
+                    l.append("False")
+            boolean_array.append(l)
+
+
+        # to csv file
+        with open("res/solutions.csv", "wt") as fp:
+            writer = csv.writer(fp, delimiter=",")
+            writer.writerow(self.var_array)  # write header
+            print(boolean_array)
+            writer.writerows(boolean_array)
 
         self.sol_spin.setMinimum(0)
         self.sol_spin.setMaximum(len(self.sol_array) - 1)

@@ -400,6 +400,7 @@ void DLL_free_from_top(DLL_List *list){
 int cycle_check(DLL_List *parent, char * child_name){
 
    DLL_List * current = parent;
+
    if (strcmp(current->n->title, child_name) == 0){
       return 1;
    }
