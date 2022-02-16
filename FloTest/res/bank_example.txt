@@ -1,0 +1,7 @@
+RELATIONS
+BANK -SAND-> {TurnOffSecurity,EnterBank,RobBank}
+TurnOffSecurity -AND-> {StopCameraA,StopCameraB}
+EnterBank -OR-> {EnterDoorA,EnterDoorB}
+COUNTERMEASURES
+
+PROPERTIES

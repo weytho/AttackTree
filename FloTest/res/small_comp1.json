@@ -1,0 +1,14 @@
+{
+    "Action":"Root1",
+    "Type":"AND",
+    "Child":[
+      {
+        "Action":"A",
+        "Type":"LEAF"
+      },
+      {
+        "Action":"~B",
+        "Type":"LEAF"
+      }
+    ]
+  }

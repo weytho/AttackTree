@@ -92,7 +92,8 @@ class Comparison():
             print("[CMP] Some formulas are None .. aborting")
             return
         ### THREAD ###
-        self.formula3 = "( ~ "+self.formula1+" | "+self.formula2+" )"
+        #self.formula3 = "( "+self.formula1+" & ( ~ "+self.formula1+" | "+self.formula2+" ) )"
+        self.formula3 = "( "+self.formula1+" & "+self.formula2+" )"
         worker3 = cmpWorker()
         worker3.formula = self.formula3
         worker3.var_array1 = self.var_array1
@@ -113,7 +114,7 @@ class Comparison():
         self.sol_array3 = self.worker3.sol_array
         print(self.sol_array3)
         # Show on screen
-        if len(self.sol_array3[0]) > 0:
+        if len(self.sol_array3) > 0:
             self.solutions.setText(' '.join(map(str, self.var_array3)) + "\n" + ' '.join(map(str, self.sol_array3[0])))
         else:
             self.solutions.setText("No Solution Found")
@@ -254,8 +255,10 @@ class cmpWorker(QObject):
         glob = {}
         exec('from sympy.core import Symbol', glob) # ok for I, E, S, N, C, O, or Q
         parsed_formula = parse_expr(self.formula, global_dict=glob)
+        print("Parsed Formula : "+self.formula)
         cnf_formula = to_cnf(parsed_formula)
         self.cnf = str(cnf_formula)
+        print("Cnf Formula : "+self.cnf)
         # Create varlist from previous ones
         self.list_var = self.var_array1
         for var in self.var_array2:
