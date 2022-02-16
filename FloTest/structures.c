@@ -143,6 +143,9 @@ Formula * Parenthesis(const char* type){
    else if(!strncmp("OR",type,3)){
       new->data = " OR ";
    }
+   else if(!strncmp("XOR",type,4)){
+      new->data = " XOR ";
+   }
    else{
       new->data = " SAND ";
    }
@@ -166,6 +169,9 @@ Formula * formula(char* type){
    }
    else if(!strncmp("NOT",type,4)){
       new->data = " ~ ";
+   }
+   else if(!strncmp("XOR",type,4)){
+      new->data = " ^ ";
    }
    else{
       new->data = " & ";

@@ -50,8 +50,8 @@
         
 
         // parsing and collecting nodes and edges from the python
-        nodes = new vis.DataSet([{"id": "Root2", "label": "Root2", "shape": "box", "title": "Root2: cost = 0, prob = 0.0", "x": 362.19, "y": -389.0}, {"group": "leaf", "id": "A", "label": "A", "shape": "box", "title": "A: cost = 0, prob = 0.0", "x": 194.19, "y": -43.0}, {"group": "leaf", "id": "B", "label": "B", "shape": "box", "title": "B: cost = 0, prob = 0.0", "x": 530.19, "y": -43.0}, {"group": "logic", "id": "Root2_LOGIC", "label": "OR", "shape": "box", "x": 362.19, "y": -216.0}]);
-        edges = new vis.DataSet([{"from": "Root2_LOGIC", "to": "A"}, {"from": "Root2_LOGIC", "to": "B"}, {"color": "#000000", "from": "Root2", "to": "Root2_LOGIC", "width": 4}]);
+        nodes = new vis.DataSet([{"id": "Root2", "label": "Root2", "shape": "box", "title": "Root2: cost = 0, prob = 0.0", "x": 315.04, "y": -408.0}, {"group": "leaf", "id": "A", "label": "A", "shape": "box", "title": "A: cost = 0, prob = 0.0", "x": 169.04, "y": -216.0}, {"id": "B", "label": "B", "shape": "box", "title": "B: cost = 0, prob = 0.0", "x": 460.04, "y": -216.0}, {"group": "leaf", "id": "C", "label": "C", "shape": "box", "title": "C: cost = 0, prob = 0.0", "x": 315.04, "y": -24.0}, {"group": "leaf", "id": "D", "label": "D", "shape": "box", "title": "D: cost = 0, prob = 0.0", "x": 606.04, "y": -24.0}, {"group": "logic", "id": "Root2_LOGIC", "label": "AND", "shape": "box", "x": 315.04, "y": -312.0}, {"group": "logic", "id": "B_LOGIC", "label": "OR", "shape": "box", "x": 460.04, "y": -120.0}]);
+        edges = new vis.DataSet([{"from": "Root2_LOGIC", "to": "A"}, {"from": "Root2_LOGIC", "to": "B"}, {"from": "B_LOGIC", "to": "C"}, {"from": "B_LOGIC", "to": "D"}, {"color": "#000000", "from": "Root2", "to": "Root2_LOGIC", "width": 4}, {"color": "#000000", "from": "B", "to": "B_LOGIC", "width": 4}]);
 
         // adding nodes and edges to the graph
         data = {nodes: nodes, edges: edges};
