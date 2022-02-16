@@ -610,10 +610,10 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
                
                addParents(tmp_dll, dll_node);
                
-               parent_is_in = 0;
-               
                ptr2 = strtok_r(NULL, delim4, &saveptr2);
             }
+
+            parent_is_in = 0;
 
          }
          free(ptr_copy);
