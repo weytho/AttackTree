@@ -481,7 +481,7 @@ class Window(QDialog):
                                         n2['group'] = 'model'
 
                 for n in self.current_network.nodes :
-                    if n['id'] in list:
+                    if n['id'] in list or (n['id'][0] == '~' and n['id'][1:] not in list):
                         n['group'] = 'model_leaf'
                         for e in self.current_network.edges :
                             if e['to'] == n['id']:
