@@ -1,5 +1,6 @@
 from Worker import *
 from PyQt5.QtCore import QThread, QUrl, Qt
+from PyQt5 import QtGui
 from sympy import *
 from threading import Semaphore
 import networkx as nx
@@ -31,9 +32,11 @@ class Comparison():
     def tree_comparison(self,fileName1,fileName2,text1,text2):
         
         worker1 = Worker()
+        worker1.max_val = self.max_sol
         worker1.pathFile = fileName1
         worker1.useTseitin = false
         worker2 = Worker()
+        worker2.max_val = self.max_sol
         worker2.pathFile = fileName2
         worker2.useTseitin = false
         self.worker1 = worker1
@@ -68,6 +71,7 @@ class Comparison():
             self.sol_array1 = self.worker1.sol_array
             self.var_array1 = self.worker1.var_array
             text.setText(self.formula1)
+            self.sol1.setText("number of solutions found : " + str(len(self.sol_array1)))
             self.subplot(self.worker1.node_list, self.worker1.edge_list, self.webengine1, "first_comp")
             self.worker1.deleteLater
         if nbr==2:
@@ -76,6 +80,7 @@ class Comparison():
             self.sol_array2 = self.worker2.sol_array
             self.var_array2 = self.worker2.var_array
             text.setText(self.formula2)
+            self.sol2.setText("number of solutions found : " + str(len(self.sol_array2)))
             self.subplot(self.worker2.node_list, self.worker2.edge_list, self.webengine2, "second_comp")
             self.worker2.deleteLater
         ### UPDATE WINDOW WITH ARGUMENT TODO ###
@@ -115,9 +120,21 @@ class Comparison():
         print(self.sol_array3)
         # Show on screen
         if len(self.sol_array3) > 0:
-            self.solutions.setText(' '.join(map(str, self.var_array3)) + "\n" + ' '.join(map(str, self.sol_array3[0])))
+            #self.solutions.setText(' '.join(map(str, self.var_array3)) + "\n" + ' '.join(map(str, self.sol_array3[0])))
+            self.solutions.setText("")
+            cursor = self.solutions.textCursor()
+            cursor.insertTable(2, len(self.var_array3))
+            for header in self.var_array3:
+                cursor.insertText(header)
+                cursor.movePosition(QtGui.QTextCursor.NextCell)
+            for row in self.sol_array3[0]:
+                if row >= 0:
+                    cursor.insertText("True")
+                else:
+                    cursor.insertText("False")
+                cursor.movePosition(QtGui.QTextCursor.NextCell)
         else:
-            self.solutions.setText("No Solution Found")
+            self.solutions.setText("No Mutual Solution Found Between : " + str(len(self.sol_array1)) + " for the first tree and " + str(len(self.sol_array2)) + " for the second one.")
         self.solutions.repaint()
         self.concated_formula_text.setText(self.cnf3)
         self.worker3.deleteLater

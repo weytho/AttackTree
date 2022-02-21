@@ -111,7 +111,7 @@ class Window(QDialog):
         solution.setLayout(sol_layout)
 
         toolButton = QToolButton()
-        toolButton.setText("Solve (max=0)")
+        toolButton.setText("Solve (max)")
         toolButton.setCheckable(False)
         toolButton.setAutoExclusive(True)
         toolButton.clicked.connect(self.outputSolution)
@@ -175,6 +175,10 @@ class Window(QDialog):
         toolButton.setText("nx edges")
         toolButton.clicked.connect(self.show_nx_edges)
         toolBar.addWidget(toolButton)
+        toolButton = QToolButton()
+        toolButton.setText("solutions list")
+        toolButton.clicked.connect(self.show_sol)
+        toolBar.addWidget(toolButton)
 
         toolBar.addSeparator()
         section_output = QLabel("CNF Transform")
@@ -210,7 +214,22 @@ class Window(QDialog):
         toolButton.clicked.connect(lambda: self.compareTrees())
         toolBar.addWidget(toolButton)
 
-        Vlayout_toolbar.addWidget(toolBar)        
+        Vlayout_toolbar.addWidget(toolBar)
+
+        solver = QWidget()
+        max_layout = QHBoxLayout()
+        solver.setLayout(max_layout)
+
+        toolButton = QLabel("Max SAT Sol")
+        toolButton.setFixedWidth(110)
+        max_layout.addWidget(toolButton)
+        toolSpinMax = QSpinBox()
+        toolSpinMax.setValue(20)
+        toolSpinMax.setRange(-1, 99)
+        max_layout.addWidget(toolSpinMax)
+        self.max_spin = toolSpinMax
+
+        toolBar.addWidget(solver)
 
         result_layout = QHBoxLayout()
         result_layout.addWidget(self.tracesFound)
@@ -229,7 +248,7 @@ class Window(QDialog):
         self.sol_array = None
         self.uniq_node_list = None
         self.uniq_node_list_cm = None   
-        self.useTseitin = False    
+        self.useTseitin = False
 
     ## Creation of the Digraph using Networkx and Pyvis :
     #   Create graph from given information by adding logic nodes,
@@ -405,6 +424,7 @@ class Window(QDialog):
 
         self.worker.pathFile = fileName
         self.worker.useTseitin = self.useTseitin
+        self.worker.max_val = self.max_spin.value()
         self.worker.moveToThread(self.thread)
 
         self.thread.started.connect(self.worker.run)
@@ -712,6 +732,7 @@ class Window(QDialog):
 
         self.thread = QThread()
         self.worker = Worker()
+        self.worker.max_val = self.max_spin.value()
 
         if self.mandatory_cm_counter > 0:
             self.worker.str_formula = self.curr_formula_cm
@@ -787,6 +808,24 @@ class Window(QDialog):
             self.msg.resize(500,500)
             self.msg.show()
 
+    def show_sol(self):
+        if hasattr(self, 'var_array'):
+            self.msg = QDialog()
+            layout = QVBoxLayout(self.msg)
+            list = QListWidget()
+            self.msg.setWindowTitle("Solutions")
+            i = QListWidgetItem(str(self.var_array))
+            i.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled|Qt.ItemIsEditable)
+            list.addItem(i)
+            for i in self.boolean_sol_arr:
+                item = QListWidgetItem(str(i))
+                item.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled|Qt.ItemIsEditable)
+                list.addItem(item)
+            layout.addWidget(list)
+            self.msg.setLayout(layout)
+            self.msg.resize(500,500)
+            self.msg.show()
+
     ## Action called by two CNF transform buttons :
     #   Set the type of CNF transformation used by the Worker
     #  @param self The object pointer.
@@ -815,16 +854,23 @@ class Window(QDialog):
         form2 = QtWidgets.QTextEdit()
         form2.setFixedHeight(30)
 
+        sol1 = QtWidgets.QTextEdit()
+        sol1.setFixedHeight(30)
+        sol2 = QtWidgets.QTextEdit()
+        sol2.setFixedHeight(30)
+
         first = QWebEngineView()
         second = QWebEngineView()
 
         VlayoutFirst.addWidget(first)
         VlayoutFirst.addWidget(path1)
         VlayoutFirst.addWidget(form1)
+        VlayoutFirst.addWidget(sol1)
 
         VlayoutSecond.addWidget(second)
         VlayoutSecond.addWidget(path2)
         VlayoutSecond.addWidget(form2)
+        VlayoutSecond.addWidget(sol2)
 
         tree1 = QWidget()
         tree1.setLayout(VlayoutFirst)
@@ -839,24 +885,27 @@ class Window(QDialog):
 
         Vlayout.addWidget(tot_compare)
         full_sol = QtWidgets.QTextEdit()
-        full_sol.setFixedHeight(40)
+        full_sol.setFixedHeight(60)
         Vlayout.addWidget(full_sol)
         full_form = QtWidgets.QTextEdit()
         full_form.setFixedHeight(40)
         Vlayout.addWidget(full_form)
 
-        self.call_compare(form1, form2, full_form, first, second, path1, path2, full_sol)
+        self.call_compare(form1, form2, full_form, first, second, path1, path2, full_sol, sol1, sol2)
 
         self.comp.setLayout(Vlayout)
         self.comp.resize(1400,800)
         self.comp.show()
 
-    def call_compare(self, form1, form2, form3, web1, web2, path1, path2, solutions):
+    def call_compare(self, form1, form2, form3, web1, web2, path1, path2, solutions, sol1, sol2):
         comparator = Comparison()
         comparator.concated_formula_text = form3
         comparator.webengine1 = web1
         comparator.webengine2 = web2
         comparator.solutions = solutions
+        comparator.sol1 = sol1
+        comparator.sol2 = sol2
+        comparator.max_sol = self.max_spin.value()
         file1, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'File : Antecedent', QtCore.QDir.currentPath() + '/res' , '*.json')
         if not file1 :
             return
@@ -884,18 +933,18 @@ class Window(QDialog):
                 else:
                     l.append("False")
             boolean_array.append(l)
-
+        self.boolean_sol_arr = boolean_array
 
         # to csv file
         with open("res/solutions.csv", "wt") as fp:
             writer = csv.writer(fp, delimiter=",")
             writer.writerow(self.var_array)  # write header
-            print(boolean_array)
+            #print(boolean_array)
             writer.writerows(boolean_array)
 
         self.sol_spin.setMinimum(0)
         self.sol_spin.setMaximum(len(self.sol_array) - 1)
-        self.sol_button.setText("Solve (max=" + str(len(self.sol_array)) + ")")
+        self.sol_button.setText("Solve (" + str(len(self.sol_array)) + ")")
 
         if bool_plot == 0 :
             self.tracesFound.setText(self.worker.str_formula)

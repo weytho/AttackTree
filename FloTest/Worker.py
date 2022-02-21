@@ -3,6 +3,7 @@
 # Retrieve the ctype Structure representing the tree
 # Retrieve the tree boolean formula
 # Use a Sat-Solver to solve the formula
+from json.encoder import INFINITY
 import time
 from PyQt5.QtCore import QObject, pyqtSignal
 import ctypes
@@ -144,7 +145,9 @@ class Worker(QObject):
         self.uniq_node_list = node_list_uniq
         self.uniq_node_list_cm = node_list_uniq_cm
 
-        self.sat_solver(tmp_formula, node_list_uniq)
+        print("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDd")
+        print(self.max_val)
+        self.sat_solver(tmp_formula, node_list_uniq, [], self.max_val)
 
         my_function.freeList(newlist)
         #my_function.freeEList(newEdgeList)
@@ -159,16 +162,18 @@ class Worker(QObject):
         exec('from sympy.core import Symbol', glob) # ok for I, E, S, N, C, O, or Q
         tmp_formula = to_cnf(parse_expr(self.str_formula, global_dict=glob))
 
-        self.sat_solver(tmp_formula, self.uniq_node_list, self.assumptions)
+        self.sat_solver(tmp_formula, self.uniq_node_list, self.assumptions, self.max_val)
         self.finished.emit()
 
-    def sat_solver(self, formula, list_var, assumptions=[]):
+    def sat_solver(self, formula, list_var, assumptions=[], max_val=20):
         print("####################### SAT SOLVER !!! #########################")
         print(formula)
         print(list_var)
         
         if formula == None:
             return
+        if max_val < 0:
+            max_val = INFINITY
 
         dict_var = {}
         dict_index = {}
@@ -255,7 +260,7 @@ class Worker(QObject):
             # TODO LIMIT TO 20 FOR PERFORMANCE ISSUE
             cnt = 0
             for m in g.enum_models(assumptions=assumptions):
-                if cnt >= 20 :
+                if cnt >= max_val :
                     break
                 self.sol_array.append(m)
                 cnt += 1
