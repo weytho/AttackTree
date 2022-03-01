@@ -92,3 +92,7 @@ A -AND-> {B,~C}
 COUNTERMEASURES
 
 PROPERTIES
+
+pip install pysmt
+pysmt-install --check
+pysmt-install --msat # MathSAT 5
