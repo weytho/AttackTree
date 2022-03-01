@@ -106,41 +106,92 @@ class Comparison():
         thread3 = QThread()
         thread3.started.connect(worker3.run)
         worker3.finished.connect(thread3.quit)
-        worker3.finished.connect(lambda: self.clean_cmpWorker())
+        worker3.finished.connect(lambda: self.clean_cmpWorker(1))
         thread3.finished.connect(thread3.deleteLater)
         self.worker3 = worker3
         self.t3 = thread3
         self.t3.start()
 
-    def clean_cmpWorker(self):
-        ## TODO
-        self.cnf3 = self.worker3.cnf
-        self.var_array3 = self.worker3.var_array
-        self.sol_array3 = self.worker3.sol_array
-        print(self.sol_array3)
-        # Show on screen
-        if len(self.sol_array3) > 0:
-            #self.solutions.setText(' '.join(map(str, self.var_array3)) + "\n" + ' '.join(map(str, self.sol_array3[0])))
-            self.solutions.setText("")
-            cursor = self.solutions.textCursor()
-            cursor.insertTable(2, len(self.var_array3))
-            for header in self.var_array3:
-                cursor.insertText(header)
-                cursor.movePosition(QtGui.QTextCursor.NextCell)
-            for row in self.sol_array3[0]:
-                if row >= 0:
-                    cursor.insertText("True")
-                else:
-                    cursor.insertText("False")
-                cursor.movePosition(QtGui.QTextCursor.NextCell)
-        else:
-            self.solutions.setText("No Mutual Solution Found Between : " + str(len(self.sol_array1)) + " for the first tree and " + str(len(self.sol_array2)) + " for the second one.")
-        self.solutions.repaint()
-        self.concated_formula_text.setText(self.cnf3)
-        self.worker3.deleteLater
+        self.formula4 = "( "+self.formula1+" & ( ~ ("+self.formula2+" ) ) )"
+        worker4 = cmpWorker()
+        worker4.formula = self.formula4
+        worker4.var_array1 = self.var_array1
+        worker4.var_array2 = self.var_array2
+        thread4 = QThread()
+        thread4.started.connect(worker4.run)
+        worker4.finished.connect(thread4.quit)
+        worker4.finished.connect(lambda: self.clean_cmpWorker(2))
+        thread4.finished.connect(thread4.deleteLater)
+        self.worker4 = worker4
+        self.t4 = thread4
+        self.t4.start()
 
+    def clean_cmpWorker(self, nbr):
+        ## TODO
+        if nbr == 1:
+            self.cnf3 = self.worker3.cnf
+            self.var_array3 = self.worker3.var_array
+            self.sol_array3 = self.worker3.sol_array
+            self.boolean_sol_arr3 = []
+            print(self.sol_array3)
+            # Show on screen
+            if len(self.sol_array3) > 0:
+                boolean_array = []
+                for l1 in self.sol_array3:
+                    l = []
+                    for l2 in l1:
+                        if l2 >= 0:
+                            l.append("True")
+                        else:
+                            l.append("False")
+                    boolean_array.append(l)
+                self.boolean_sol_arr3 = boolean_array
+            self.worker3.deleteLater
+        else:
+            self.cnf4 = self.worker4.cnf
+            self.var_array4 = self.worker4.var_array
+            self.sol_array4 = self.worker4.sol_array
+            self.boolean_sol_arr4 = []
+            print(self.sol_array4)
+            # Show on screen
+            if len(self.sol_array4) > 0:
+                boolean_array = []
+                for l1 in self.sol_array4:
+                    l = []
+                    for l2 in l1:
+                        if l2 >= 0:
+                            l.append("True")
+                        else:
+                            l.append("False")
+                    boolean_array.append(l)
+                self.boolean_sol_arr4 = boolean_array
+            self.worker4.deleteLater
         self.window.raise_()
         self.window.activateWindow()
+        ### UPDATE WINDOW WITH ARGUMENT TODO ###
+        self.sem.acquire()
+        self.cnt += 1
+        if self.cnt == 4:
+            self.sem.release()
+
+            if len(self.sol_array4) > 0:
+                self.solutions.setText("Some Solution Are Not Found : " + str(len(self.sol_array3)) + " Included and " + str(len(self.sol_array4)) + " Not.")
+            elif len(self.sol_array3) > 0:
+                self.solutions.setText("")
+                cursor = self.solutions.textCursor()
+                cursor.insertTable(2, len(self.var_array3))
+                for header in self.var_array3:
+                    cursor.insertText(header)
+                    cursor.movePosition(QtGui.QTextCursor.NextCell)
+                for row in self.boolean_sol_arr3[0]:
+                    cursor.insertText(row)
+                    cursor.movePosition(QtGui.QTextCursor.NextCell)
+            else:
+                self.solutions.setText("No Solution From The First Tree Found In the Second !")
+            self.solutions.repaint()
+            self.concated_formula_text.setText(self.cnf3)
+        else:
+            self.sem.release()
 
     def subplot(self, node_list, edge_list, web, name):
         self.get_canvas(node_list, edge_list, name)    

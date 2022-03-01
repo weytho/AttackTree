@@ -884,6 +884,10 @@ class Window(QDialog):
         tot_compare.setLayout(layout)
 
         Vlayout.addWidget(tot_compare)
+
+        buttonResults = QPushButton('Print Results')
+        buttonResults.clicked.connect(self.showResults)
+        Vlayout.addWidget(buttonResults)
         full_sol = QtWidgets.QTextEdit()
         full_sol.setFixedHeight(60)
         Vlayout.addWidget(full_sol)
@@ -891,13 +895,57 @@ class Window(QDialog):
         full_form.setFixedHeight(40)
         Vlayout.addWidget(full_form)
 
-        self.call_compare(form1, form2, full_form, first, second, path1, path2, full_sol, sol1, sol2)
+        self.call_compare(form1, form2, full_form, first, second, path1, path2, full_sol, sol1, sol2, buttonResults)
 
         self.comp.setLayout(Vlayout)
         self.comp.resize(1400,800)
         self.comp.show()
 
-    def call_compare(self, form1, form2, form3, web1, web2, path1, path2, solutions, sol1, sol2):
+    
+    def showResults(self):
+        if hasattr(self.comparator, 'var_array3'):
+            msg = QDialog()
+            twocolumns = QHBoxLayout()
+            
+            layout = QVBoxLayout()
+            twocolumns.addLayout(layout)
+            layout2 = QVBoxLayout()
+            twocolumns.addLayout(layout2)
+
+            msg.setWindowTitle("Solutions")
+
+            label = QLabel("Included")
+            layout.addWidget(label)
+            list = QListWidget()
+            i = QListWidgetItem(str(self.comparator.var_array3))
+            i.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled|Qt.ItemIsEditable)
+            list.addItem(i)
+            for i in self.comparator.boolean_sol_arr3:
+                item = QListWidgetItem(str(i))
+                item.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled|Qt.ItemIsEditable)
+                list.addItem(item)
+            layout.addWidget(list)
+
+            if hasattr(self.comparator, 'var_array4'):
+
+                label = QLabel("Not Included")
+                layout2.addWidget(label)
+                list = QListWidget()
+                i = QListWidgetItem(str(self.comparator.var_array4))
+                i.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled|Qt.ItemIsEditable)
+                list.addItem(i)
+                for i in self.comparator.boolean_sol_arr4:
+                    item = QListWidgetItem(str(i))
+                    item.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled|Qt.ItemIsEditable)
+                    list.addItem(item)
+                layout2.addWidget(list)
+
+            msg.setLayout(twocolumns)
+            msg.resize(500,500)
+            self.comparator.msg = msg
+            self.comparator.msg.show()
+
+    def call_compare(self, form1, form2, form3, web1, web2, path1, path2, solutions, sol1, sol2, buttonResults):
         comparator = Comparison()
         comparator.concated_formula_text = form3
         comparator.webengine1 = web1
@@ -905,6 +953,7 @@ class Window(QDialog):
         comparator.solutions = solutions
         comparator.sol1 = sol1
         comparator.sol2 = sol2
+        comparator.buttonResults = buttonResults
         comparator.max_sol = self.max_spin.value()
         file1, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'File : Antecedent', QtCore.QDir.currentPath() + '/res' , '*.json')
         if not file1 :
@@ -916,6 +965,7 @@ class Window(QDialog):
         path2.setText(file2)
         comparator.tree_comparison(file1, file2, form1, form2)
         comparator.window = self.comp
+        self.comparator = comparator
 
     ## Get the Worker results and update them in the Window before deleting :
     #  @param self The object pointer.
