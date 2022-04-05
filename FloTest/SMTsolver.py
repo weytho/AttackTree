@@ -44,7 +44,7 @@ def main():
     SOL = Symbol("SOL", INT)
     SOL2 = Symbol("SOL2", INT)
 
-    m = Ite(X1, Int(1), Int(0))
+    m = Ite(X1, Int(3), Int(0))
     print(m)
     n = Ite(X2, Int(2), Int(0))
     print(n)
@@ -52,7 +52,7 @@ def main():
     m2 = Plus(m, n)
     print(m2)
 
-    problem = Or(X1,X2)
+    problem = And(X2,X1)
 
     fin = And(problem, Equals(SOL, m2))
     print(fin.serialize())
@@ -96,9 +96,19 @@ def main():
     T = Symbol("T", INT)
     T2 = Symbol("T2", INT)
 
-    form1 = ForAll([T], And( GT(T, Int(0)), LE(T2, T) ))
+    inside = And( GT(T, Int(1)), LT(T2, T) , GE(T2, Int(0)))
+    print(inside)
+    print(get_model(inside))
+
+    form1 = ForAll([T], Exists([T2], inside))
     print(form1)
-    form1 = Exists([T2], And( GE(T2, Int(0)), form1))
+    print(get_model(form1))
+
+    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+
+    form1 = ForAll([T], inside)
+    print(form1)
+    form1 = Exists([T2], form1)
 
     print(form1.serialize())
     qf_f = qelim(form1, solver_name="z3")
