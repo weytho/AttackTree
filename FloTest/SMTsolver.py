@@ -7,7 +7,7 @@
 # 3. Pass results from one solver to another
 #
 from math import inf
-from pysmt.shortcuts import Solver, Symbol, Real, Plus, And, Equals, Ite
+from pysmt.shortcuts import Solver, Symbol, Real, Plus, And, Equals, Ite, Times, GE, LE
 from pysmt.typing import REAL
 from pysmt.parsing import parse
 import z3
@@ -15,7 +15,9 @@ from decimal import Decimal
 from fractions import Fraction
 import pysmt
 
-def SMTcost(list_var, list_cost, formula):
+# ! Instead of using Forall to compare all existing models to find the minimum -> Minimize -> Simplex Z3
+
+def SMTcost(list_var, list_cost, formula, upper_bound=None):
 
     list_symbols = [Symbol(s) for s in list_var]
     print(list_symbols)
@@ -27,6 +29,9 @@ def SMTcost(list_var, list_cost, formula):
     sum = Plus(list_cond_cost)
     print(sum)
     f = And(problem, Equals(SOL, sum))
+
+    if upper_bound != None:
+        f = And(f, LE(SOL, Real(upper_bound)))
     print("")
     print("@@@@@@@@@@ SMT SOLVER Z3 @@@@@@@@@@")
 
@@ -43,7 +48,8 @@ def SMTcost(list_var, list_cost, formula):
         o.minimize(Z3_sol)
         print(Z3_sol)
         print(o.check())
-        print(o.reason_unknown())
+        if o.check() != z3.sat:
+            print(o.reason_unknown())
         first = True
         best = z3.Real(0)
         while o.check() == z3.sat:
@@ -63,19 +69,22 @@ def SMTcost(list_var, list_cost, formula):
                 block.append(c != model[d])
             o.add(z3.Or(block))
 
-def SMTproba(list_var, list_proba, formula):
+def SMTproba(list_var, list_proba, formula, lower_bound=0):
 
     list_symbols = [Symbol(s) for s in list_var]
     print(list_symbols)
     SOL = Symbol("%SOL%", REAL)
-    zero = Real(0)
-    list_and_proba = [Ite(s, Real(c), zero) for s, c in zip(list_symbols, list_proba)]
+    one = Real(1)
+    list_and_proba = [Ite(s, Real(c), one) for s, c in zip(list_symbols, list_proba)]
     print(list_and_proba)
     problem = parse(formula)
     # TODO CHANGE TO ENABLE PROBA
-    sum = Plus(list_and_proba)
+    sum = Times(list_and_proba)
     print(sum)
     f = And(problem, Equals(SOL, sum))
+
+    if lower_bound > 0:
+        f = And(f, GE(SOL, Real(lower_bound)))
     print("")
     print("@@@@@@@@@@ SMT SOLVER Z3 @@@@@@@@@@")
 
@@ -89,10 +98,11 @@ def SMTproba(list_var, list_proba, formula):
         o = z3.Optimize()
         o.add(Z3_form)
         print(Z3_form)
-        o.minimize(Z3_sol)
+        o.maximize(Z3_sol)
         print(Z3_sol)
         print(o.check())
-        print(o.reason_unknown())
+        if o.check() != z3.sat:
+            print(o.reason_unknown())
         first = True
         best = z3.Real(0)
         while o.check() == z3.sat:
@@ -102,7 +112,7 @@ def SMTproba(list_var, list_proba, formula):
             if first:
                 best = new_best
                 first = False
-            elif z3.simplify(new_best > best):
+            elif z3.simplify(new_best < best):
                 break
 
             print(model)
@@ -125,6 +135,11 @@ if __name__ == "__main__":
 
     formula = " (X1 | X2) & (X3 | X4) "
 
-    SMTcost(list_var, list_cost, formula)
+    cost_max = Fraction(str(3.6))
+    proba_min = Fraction(str(0.3))
 
-    SMTproba(list_var, list_proba, formula)
+    print("COST")
+    SMTcost(list_var, list_cost, formula, cost_max)
+
+    print("PROBA")
+    SMTproba(list_var, list_proba, formula, proba_min)
