@@ -1,11 +1,12 @@
 from Worker import *
 from PyQt5.QtCore import QThread, QUrl, Qt
 from PyQt5 import QtGui
-from sympy import *
+from sympy.parsing.sympy_parser import parse_expr
 from threading import Semaphore
 import networkx as nx
 from pyvis.network import Network
 import json
+from SATsolver import sat_solver
 
 dirname = os.path.dirname(__file__)
 os.chdir(dirname)
@@ -333,116 +334,5 @@ class cmpWorker(QObject):
             if var not in self.list_var:
                 self.list_var.append(var)
 
-        self.sat_solver(cnf_formula, self.list_var)
+        self.var_array, self.sol_array = sat_solver(cnf_formula, self.list_var)
         self.finished.emit()
-
-    def sat_solver(self, formula, list_var, assumptions=[]):
-        print("####################### SAT SOLVER !!! #########################")
-        print(list_var)
-        print(formula)
-
-        if formula == None:
-            return
-
-        dict_var = {}
-        dict_index = {}
-        i = 1
-        for v in list_var:
-            dict_var[v] = i
-            dict_index[i] = v
-            i = i + 1
-
-        #print(dict_var)
-        #print(dict_index)
-
-        g = Glucose3()
-
-        if(type(formula) is And):
-            list_and = formula.args
-
-            for x in list_and:
-                l = []
-                if(type(x) is Or):
-                    list_or = x.args
-
-                    for y in list_or:
-                        if(type(y) is Not):
-                            val = str(y.args[0])
-                            l.append(-dict_var[val])
-                        else:
-                            val = str(y)
-                            l.append(dict_var[val])
-
-                elif(type(x) is Not):
-                    val = str(x.args[0])
-                    l.append(-dict_var[val])
-
-                else:
-                    val = str(x)
-                    l.append(dict_var[val])
-
-                #print(l)
-                g.add_clause(l)
-
-        elif(type(formula) is Or):
-            l = []
-            list_or = formula.args
-
-            for x in list_or:
-                if(type(x) is Not):
-                    val = str(x.args[0])
-                    l.append(-dict_var[val])
-                else:
-                    val = str(x)
-                    l.append(dict_var[val])
-
-            #print(l)
-            g.add_clause(l)
-
-        elif(type(formula) is Not):
-            l = []
-            val = str(formula.args[0])
-            l.append(-dict_var[val])
-
-            #print(l)
-            g.add_clause(l)
-
-        #print(g)
-
-        b = g.solve(assumptions=assumptions)
-        print(b)
-        self.var_array = list_var
-        self.sol_array = []
-
-        if(b):
-            # TODO ATTENTION PAS ASSUMPTIONS SUR LE MODEL
-            model = g.get_model()
-            print(model)
-
-            result = []
-            for n in model:
-                if(n < 0):
-                    result.append("Not("+dict_index[-n]+")")
-                else:
-                    result.append(dict_index[n])
-
-            print(result)
-
-            # TODO LIMIT TO 20 FOR PERFORMANCE ISSUE
-            cnt = 0
-            for m in g.enum_models(assumptions=assumptions):
-                if cnt >= 20 :
-                    break
-                self.sol_array.append(m)
-                cnt += 1
-
-            #print(self.sol_array)
-
-
-
-
-
-    
-            
-        
-

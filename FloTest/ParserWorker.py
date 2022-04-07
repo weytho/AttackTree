@@ -7,9 +7,6 @@ import time
 from PyQt5.QtCore import QObject, pyqtSignal
 import ctypes
 import os
-from pysat.solvers import Glucose3
-from sympy import *
-from sympy.parsing.sympy_parser import parse_expr
 # From folder 
 #from Struct import *
 
@@ -54,7 +51,7 @@ class ParserWorker(QObject):
             my_function.parser.argtypes = [ctypes.c_char_p]
             ret = my_function.parser(s, s3, s2)
 
-        time.sleep(2)
+        #time.sleep(2)
         self.finished.emit(ret)
 
         if ret == 0 :

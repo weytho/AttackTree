@@ -127,7 +127,7 @@ class Window(QDialog):
 
         toolButton = QToolButton()
         toolButton.setText("Clear")
-        toolButton.setCheckable(True)
+        toolButton.setCheckable(False)
         toolButton.setAutoExclusive(True)
         toolButton.clicked.connect(self.outputClear)
         toolBar.addWidget(toolButton)
