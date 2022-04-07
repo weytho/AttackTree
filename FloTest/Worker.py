@@ -212,7 +212,6 @@ class Worker(QObject):
                     val = str(x)
                     l.append(dict_var[val])
 
-                #print(l)
                 g.add_clause(l)
 
         elif(type(formula) is Or):
@@ -226,16 +225,12 @@ class Worker(QObject):
                 else:
                     val = str(x)
                     l.append(dict_var[val])
-
-            #print(l)
             g.add_clause(l)
 
         elif(type(formula) is Not):
             l = []
             val = str(formula.args[0])
             l.append(-dict_var[val])
-
-            #print(l)
             g.add_clause(l)
 
         b = g.solve(assumptions=assumptions)
@@ -244,19 +239,6 @@ class Worker(QObject):
         self.sol_array = []
 
         if(b):
-            # TODO ATTENTION PAS ASSUMPTIONS SUR LE MODEL
-            model = g.get_model()
-            print(model)
-
-            result = []
-            for n in model:
-                if(n < 0):
-                    result.append("Not("+dict_index[-n]+")")
-                else:
-                    result.append(dict_index[n])
-
-            #print(result)
-
             # TODO LIMIT TO 20 FOR PERFORMANCE ISSUE
             cnt = 0
             for m in g.enum_models(assumptions=assumptions):
@@ -264,4 +246,6 @@ class Worker(QObject):
                     break
                 self.sol_array.append(m)
                 cnt += 1
-    
+            # Sort by fewest nbr of nodes taken
+            sorter = lambda x: sum(1 for i in x if i >= 0)
+            self.sol_array = sorted(self.sol_array, key=sorter)
