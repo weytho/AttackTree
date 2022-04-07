@@ -17,7 +17,6 @@ import json
 # From Folder
 from Worker import *
 from ParserWorker import *
-from Struct import *
 from Comparison import *
 import copy
 from functools import partial

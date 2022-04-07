@@ -1,5 +1,5 @@
 from Worker import *
-from PyQt5.QtCore import QThread, QUrl, Qt
+from PyQt5.QtCore import QThread, QUrl
 from PyQt5 import QtGui
 from sympy.parsing.sympy_parser import parse_expr
 from threading import Semaphore

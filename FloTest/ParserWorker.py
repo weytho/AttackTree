@@ -3,12 +3,10 @@
 # Class ParserWorker
 # used to send the text representation of an attack tree to the C parser
 #
-import time
 from PyQt5.QtCore import QObject, pyqtSignal
 import ctypes
 import os
-# From folder 
-#from Struct import *
+# From folder
 
 class ParserWorker(QObject):
     finished = pyqtSignal(int)

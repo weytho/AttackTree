@@ -2,10 +2,7 @@
 # @file
 # Random Tree Generation with Grammar
 #
-import math
-import sys
 import random
-from tkinter.tix import Tree
 
 ##
 # recursive tree generator 1
