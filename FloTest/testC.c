@@ -443,10 +443,10 @@ json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mod
    return parent;
 }
 
-void create_Json_file(DLL_List * wholeTree, int boolean_mode, HashTable *ht_CM){
+void create_Json_file(DLL_List * wholeTree, int boolean_mode, HashTable *ht_CM, char *filename){
 
    printf(" NAME FINAL IS %s\n", wholeTree->n->title);
-   const char *filename = "res/StructureTestingParser.json";
+   //const char *filename = "res/StructureTestingParser.json";
    json_object *root = json_object_new_object();
 
    // Clean file
@@ -466,11 +466,12 @@ void create_Json_file(DLL_List * wholeTree, int boolean_mode, HashTable *ht_CM){
 }
 
 ///////////////////////
-int parser(char * toParse, char * prop_text, char * counter_text) {
+int parser(char * toParse, char * prop_text, char * counter_text, char * filename) {
    if(toParse == NULL || is_empty(toParse)){
       return 1;
    }
    int boolean_mode = 0;
+
    if(is_empty(prop_text)){
       printf("BOOLEAN MODE \n");
       boolean_mode = 1;
@@ -642,7 +643,7 @@ int parser(char * toParse, char * prop_text, char * counter_text) {
 
    // ADD countermeasures
 
-   create_Json_file(whole_list, boolean_mode, ht_CM);
+   create_Json_file(whole_list, boolean_mode, ht_CM, filename);
    if( ht_CM != NULL ){
       freeH(ht_CM);
    }
@@ -701,6 +702,6 @@ node122:{cost = 9,prob = 1.0} \
 node20:{cost = 1,prob = 1.0}  \
 node21:{cost = 4,prob = 1.0} ";
 
-   int r = parser(a, " ", " ");
+   int r = parser(a, " ", " ", "test");
 	return 0;
 }

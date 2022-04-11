@@ -49,16 +49,22 @@ class Window(QDialog):
         self.buttonImportJson = QPushButton('Import JSON')
         self.buttonImportGrammar = QPushButton('Import Grammar')
         self.buttonParse = QPushButton('Create JSON')
+        self.buttonParse.setFixedWidth(180)
         self.buttonImportJson.clicked.connect(self.getfileJSON)
         self.buttonImportGrammar.clicked.connect(self.getfileGrammar)
         self.buttonParse.clicked.connect(self.parser)
 
+        self.jsonName = QtWidgets.QTextEdit(self)
+        self.jsonName.setText('DefaultJsonName.json')
 
         self.pathFile = QtWidgets.QTextEdit(self)
-        self.pathFile.setFixedSize(self.width, 24)
+        self.pathFile.setFixedHeight(24)
         self.tracesFound = QtWidgets.QTextEdit(self)
         self.tracesFound.setFixedHeight(60)
         self.tracesFound.setAlignment(Qt.AlignHCenter)
+
+        self.buttonReload = QPushButton('Reload')
+        self.buttonReload.setFixedWidth(180)
 
         base_layout = QVBoxLayout()
 
@@ -74,7 +80,15 @@ class Window(QDialog):
         Vlayout_left.addWidget(self.canvas)
         Vlayout_left.addWidget(self.buttonImportJson)   
 
-        Vlayout_left.addWidget(self.pathFile)
+        reload_and_path = QWidget()
+        reload_and_path_layout = QHBoxLayout()
+        reload_and_path_layout.setContentsMargins(0,0,0,0)
+        reload_and_path.setLayout(reload_and_path_layout)
+        reload_and_path_layout.addWidget(self.buttonReload)
+        reload_and_path_layout.addWidget(self.pathFile)
+        reload_and_path.setFixedSize(self.width, 24)
+
+        Vlayout_left.addWidget(reload_and_path)
 
         # Create pyqt toolbar
         toolBar = QToolBar()
@@ -238,7 +252,16 @@ class Window(QDialog):
         self.grammarText.setFixedWidth(400)
         Vlayout_right.addWidget(self.grammarText)
         Vlayout_right.addWidget(self.buttonImportGrammar)
-        Vlayout_right.addWidget(self.buttonParse)
+
+        json_creation = QWidget()
+        json_creation_layout = QHBoxLayout()
+        json_creation_layout.setContentsMargins(0,0,0,0)
+        json_creation.setLayout(json_creation_layout)
+        json_creation_layout.addWidget(self.buttonParse)
+        json_creation_layout.addWidget(self.jsonName)
+        json_creation.setFixedSize(400, 24)
+
+        Vlayout_right.addWidget(json_creation)
 
         self.setLayout(base_layout)
 
@@ -1015,6 +1038,7 @@ class Window(QDialog):
         self.parser_thread = QThread()
         self.parser_worker = ParserWorker()
         self.parser_worker.fullText = self.grammarText.toPlainText()
+        self.parser_worker.filename = "res/" + self.jsonName.toPlainText()
         self.parser_worker.moveToThread(self.parser_thread)
         self.parser_thread.started.connect(self.parser_worker.run)
         self.parser_worker.finished.connect(self.parser_thread.quit)

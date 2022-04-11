@@ -20,12 +20,18 @@ class ParserWorker(QObject):
         my_function = ctypes.CDLL(so_file)
 
         strTest = self.fullText
+
+        if not strTest:
+            print("Error empty string to parse")
+            self.finished.emit(1)
+            return
         new_s = strTest.split("RELATIONS")
         #print(new_s)
         new_s2 = new_s[1].split("COUNTERMEASURES")
         #print(new_s2)
         new_s3 = new_s2[1].split("PROPERTIES")
         #print(new_s3)
+        file = ctypes.create_string_buffer(self.filename.encode('utf-8'))
 
         if(len(new_s3) <= 1):
             print("Boolean mode")
@@ -34,7 +40,7 @@ class ParserWorker(QObject):
 
             my_function.parser.restype = ctypes.c_int
             my_function.parser.argtypes = [ctypes.c_char_p]
-            ret = my_function.parser(s, "", s2)
+            ret = my_function.parser(s, "", s2, file)
         else:
             #print(new_s2[0])
             #print(new_s3[0])
@@ -47,7 +53,7 @@ class ParserWorker(QObject):
 
             my_function.parser.restype = ctypes.c_int
             my_function.parser.argtypes = [ctypes.c_char_p]
-            ret = my_function.parser(s, s3, s2)
+            ret = my_function.parser(s, s3, s2, file)
 
         #time.sleep(2)
         self.finished.emit(ret)
