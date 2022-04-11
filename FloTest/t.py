@@ -65,6 +65,7 @@ class Window(QDialog):
 
         self.buttonReload = QPushButton('Reload')
         self.buttonReload.setFixedWidth(180)
+        self.buttonReload.clicked.connect(lambda: self.getfileJSON(True))
 
         base_layout = QVBoxLayout()
 
@@ -435,12 +436,15 @@ class Window(QDialog):
     #   Use a file explorer to choose the JSON file to import
     #   Create a new thread for the Worker class
     #  @param self The object pointer.
-    def getfileJSON(self):
-        fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Single File', QtCore.QDir.currentPath() + '/res' , '*.json')
-        if not fileName :
-            return
+    def getfileJSON(self, already_chosen=False):
+        if not already_chosen:
+            fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Single File', QtCore.QDir.currentPath() + '/res' , '*.json')
+            if not fileName :
+                return
+            self.pathFile.setText(fileName)
+        else:
+            fileName = self.pathFile.toPlainText()
 
-        self.pathFile.setText(fileName)
         self.thread = QThread()
         self.worker = Worker()
 
