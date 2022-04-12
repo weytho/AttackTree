@@ -11,11 +11,19 @@ from pysmt.shortcuts import Solver, Symbol, Real, Plus, And, Equals, Ite, Times,
 from pysmt.typing import REAL
 from pysmt.parsing import parse
 import z3
-from decimal import Decimal
 from fractions import Fraction
-import pysmt
 
 # ! Instead of using Forall to compare all existing models to find the minimum -> Minimize -> Simplex Z3
+
+def SMTformating(solutions, list_var):
+    bool_only_list = []
+    for l in solutions:
+        tmp = [-1]*len(list_var)
+        for e in l:
+            if z3.is_true(l[e]):
+                tmp[list_var.index(str(e()))] = 1
+        bool_only_list.append(tmp)
+    return list_var, bool_only_list
 
 def SMTcost(list_var, list_cost, formula, upper_bound=None):
 
@@ -37,7 +45,6 @@ def SMTcost(list_var, list_cost, formula, upper_bound=None):
 
     with Solver(name="z3") as sol_z3:
         converter = sol_z3.converter
-
         # How ??
         # Dual Simplex
         Z3_form = converter.convert(f)
@@ -52,22 +59,30 @@ def SMTcost(list_var, list_cost, formula, upper_bound=None):
             print(o.reason_unknown())
         first = True
         best = z3.Real(0)
+        solutions = []
         while o.check() == z3.sat:
+            # TODO model doesnt give every variable !!
             model = o.model()
             new_best = model[Z3_sol]
 
             if first:
                 best = new_best
                 first = False
+                # MODEL COMPLETION OPTION TO GET EVERY VARIABLE
+                model.eval(Z3_form, model_completion=True)
             elif z3.simplify(new_best > best):
                 break
 
             print(model)
+            solutions.append(model)
             block = []
             for d in model:
                 c = d()
                 block.append(c != model[d])
             o.add(z3.Or(block))
+
+        vars, sols = SMTformating(solutions, list_var)
+        return vars, sols, best
 
 def SMTproba(list_var, list_proba, formula, lower_bound=0):
 
@@ -90,9 +105,9 @@ def SMTproba(list_var, list_proba, formula, lower_bound=0):
 
     with Solver(name="z3") as sol_z3:
         converter = sol_z3.converter
-
         # How ??
         # Dual Simplex
+        #Z3_symbols = [converter.convert(s) for s in list_symbols]
         Z3_form = converter.convert(f)
         Z3_sol = converter.convert(SOL)
         o = z3.Optimize()
@@ -105,6 +120,7 @@ def SMTproba(list_var, list_proba, formula, lower_bound=0):
             print(o.reason_unknown())
         first = True
         best = z3.Real(0)
+        solutions = []
         while o.check() == z3.sat:
             model = o.model()
             new_best = model[Z3_sol]
@@ -112,15 +128,21 @@ def SMTproba(list_var, list_proba, formula, lower_bound=0):
             if first:
                 best = new_best
                 first = False
+                # MODEL COMPLETION OPTION TO GET EVERY VARIABLE
+                model.eval(Z3_form, model_completion=True)
             elif z3.simplify(new_best < best):
                 break
 
             print(model)
+            solutions.append(model)
             block = []
             for d in model:
                 c = d()
                 block.append(c != model[d])
             o.add(z3.Or(block))
+
+        vars, sols = SMTformating(solutions, list_var)
+        return vars, sols, best
 
 if __name__ == "__main__":
 
@@ -139,7 +161,7 @@ if __name__ == "__main__":
     proba_min = Fraction(str(0.3))
 
     print("COST")
-    SMTcost(list_var, list_cost, formula, cost_max)
+    print(SMTcost(list_var, list_cost, formula, cost_max))
 
     print("PROBA")
-    SMTproba(list_var, list_proba, formula, proba_min)
+    print(SMTproba(list_var, list_proba, formula, proba_min))

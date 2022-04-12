@@ -18,6 +18,7 @@ import json
 from Worker import *
 from ParserWorker import *
 from Comparison import *
+from SMTWorker import *
 import copy
 from functools import partial
 import csv
@@ -120,6 +121,12 @@ class Window(QDialog):
         toolBar.addWidget(toolButton)
         self.complete_button = toolButton
 
+        toolBar.addSeparator()
+        section_output = QLabel("SAT solver")
+        section_output.setAlignment(Qt.AlignHCenter)
+        section_output.setStyleSheet("font-weight: bold")
+        toolBar.addWidget(section_output)
+
         solution = QWidget()
         sol_layout = QHBoxLayout()
         solution.setLayout(sol_layout)
@@ -138,6 +145,21 @@ class Window(QDialog):
         self.sol_spin = toolSpinSol
 
         toolBar.addWidget(solution)
+
+        solver = QWidget()
+        max_layout = QHBoxLayout()
+        solver.setLayout(max_layout)
+
+        toolButton = QLabel("Max SAT Sol")
+        toolButton.setFixedWidth(110)
+        max_layout.addWidget(toolButton)
+        toolSpinMax = QSpinBox()
+        toolSpinMax.setValue(20)
+        toolSpinMax.setRange(-1, 99)
+        max_layout.addWidget(toolSpinMax)
+        self.max_spin = toolSpinMax
+
+        toolBar.addWidget(solver)
 
         toolButton = QToolButton()
         toolButton.setText("Clear")
@@ -228,22 +250,67 @@ class Window(QDialog):
         toolButton.clicked.connect(lambda: self.compareTrees())
         toolBar.addWidget(toolButton)
 
+        toolBar.addSeparator()
+        section_output = QLabel("SMT solver")
+        section_output.setAlignment(Qt.AlignHCenter)
+        section_output.setStyleSheet("font-weight: bold")
+        toolBar.addWidget(section_output)
+
+        solution = QWidget()
+        sol_layout = QHBoxLayout()
+        sol_layout.setContentsMargins(0,0,0,0)
+        solution.setLayout(sol_layout)
+
+        toolButton = QToolButton()
+        toolButton.setText("Min Cost")
+        toolButton.clicked.connect(lambda: self.callSMT(0))
+        sol_layout.addWidget(toolButton)
+        self.cost_button = toolButton
+
+        symbol = QLabel("<")
+        symbol.setFixedHeight(24)
+        sol_layout.addWidget(symbol)
+
+        value = QtWidgets.QTextEdit(self)
+        value.setFixedHeight(24)
+        sol_layout.addWidget(value)
+        self.max_cost = value
+
+        toolBar.addWidget(solution)
+
+        cost = QLabel("= ")
+        cost.setFixedHeight(24)
+        self.cost_label = cost
+        toolBar.addWidget(cost)
+
+        solution = QWidget()
+        sol_layout = QHBoxLayout()
+        sol_layout.setContentsMargins(0,0,0,0)
+        solution.setLayout(sol_layout)
+
+        toolButton = QToolButton()
+        toolButton.setText("Max Proba")
+        toolButton.clicked.connect(lambda: self.callSMT(1))
+        sol_layout.addWidget(toolButton)
+        self.proba_button = toolButton
+
+        symbol = QLabel(">")
+        symbol.setFixedHeight(24)
+        sol_layout.addWidget(symbol)
+
+        value = QtWidgets.QTextEdit(self)
+        value.setFixedHeight(24)
+        sol_layout.addWidget(value)
+        self.min_proba = value
+
+        toolBar.addWidget(solution)
+
+        proba = QLabel("= ")
+        proba.setFixedHeight(24)
+        self.proba_label = proba
+        toolBar.addWidget(proba)
+
         Vlayout_toolbar.addWidget(toolBar)
-
-        solver = QWidget()
-        max_layout = QHBoxLayout()
-        solver.setLayout(max_layout)
-
-        toolButton = QLabel("Max SAT Sol")
-        toolButton.setFixedWidth(110)
-        max_layout.addWidget(toolButton)
-        toolSpinMax = QSpinBox()
-        toolSpinMax.setValue(20)
-        toolSpinMax.setRange(-1, 99)
-        max_layout.addWidget(toolSpinMax)
-        self.max_spin = toolSpinMax
-
-        toolBar.addWidget(solver)
 
         result_layout = QHBoxLayout()
         result_layout.addWidget(self.tracesFound)
@@ -444,6 +511,8 @@ class Window(QDialog):
             self.pathFile.setText(fileName)
         else:
             fileName = self.pathFile.toPlainText()
+            if not fileName :
+                return
 
         self.thread = QThread()
         self.worker = Worker()
@@ -858,6 +927,72 @@ class Window(QDialog):
     #  @param bool The boolean value of Tseitin encoding usage.
     def setCNFTransform(self, bool):
         self.useTseitin = bool
+
+    def callSMT(self, type=0):
+        self.thread = QThread()
+        self.worker = SMTWorker()
+
+        self.worker.str_formula = self.curr_formula
+        var_list = []
+        cost_list = []
+        proba_list = []
+        if hasattr(self, 'current_digraph'):
+            for (u, d) in self.current_digraph.nodes(data=True):
+                if d['type'] == 'LEAF':
+                    var_list.append(u)
+                    cost_list.append(d['cost'])
+                    proba_list.append(d['prob'])
+        else:
+            self.thread.deleteLater
+            self.worker.deleteLater
+            return
+
+        self.worker.type = type
+
+        self.worker.var_list = var_list
+        self.worker.cost_list = cost_list
+        self.worker.proba_list = proba_list
+        self.worker.moveToThread(self.thread)
+
+        self.thread.started.connect(self.worker.run)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(lambda: self.SMTcleaning())
+        self.thread.finished.connect(self.thread.deleteLater)
+
+        self.thread.start()
+
+        # Final resets
+        self.buttonImportJson.setEnabled(False)
+        self.thread.finished.connect(
+            lambda: self.buttonImportJson.setEnabled(True)
+        )
+
+    def SMTcleaning(self):
+        self.sol_array = self.worker.sol_array
+        self.var_array = self.worker.var_array
+
+        boolean_array = []
+        for l1 in self.sol_array:
+            l = []
+            for l2 in l1:
+                if l2 >= 0:
+                    l.append("True")
+                else:
+                    l.append("False")
+            boolean_array.append(l)
+        self.boolean_sol_arr = boolean_array
+
+        # to csv file
+        with open("res/solutionsSMT.csv", "wt") as fp:
+            writer = csv.writer(fp, delimiter=",")
+            writer.writerow(self.var_array)  # write header
+            writer.writerows(boolean_array)
+
+        self.sol_spin.setMinimum(0)
+        self.sol_spin.setMaximum(len(self.sol_array) - 1)
+        self.sol_button.setText("Solve (" + str(len(self.sol_array)) + ")")
+
+        self.worker.deleteLater
 
     def compareTrees(self):
         self.comp = QDialog()
