@@ -956,7 +956,7 @@ class Window(QDialog):
 
         self.thread.started.connect(self.worker.run)
         self.worker.finished.connect(self.thread.quit)
-        self.worker.finished.connect(lambda: self.SMTcleaning())
+        self.worker.finished.connect(lambda: self.SMTcleaning(type))
         self.thread.finished.connect(self.thread.deleteLater)
 
         self.thread.start()
@@ -967,7 +967,7 @@ class Window(QDialog):
             lambda: self.buttonImportJson.setEnabled(True)
         )
 
-    def SMTcleaning(self):
+    def SMTcleaning(self, type):
         self.sol_array = self.worker.sol_array
         self.var_array = self.worker.var_array
 
@@ -991,6 +991,10 @@ class Window(QDialog):
         self.sol_spin.setMinimum(0)
         self.sol_spin.setMaximum(len(self.sol_array) - 1)
         self.sol_button.setText("Solve (" + str(len(self.sol_array)) + ")")
+        if type == 0:
+            self.cost_label.setText("= " + str(self.worker.best_value))
+        elif type == 1:
+            self.proba_label.setText("= " + str(self.worker.best_value))
 
         self.worker.deleteLater
 

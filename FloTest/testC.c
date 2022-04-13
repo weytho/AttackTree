@@ -465,6 +465,23 @@ void create_Json_file(DLL_List * wholeTree, int boolean_mode, HashTable *ht_CM, 
    json_object_put(root);
 }
 
+char *trimwhitespace(char *str){
+   if(str == NULL){
+      return NULL;
+   }
+   char *end;
+   // Trim leading space
+   while(isspace((unsigned char)*str)) str++;
+   if(*str == 0)  // All spaces?
+      return str;
+   // Trim trailing space
+   end = str + strlen(str) - 1;
+   while(end > str && isspace((unsigned char)*end)) end--;
+   // Write new null terminator character
+   end[1] = '\0';
+   return str;
+}
+
 ///////////////////////
 int parser(char * toParse, char * prop_text, char * counter_text, char * filename) {
    if(toParse == NULL || is_empty(toParse)){
@@ -501,9 +518,9 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
 
    printf("TEXT IS HERE '%s'\n", RawText);
 
-   char delim2[] = "}\t\r\n\v\f";
-   char delim3[] = "-> \t\r\n\v\f";
-   char delim4[] = "->{, \t\r\n\v\f";
+   char delim2[] = "}";
+   char delim3[] = "->";
+   char delim4[] = "->{,";
 
    char *saveptr;
    char *saveptr2;
@@ -520,11 +537,11 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
          size_t size2 = strlen(ptr) + 1;
          char *ptr_copy = malloc(size2 * sizeof(char));
          memcpy(ptr_copy, ptr, size2);
-         char *ptr2 = strtok_r(ptr_copy, delim3, &saveptr2);
+         char *ptr2 = trimwhitespace(strtok_r(ptr_copy, delim3, &saveptr2));
 
          if(ptr2 != NULL) {
 
-            char *ptr3 = strtok_r(NULL, delim3, &saveptr2);         
+            char *ptr3 = trimwhitespace(strtok_r(NULL, delim3, &saveptr2));         
             //printf("HELLO : %s : %s\n", ptr2, ptr3);
             DLL_List * dll_node;
             if( isInList(whole_list, ptr2) == 0){
@@ -549,69 +566,70 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
                snprintf(dll_node->n->type, sizeof(dll_node->n->type), "%s", ptr3);
             }
 
-            ptr2 = strtok_r(NULL, delim4, &saveptr2);
+            ptr2 = trimwhitespace(strtok_r(NULL, delim4, &saveptr2));
 
-            while (ptr2 != NULL && !is_empty(ptr2))   {
-               
-               //printf("INTEP 3\n");
-               DLL_List * tmp_dll;
-               if( isInList(whole_list, ptr2) == 0 ){
-                  tmp_dll = createDLLNode(ptr2, "LEAF");
-               } else {
-                  printf("TEP 4\n");
-                  
-                  tmp_dll = getFromList(whole_list, ptr2);
+            while (ptr2 != NULL)   {
+               if (!is_empty(ptr2)) {
+                  //printf("INTEP 3\n");
+                  DLL_List * tmp_dll;
+                  if( isInList(whole_list, ptr2) == 0 ){
+                     tmp_dll = createDLLNode(ptr2, "LEAF");
+                  } else {
+                     printf("TEP 4\n");
+                     
+                     tmp_dll = getFromList(whole_list, ptr2);
 
-                  if(strcmp(tmp_dll->n->title, dll_node->n->title) == 0){
-                     free(RawText);
-                     free(ptr_copy);
-                     DLL_free_from_top(whole_list);
-                     printf("3\n");
-                     return 3;
-                  }
-
-                  if(parent_is_in == 1 && tmp_dll->children != NULL){
-                     int r = cycle_check(dll_node, tmp_dll->n->title);
-                     if(r != 0){
+                     if(strcmp(tmp_dll->n->title, dll_node->n->title) == 0){
                         free(RawText);
                         free(ptr_copy);
                         DLL_free_from_top(whole_list);
                         printf("3\n");
                         return 3;
                      }
+
+                     if(parent_is_in == 1 && tmp_dll->children != NULL){
+                        int r = cycle_check(dll_node, tmp_dll->n->title);
+                        if(r != 0){
+                           free(RawText);
+                           free(ptr_copy);
+                           DLL_free_from_top(whole_list);
+                           printf("3\n");
+                           return 3;
+                        }
+                     }
+
+                     if(tmp_dll->parents == NULL){
+                        tmp_dll = extractFromList(&whole_list, ptr2);
+                        // Pas suffisant
+                        tmp_dll->next = NULL;
+                     } else {
+                        printf("TEP 8\n");
+                        DLL_List * new_tmp_dll = malloc(sizeof(DLL_List));
+                        new_tmp_dll->n = tmp_dll->n; //copy_node(tmp_dll->n); //tmp_dll->n;
+                        new_tmp_dll->children = tmp_dll->children;
+                        new_tmp_dll->parents = tmp_dll->parents;
+                        new_tmp_dll->next = NULL;
+                        tmp_dll = new_tmp_dll;
+
+                     }
+                     
                   }
 
-                  if(tmp_dll->parents == NULL){
-                     tmp_dll = extractFromList(&whole_list, ptr2);
-                     // Pas suffisant
-                     tmp_dll->next = NULL;
-                  } else {
-                     printf("TEP 8\n");
-                     DLL_List * new_tmp_dll = malloc(sizeof(DLL_List));
-                     new_tmp_dll->n = tmp_dll->n; //copy_node(tmp_dll->n); //tmp_dll->n;
-                     new_tmp_dll->children = tmp_dll->children;
-                     new_tmp_dll->parents = tmp_dll->parents;
-                     new_tmp_dll->next = NULL;
-                     tmp_dll = new_tmp_dll;
-
-                  }
+                  //printf("DLLL 3\n");
+                  printf("we have : %s with : %s\n", dll_node->n->title, tmp_dll->n->title);
                   
+                  // TODO REFAIRE PLUS PROPREMENT
+                  //printf("ADD CHILDREN\n");
+
+                  addChildren(dll_node, tmp_dll, whole_list);
+
+                  //printDLL_total(whole_list);
+                  //printf("ADD PARENTS\n");
+                  
+                  addParents(tmp_dll, dll_node);
                }
-
-               //printf("DLLL 3\n");
-               printf("we have : %s with : %s\n", dll_node->n->title, tmp_dll->n->title);
                
-               // TODO REFAIRE PLUS PROPREMENT
-               //printf("ADD CHILDREN\n");
-
-               addChildren(dll_node, tmp_dll, whole_list);
-
-               //printDLL_total(whole_list);
-               //printf("ADD PARENTS\n");
-               
-               addParents(tmp_dll, dll_node);
-               
-               ptr2 = strtok_r(NULL, delim4, &saveptr2);
+               ptr2 = trimwhitespace(strtok_r(NULL, delim4, &saveptr2));
             }
 
             parent_is_in = 0;
