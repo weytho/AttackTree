@@ -61,8 +61,9 @@ class Window(QDialog):
         self.pathFile = QtWidgets.QTextEdit(self)
         self.pathFile.setFixedHeight(24)
         self.tracesFound = QtWidgets.QTextEdit(self)
-        self.tracesFound.setFixedHeight(60)
         self.tracesFound.setAlignment(Qt.AlignHCenter)
+
+        self.tableSol = QtWidgets.QTableWidget()
 
         self.buttonReload = QPushButton('Reload')
         self.buttonReload.setFixedWidth(180)
@@ -71,7 +72,7 @@ class Window(QDialog):
         base_layout = QVBoxLayout()
 
         layout = QHBoxLayout()
-        base_layout.addLayout(layout)
+        base_layout.addLayout(layout, stretch=0)
 
         Vlayout_toolbar = QVBoxLayout()
         Vlayout_left = QVBoxLayout()
@@ -106,7 +107,7 @@ class Window(QDialog):
         # Add buttons to toolbar
         toolButton = QToolButton()
         toolButton.setText("CNF Formula")
-        toolButton.setCheckable(True)
+        toolButton.setCheckable(False)
         toolButton.setAutoExclusive(True)
         toolButton.clicked.connect(self.outputCNFformula)
         toolBar.addWidget(toolButton)
@@ -114,7 +115,7 @@ class Window(QDialog):
 
         toolButton = QToolButton()
         toolButton.setText("Complete Formula")
-        toolButton.setCheckable(True)
+        toolButton.setCheckable(False)
         toolButton.setAutoExclusive(True)
         toolButton.toggle()
         toolButton.clicked.connect(self.outputCompleteformula)
@@ -129,6 +130,7 @@ class Window(QDialog):
 
         solution = QWidget()
         sol_layout = QHBoxLayout()
+        sol_layout.setContentsMargins(0, 0, 0, 0)
         solution.setLayout(sol_layout)
 
         toolButton = QToolButton()
@@ -310,11 +312,15 @@ class Window(QDialog):
         self.proba_label = proba
         toolBar.addWidget(proba)
 
+        toolBar.addSeparator()
+
         Vlayout_toolbar.addWidget(toolBar)
 
-        result_layout = QHBoxLayout()
-        result_layout.addWidget(self.tracesFound)
-        base_layout.addLayout(result_layout)
+        result_layout = QtWidgets.QStackedLayout()
+        result_layout.addWidget(self.tracesFound,)
+        result_layout.addWidget(self.tableSol)
+        self.result_layout = result_layout
+        base_layout.addLayout(result_layout, stretch=1)
 
         self.grammarText = QtWidgets.QTextEdit(self)
         self.grammarText.setFixedWidth(400)
@@ -556,6 +562,7 @@ class Window(QDialog):
         if self.curr_cnf is not None :
             self.tracesFound.setText(self.curr_cnf)
             self.tracesFound.repaint()
+            self.result_layout.setCurrentWidget(self.tracesFound)
 
     ## Action called by the Complete Formula button :
     #   Set the output formula to its Complete form
@@ -564,6 +571,7 @@ class Window(QDialog):
         if self.curr_formula is not None :
             self.tracesFound.setText(self.curr_formula)
             self.tracesFound.repaint()
+            self.result_layout.setCurrentWidget(self.tracesFound)
 
     ## Action called by the Solve button :
     #   Get the index of the solution from the QSpinBox
@@ -575,20 +583,24 @@ class Window(QDialog):
             index = self.sol_spin.value()
             if index > -1 :
                 self.tracesFound.setText("")
-                cursor = self.tracesFound.textCursor()
-                cursor.insertTable(2, len(self.var_array))
-                for header in self.var_array:
-                    cursor.insertText(header)
-                    cursor.movePosition(QtGui.QTextCursor.NextCell)
-                for row in self.sol_array[index]:
-                    if row >= 0:
-                        cursor.insertText("True")
-                    else:
-                        cursor.insertText("False")
-                    cursor.movePosition(QtGui.QTextCursor.NextCell)
 
-                #self.tracesFound.setText(' '.join(map(str, self.var_array)) + "\n" + ' '.join(map(str, self.sol_array[index])))
-                self.tracesFound.repaint()
+                self.result_layout.setCurrentWidget(self.tableSol)
+                
+                self.tableSol.clear()
+                #Row count
+                self.tableSol.setRowCount(1) 
+                #Column count
+                self.tableSol.setColumnCount(len(self.var_array))
+
+                self.tableSol.setHorizontalHeaderLabels(self.var_array)
+                for pos2, row in enumerate(self.sol_array[index]):
+                    if row >= 0:
+                        item = QtWidgets.QTableWidgetItem(("True"))
+                    else:
+                        item = QtWidgets.QTableWidgetItem(("False"))
+                    item.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.tableSol.setItem(0, pos2, item)
+                #self.tracesFound.repaint()
                 list = []
                 old_nodes = copy.deepcopy(self.current_network.nodes)
                 for i, v in enumerate(self.sol_array[index]) :
@@ -625,6 +637,7 @@ class Window(QDialog):
             else :
                 self.tracesFound.setText("No Solution Found")
                 self.tracesFound.repaint()
+                self.result_layout.setCurrentWidget(self.tracesFound)
 
     ## Recursive iteration on the nodes :
     #   Recursively goes up in the tree by iterating on the edges
@@ -668,6 +681,7 @@ class Window(QDialog):
     def outputClear(self):
         self.tracesFound.setText("")
         self.tracesFound.repaint()
+        self.result_layout.setCurrentWidget(self.tracesFound)
         html_file = os.path.join(dirname, 'res/nx.html')
         local_url = QUrl.fromLocalFile(html_file)
         self.canvas.load(local_url)
@@ -1163,6 +1177,7 @@ class Window(QDialog):
 
         if bool_plot == 0 :
             self.tracesFound.setText(self.worker.str_formula)
+            self.result_layout.setCurrentWidget(self.tracesFound)
             self.curr_formula = self.worker.str_formula
             self.curr_cnf = self.worker.str_cnf
             self.curr_formula_cm = self.worker.str_formula_cm

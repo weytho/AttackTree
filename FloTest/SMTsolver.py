@@ -149,11 +149,9 @@ if __name__ == "__main__":
     list_var = ["X1", "X2", "X3", "X4"]
     list_cost = [3, 1.5, 2, 2]
     list_cost = [Fraction(str(x)) for x in list_cost]
-    # USE GMPY LIBRARY
-    #list_proba = [Fraction('0.7'), Fraction('0.2'), Fraction('0.5'), Fraction('0.5')]
+    
     list_proba = [0.7, 0.2, 0.5, 0.5]
     list_proba = [Fraction(str(x)) for x in list_proba]
-    print(list_proba)
 
     formula = " (X1 | X2) & (X3 | X4) "
 
