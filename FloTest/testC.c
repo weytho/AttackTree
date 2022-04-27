@@ -482,7 +482,7 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
    struct HashTable *ht_CM = NULL;
 
    if(boolean_mode == 0){
-
+      printf("BOOLEAN MODE 000\n");
       ht_properties = parse_properties(prop_text);
 
    }
@@ -521,10 +521,12 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
          char *ptr_copy = malloc(size2 * sizeof(char));
          memcpy(ptr_copy, ptr, size2);
          char *ptr2 = trimwhitespace(strtok_r(ptr_copy, delim3, &saveptr2));
+         replace_spaces(ptr2);
 
          if(ptr2 != NULL) {
 
-            char *ptr3 = trimwhitespace(strtok_r(NULL, delim3, &saveptr2));         
+            char *ptr3 = trimwhitespace(strtok_r(NULL, delim3, &saveptr2));   
+            replace_spaces(ptr3);      
             //printf("HELLO : %s : %s\n", ptr2, ptr3);
             DLL_List * dll_node;
             if( isInList(whole_list, ptr2) == 0){
@@ -550,6 +552,7 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
             }
 
             ptr2 = trimwhitespace(strtok_r(NULL, delim4, &saveptr2));
+            replace_spaces(ptr2);
 
             while (ptr2 != NULL)   {
                if (!is_empty(ptr2)) {
@@ -613,6 +616,7 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
                }
                
                ptr2 = trimwhitespace(strtok_r(NULL, delim4, &saveptr2));
+               replace_spaces(ptr2);
             }
 
             parent_is_in = 0;
@@ -637,6 +641,7 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
    // ADD properties
 
    if( boolean_mode == 0 ){
+      printf("BOOLEAN MODE\n");
       displayH(ht_properties);
       set_properties_total(whole_list, ht_properties);
       //freeH(ht_properties);

@@ -28,11 +28,13 @@ Node * copy_node(Node *old){
 }
 
 void replace_spaces(char *str){
-   while (*str){
-      if(isspace((unsigned char)*str)){
-         *str = '_';
+   if (str != NULL) {
+      while (*str){
+         if(isspace((unsigned char)*str)){
+            *str = '_';
+         }
+         str++;
       }
-      str++;
    }
 }
 
@@ -50,7 +52,6 @@ char *trimwhitespace(char *str){
    while(end > str && isspace((unsigned char)*end)) end--;
    // Write new null terminator character
    end[1] = '\0';
-   replace_spaces(str);
    return str;
 }
 
@@ -492,8 +493,8 @@ HashTable * parse_properties(char * prop_text){
 
    char delim5[] = "}";
    char delim6[] = ":";
-   char delim7[] = "{:=";
-   char delim8[] = ":=,";
+   char delim7[] = "{=";
+   char delim8[] = "=,";
 
    size_t size_prop = strlen(prop_text) + 1;
    char *length_ptr = malloc(size_prop * sizeof(char));
@@ -529,6 +530,7 @@ HashTable * parse_properties(char * prop_text){
          memcpy(ptr_prop_copy, ptr_prop, size2);
 
          ptr_prop = trimwhitespace(strtok_r(ptr_prop_copy, delim6, &saveptr4));
+         replace_spaces(ptr_prop);
 
          NodeP *n_prop = malloc(sizeof(NodeP));
 
@@ -539,16 +541,20 @@ HashTable * parse_properties(char * prop_text){
 
          while(prop_name != NULL){
 
-            prop_value = trimwhitespace(strtok_r(NULL, delim8, &saveptr4));
-            
-            if(strcmp(prop_name, "cost") == 0){
-               n_prop->cost = strtol(prop_value, NULL, 10);
-            } else if (strcmp(prop_name, "prob") == 0){
-               n_prop->prob = strtod(prop_value, NULL);//atof(myNumber);
+            if(!is_empty(prop_name)){
+               printf("name is : %s\n", prop_name);
+               prop_value = trimwhitespace(strtok_r(NULL, delim8, &saveptr4));
+               
+               if(strcmp(prop_name, "cost") == 0){
+                  n_prop->cost = strtol(prop_value, NULL, 10);
+                  printf("cost is : %d\n", n_prop->cost);
+               } else if (strcmp(prop_name, "prob") == 0){
+                  n_prop->prob = strtod(prop_value, NULL);//atof(myNumber);
+                  printf("cost is : %f\n", n_prop->prob);
+               }
             }
-
             prop_name = trimwhitespace(strtok_r(NULL, delim7, &saveptr4));
-
+            
          }
 
          insertH(ht_properties, n_prop);
@@ -604,6 +610,7 @@ HashTable * parse_countermeasures(char * counter_text){
 
          //printf("here we have : %s\n", new_ptr);
          ptr_cm = trimwhitespace(strtok_r(n_ptr_copy, delim10, &saveptr7));
+         replace_spaces(ptr_cm);
 
          //printf("here4444444444444 we have : %s\n", ptr_cm);
          new_ptr = trimwhitespace(strtok_r(NULL, delim10, &saveptr7));
