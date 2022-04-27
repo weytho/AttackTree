@@ -962,6 +962,10 @@ class Window(QDialog):
             return
 
         self.worker.type = type
+        if type == 0:
+            self.worker.limit = self.max_cost
+        else:
+            self.worker.limit = self.min_proba
 
         self.worker.var_list = var_list
         self.worker.cost_list = cost_list

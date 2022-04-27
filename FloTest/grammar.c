@@ -22,9 +22,37 @@ Node * copy_node(Node *old){
    Node * new_Node = malloc(sizeof(Node));
    memcpy(new_Node->title, old->title, sizeof(new_Node->title));
    memcpy(new_Node->type, old->type, sizeof(new_Node->type));
+   new_Node->cost = 0;
+   new_Node->prob = 1.0;
    return new_Node;
 }
 
+void replace_spaces(char *str){
+   while (*str){
+      if(isspace((unsigned char)*str)){
+         *str = '_';
+      }
+      str++;
+   }
+}
+
+char *trimwhitespace(char *str){
+   if(str == NULL){
+      return NULL;
+   }
+   char *end;
+   // Trim leading space
+   while(isspace((unsigned char)*str)) str++;
+   if(*str == 0)  // All spaces?
+      return str;
+   // Trim trailing space
+   end = str + strlen(str) - 1;
+   while(end > str && isspace((unsigned char)*end)) end--;
+   // Write new null terminator character
+   end[1] = '\0';
+   replace_spaces(str);
+   return str;
+}
 
 int is_empty(char *s) {
   while (*s != '\0') {
@@ -199,6 +227,8 @@ DLL_List * createDLLNode(char * title, char * type){
    //memcpy(new_Node->type, type, sizeof(new_Node->type));
    snprintf(new_Node->title, sizeof(new_Node->title), "%s", title);
    snprintf(new_Node->type, sizeof(new_Node->type), "%s", type);
+   new_Node->cost = 0;
+   new_Node->prob = 1.0;
 
    new_DLL->n = new_Node;
    new_DLL->children = NULL;
@@ -460,10 +490,10 @@ HashTable * parse_properties(char * prop_text){
    char *saveptr4;
    char *saveptr5;
 
-   char delim5[] = "}\t\r\n\v\f";
-   char delim6[] = ": \t\r\n\v\f";
-   char delim7[] = "{:= \t\r\n\v\f";
-   char delim8[] = ":=, \t\r\n\v\f";
+   char delim5[] = "}";
+   char delim6[] = ":";
+   char delim7[] = "{:=";
+   char delim8[] = ":=,";
 
    size_t size_prop = strlen(prop_text) + 1;
    char *length_ptr = malloc(size_prop * sizeof(char));
@@ -471,13 +501,12 @@ HashTable * parse_properties(char * prop_text){
 
    printf("@@@@@@@@@@@@@ NODES @@@@@@@@@@@@@\n");
 
-   char delim_lines[] = ":";
    int count = 0;
-   char *length_runner = strtok_r(length_ptr, delim_lines, &saveptr5);
+   char *length_runner = strtok_r(length_ptr, delim6, &saveptr5);
 
    while(length_runner != NULL){
       count = count + 1;
-      length_runner = strtok_r(NULL, delim_lines, &saveptr5);
+      length_runner = strtok_r(NULL, delim6, &saveptr5);
    }
    if( count > 0 ){
       count = count - 1;
@@ -499,18 +528,18 @@ HashTable * parse_properties(char * prop_text){
          char *ptr_prop_copy = malloc(size2 * sizeof(char));
          memcpy(ptr_prop_copy, ptr_prop, size2);
 
-         ptr_prop = strtok_r(ptr_prop_copy, delim6, &saveptr4);
+         ptr_prop = trimwhitespace(strtok_r(ptr_prop_copy, delim6, &saveptr4));
 
          NodeP *n_prop = malloc(sizeof(NodeP));
 
          // TODO MIEUX
          memcpy(n_prop->Name, ptr_prop, sizeof(n_prop->Name));
 
-         prop_name = strtok_r(NULL, delim7, &saveptr4);
+         prop_name = trimwhitespace(strtok_r(NULL, delim7, &saveptr4));
 
          while(prop_name != NULL){
 
-            prop_value = strtok_r(NULL, delim8, &saveptr4);
+            prop_value = trimwhitespace(strtok_r(NULL, delim8, &saveptr4));
             
             if(strcmp(prop_name, "cost") == 0){
                n_prop->cost = strtol(prop_value, NULL, 10);
@@ -518,7 +547,7 @@ HashTable * parse_properties(char * prop_text){
                n_prop->prob = strtod(prop_value, NULL);//atof(myNumber);
             }
 
-            prop_name = strtok_r(NULL, delim7, &saveptr4);
+            prop_name = trimwhitespace(strtok_r(NULL, delim7, &saveptr4));
 
          }
 
@@ -540,20 +569,19 @@ HashTable * parse_countermeasures(char * counter_text){
    char *saveptr6;
    char *saveptr7;
 
-   char delim9[] = ")\t\r\n\v\f";
-   char delim10[] = "(, \t\r\n\v\f";
+   char delim9[] = ")";
+   char delim10[] = "(,";
 
    size_t counter_size = strlen(counter_text) + 1;
    char * new_counter_text = malloc(counter_size * sizeof(char));
    memcpy(new_counter_text, counter_text, counter_size);
 
-   char delim_lines[] = ")";
    int count = 0;
-   char *length_runner = strtok_r(new_counter_text, delim_lines, &saveptr6);
+   char *length_runner = strtok_r(new_counter_text, delim9, &saveptr6);
 
    while(length_runner != NULL){
       count = count + 1;
-      length_runner = strtok_r(NULL, delim_lines, &saveptr6);
+      length_runner = strtok_r(NULL, delim9, &saveptr6);
    }
    if( count > 0 ){
       count = count - 1;
@@ -575,10 +603,10 @@ HashTable * parse_countermeasures(char * counter_text){
          memcpy(n_ptr_copy, new_ptr, size2);
 
          //printf("here we have : %s\n", new_ptr);
-         ptr_cm = strtok_r(n_ptr_copy, delim10, &saveptr7);
+         ptr_cm = trimwhitespace(strtok_r(n_ptr_copy, delim10, &saveptr7));
 
          //printf("here4444444444444 we have : %s\n", ptr_cm);
-         new_ptr = strtok_r(NULL, delim10, &saveptr7);
+         new_ptr = trimwhitespace(strtok_r(NULL, delim10, &saveptr7));
          int i = -1;
 
          while(new_ptr != NULL){
@@ -615,7 +643,7 @@ HashTable * parse_countermeasures(char * counter_text){
                //displayH(ht_CM);
             }
 
-            new_ptr = strtok_r(NULL, delim10, &saveptr7);
+            new_ptr = trimwhitespace(strtok_r(NULL, delim10, &saveptr7));
 
          }
 

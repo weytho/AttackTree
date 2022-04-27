@@ -465,23 +465,6 @@ void create_Json_file(DLL_List * wholeTree, int boolean_mode, HashTable *ht_CM, 
    json_object_put(root);
 }
 
-char *trimwhitespace(char *str){
-   if(str == NULL){
-      return NULL;
-   }
-   char *end;
-   // Trim leading space
-   while(isspace((unsigned char)*str)) str++;
-   if(*str == 0)  // All spaces?
-      return str;
-   // Trim trailing space
-   end = str + strlen(str) - 1;
-   while(end > str && isspace((unsigned char)*end)) end--;
-   // Write new null terminator character
-   end[1] = '\0';
-   return str;
-}
-
 ///////////////////////
 int parser(char * toParse, char * prop_text, char * counter_text, char * filename) {
    if(toParse == NULL || is_empty(toParse)){
@@ -656,7 +639,7 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
    if( boolean_mode == 0 ){
       displayH(ht_properties);
       set_properties_total(whole_list, ht_properties);
-      freeH(ht_properties);
+      //freeH(ht_properties);
    }
 
    // ADD countermeasures
@@ -664,6 +647,9 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
    create_Json_file(whole_list, boolean_mode, ht_CM, filename);
    if( ht_CM != NULL ){
       freeH(ht_CM);
+   }
+   if (ht_properties != NULL) {
+      freeH(ht_properties);
    }
 
    DLL_free_from_top(whole_list);

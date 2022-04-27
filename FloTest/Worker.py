@@ -164,3 +164,11 @@ class Worker(QObject):
         self.var_array, self.sol_array = sat_solver(tmp_formula, self.uniq_node_list, self.assumptions, self.max_val)
         self.finished.emit()
 
+if __name__ == "__main__":
+
+    str_formula = "a & B & C_C | E | SN | C"
+    glob = {}
+    exec('from sympy.core import Symbol', glob) # ok for I, E, S, N, C, O, or Q
+    print(str_formula)
+    parsed_formula = parse_expr(str_formula, global_dict=glob)
+    print(parsed_formula)
