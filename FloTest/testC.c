@@ -75,7 +75,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
          json_object_object_get_ex(CMchild, "CMtitle", &CMtitle);
          bool hasCost = json_object_object_get_ex(CMchild, "CMcost", &CMcost);
          bool hasProb = json_object_object_get_ex(CMchild, "CMprob", &CMprob);
-         totCMcost += json_object_get_int(CMcost);
+         //totCMcost += json_object_get_int(CMcost);
 
          // ADD CM to nodes
          Node *CMnode = malloc(sizeof(Node));
