@@ -4,7 +4,8 @@
 # Create GUI using PyQt5
 
 import sys
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtGui import QIntValidator, QDoubleValidator
 from PyQt5.QtWidgets import QMessageBox, QToolBar, QToolButton
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 import matplotlib.pyplot as plt
@@ -33,7 +34,7 @@ from PyQt5.QtWidgets import (
 ## Window Class
 #
 #  Main GUI interface of the application
-class Window(QDialog):
+class Window(QWidget):
     ## The constructor.
     def __init__(self, parent=None):
         super().__init__()
@@ -273,7 +274,8 @@ class Window(QDialog):
         symbol.setFixedHeight(24)
         sol_layout.addWidget(symbol)
 
-        value = QtWidgets.QTextEdit(self)
+        value = QtWidgets.QLineEdit(self)
+        value.setValidator(QIntValidator())
         value.setFixedHeight(24)
         sol_layout.addWidget(value)
         self.max_cost = value
@@ -300,7 +302,8 @@ class Window(QDialog):
         symbol.setFixedHeight(24)
         sol_layout.addWidget(symbol)
 
-        value = QtWidgets.QTextEdit(self)
+        value = QtWidgets.QLineEdit(self)
+        value.setValidator(QDoubleValidator())
         value.setFixedHeight(24)
         sol_layout.addWidget(value)
         self.min_proba = value
@@ -345,6 +348,8 @@ class Window(QDialog):
         self.uniq_node_list = None
         self.uniq_node_list_cm = None   
         self.useTseitin = False
+        self.max_cost = None
+        self.min_proba = None
 
     ## Creation of the Digraph using Networkx and Pyvis :
     #   Create graph from given information by adding logic nodes,

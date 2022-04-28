@@ -10,6 +10,8 @@
 typedef struct NodeCountermeasure NodeCM;
 struct NodeCountermeasure {
    char CMtitle [50];
+   int cost;
+   double prob;
    NodeCM * next;
 };
 

@@ -459,11 +459,13 @@ void set_properties(DLL_List * list, HashTable * h){
       //displayH(h);
       NodeP * Nn = getH(h, i);
       if(Nn != NULL){
-         //printf("NICE !! %d, %f\n", Nn->cost, Nn->prob);
          current->n->cost = Nn->cost;
          current->n->prob = Nn->prob;
          deleteH(h, Nn);
-         //displayH(h);
+
+         printf("NORMAL NAME is = %s \n", current->n->title);
+         printf("NORMAL OLD COST = %d \n", Nn->cost);
+         printf("NORMAL OLD PROB = %f \n", Nn->prob);
       }
 
    }
@@ -533,6 +535,8 @@ HashTable * parse_properties(char * prop_text){
          replace_spaces(ptr_prop);
 
          NodeP *n_prop = malloc(sizeof(NodeP));
+         n_prop->cost = 0;
+         n_prop->prob = 1.0;
 
          // TODO MIEUX
          memcpy(n_prop->Name, ptr_prop, sizeof(n_prop->Name));
@@ -568,7 +572,7 @@ HashTable * parse_properties(char * prop_text){
    return ht_properties;
 }
 
-HashTable * parse_countermeasures(char * counter_text){
+HashTable * parse_countermeasures(char * counter_text, HashTable *ht_properties){
 
    struct HashTable *ht_CM;
 
@@ -614,6 +618,7 @@ HashTable * parse_countermeasures(char * counter_text){
 
          //printf("here4444444444444 we have : %s\n", ptr_cm);
          new_ptr = trimwhitespace(strtok_r(NULL, delim10, &saveptr7));
+         replace_spaces(new_ptr);
          int i = -1;
 
          while(new_ptr != NULL){
@@ -623,9 +628,25 @@ HashTable * parse_countermeasures(char * counter_text){
             NodeP * Nn = getH(ht_CM, i);
             if(Nn != NULL){
                //printf("HEHEHEHEHEHEHEHEHEH CM ! \n");
+               NodeCM * node = malloc(sizeof(NodeCM));
+
+               if (ht_properties != NULL){
+                  int k = NameIndex(ht_properties, ptr_cm);
+                  printf("NAME is = %s \n", ptr_cm);
+                  NodeP * prop_Nn = getH(ht_properties, k);
+                  if(prop_Nn != NULL){
+                     printf("OLD COST = %d \n", prop_Nn->cost);
+                     printf("OLD PROB = %f \n", prop_Nn->prob);
+                     node->cost = prop_Nn->cost;
+                     node->prob = prop_Nn->prob;
+                  } else {
+                     node->cost = 0;
+                     node->prob = 1.0;
+                  }
+               }
+
                if(Nn->CMlist != NULL){
                   NodeCM * tmp = Nn->CMlist;
-                  NodeCM * node = malloc(sizeof(NodeCM));
                   memcpy(node->CMtitle, ptr_cm, sizeof(node->CMtitle));
                   node->next = NULL;
                   while(tmp->next != NULL){
@@ -633,7 +654,6 @@ HashTable * parse_countermeasures(char * counter_text){
                   }
                   tmp->next = node;
                } else {
-                  NodeCM * node = malloc(sizeof(NodeCM));
                   memcpy(node->CMtitle, ptr_cm, sizeof(node->CMtitle));
                   node->next = NULL;
                   Nn->CMlist = node;
@@ -646,11 +666,33 @@ HashTable * parse_countermeasures(char * counter_text){
                memcpy(node->CMtitle, ptr_cm, sizeof(node->CMtitle));
                node->next = NULL;
                Nn->CMlist = node;
+
+               if (ht_properties != NULL){
+                  int j = NameIndex(ht_properties, ptr_cm);
+                  printf("NAME is = %s \n", ptr_cm);
+                  NodeP * prop_Nn = getH(ht_properties, j);
+                  if(prop_Nn != NULL){
+                     printf("OLD COST = %d \n", prop_Nn->cost);
+                     printf("OLD PROB = %f \n", prop_Nn->prob);
+                     Nn->cost = prop_Nn->cost;
+                     Nn->prob = prop_Nn->prob;
+                     node->cost = prop_Nn->cost;
+                     node->prob = prop_Nn->prob;
+                     //deleteH(ht_properties, prop_Nn);
+                  } else {
+                     Nn->cost = 0;
+                     Nn->prob = 1.0;
+                     node->cost = 0;
+                     node->prob = 1.0;
+                  }
+               }
+
                insertH(ht_CM, Nn);
                //displayH(ht_CM);
             }
 
             new_ptr = trimwhitespace(strtok_r(NULL, delim10, &saveptr7));
+            replace_spaces(new_ptr);
 
          }
 

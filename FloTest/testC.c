@@ -70,9 +70,11 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
          struct json_object *CMchild;
          struct json_object *CMtitle;
          struct json_object *CMcost;
+         struct json_object *CMprob;
          CMchild = json_object_array_get_idx(CM, cnt);
          json_object_object_get_ex(CMchild, "CMtitle", &CMtitle);
-         json_object_object_get_ex(CMchild, "CMcost", &CMcost);
+         bool hasCost = json_object_object_get_ex(CMchild, "CMcost", &CMcost);
+         bool hasProb = json_object_object_get_ex(CMchild, "CMprob", &CMprob);
          totCMcost += json_object_get_int(CMcost);
 
          // ADD CM to nodes
@@ -85,11 +87,19 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
          strcpy(CMnode->title, buf);
          strcpy(CMnode->variable, json_object_get_string(CMtitle));
          strcpy(CMnode->type, "CntMs");
-         CMnode->cost = json_object_get_int(CMcost);
+         if (hasCost){
+            CMnode->cost = json_object_get_int(CMcost);
+         } else {
+            CMnode->cost = 0;
+         }
          CMnode->leaf = 1;
          CMnode->root = 0;
          CMnode->CM = 0;
-         CMnode->prob = 1;
+         if (hasProb){
+            CMnode->prob = json_object_get_double(CMprob);
+         } else {
+            CMnode->prob = 1.0;
+         }
          if (*list == NULL)
             *list = list_create(CMnode);
          else 
@@ -408,7 +418,9 @@ json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mod
 
    if(ht_CM != NULL){
       int i = NameIndex(ht_CM, tree->n->title);//current->n->title);
+      printf("NAME IS  :: = ((%s)) \n", tree->n->title);
       NodeP * Nn = getH(ht_CM, i);
+      printf("NAME NODE P IS  :: = ((%s)) \n", Nn->Name);
       if(Nn != NULL){
 
          NodeCM * CM_list = Nn->CMlist;
@@ -420,6 +432,13 @@ json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mod
                //char buf[101];
                //snprintf(buf, sizeof(buf), "%s_%s", CM_list->CMtitle, Nn->Name);
                json_object_object_add(tmp_root_cm, "CMtitle", json_object_new_string(CM_list->CMtitle));
+               printf("NAME :: = (%s) \n", CM_list->CMtitle);
+               if(boolean_mode == 0){
+                  printf("COST = %d \n", CM_list->cost);
+                  printf("PROB = %f \n", CM_list->prob);
+                  json_object_object_add(tmp_root_cm, "CMcost", json_object_new_int(CM_list->cost));
+                  json_object_object_add(tmp_root_cm, "CMprob", json_object_new_double(CM_list->prob));
+               }
                json_object_array_add(counter, tmp_root_cm);
                CM_list = CM_list->next;
             }
@@ -490,7 +509,7 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
 
    if(!is_empty(counter_text)){
 
-      ht_CM = parse_countermeasures(counter_text);
+      ht_CM = parse_countermeasures(counter_text, ht_properties);
 
    }
 
