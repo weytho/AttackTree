@@ -34,6 +34,9 @@ struct HashTable {
    NodeP * NodeArray;
 };
 
+// function prototype
+static void insertH(HashTable *h, NodeP *n);
+
 /**
 *  hastable constructor
 *  argument----

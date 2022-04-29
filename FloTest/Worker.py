@@ -124,7 +124,9 @@ class Worker(QObject):
         glob = {}
         exec('from sympy.core import Symbol', glob) # ok for I, E, S, N, C, O, or Q
 
+        print(str_formula)
         parsed_formula = parse_expr(str_formula, global_dict=glob)
+        print(str_formula_cm)
         parsed_formula_cm = parse_expr(str_formula_cm, global_dict=glob)
 
         if self.useTseitin:
@@ -167,6 +169,7 @@ class Worker(QObject):
 if __name__ == "__main__":
 
     str_formula = "a & B & C_C | E | SN | C"
+    str_formula = "( ( node00 & node01 ) | ( node10 & node11 ) | ( node20 | ( ( node2100 & node2101 & ( node00 & node01 ) ) | node211 | node212 ) | ( node00 & node01 ) ) )"
     glob = {}
     exec('from sympy.core import Symbol', glob) # ok for I, E, S, N, C, O, or Q
     print(str_formula)

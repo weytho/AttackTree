@@ -654,6 +654,7 @@ class Window(QWidget):
     #  @param disabled_node Set of nodes which can be used.   
     def recur_path(self, current_edge, path_count_set, disabled_node):
         current = current_edge['from']
+        print("node is jjdjdjdjd :" + current)
         for n in self.current_network.nodes :
             if n['id'] == current :
 

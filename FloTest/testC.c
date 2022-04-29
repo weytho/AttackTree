@@ -134,7 +134,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
                }
             }
             Formula *newVar = malloc(sizeof(Formula));
-            newVar->data = json_object_get_string(CMtitle);
+            newVar->data = (char*) json_object_get_string(CMtitle);
             newVar->next = NULL;
             Formula *runner = *(form);
             while(runner->next != NULL){
@@ -167,7 +167,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
    if (node == NULL){
       printf("[Node] Malloc error\n");
    }
-   char * type_string = json_object_get_string(type);
+   char * type_string = (char*) json_object_get_string(type);
    strcpy(node->title, json_object_get_string(action));
    strcpy(node->variable, json_object_get_string(action));
    strcpy(node->type, type_string);
@@ -214,7 +214,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
    // ADD to formula
    if (node->leaf == 1){
       Formula *newVar = malloc(sizeof(Formula));
-      newVar->data = json_object_get_string(action);
+      newVar->data = (char*) json_object_get_string(action);
       newVar->next = NULL;
       if((*form) == NULL){
          (*form) = newVar;
@@ -236,7 +236,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
       n_children = json_object_array_length(children);
       Formula *left = formula("LEFT");
       if (strcmp(type_string, "NOT") == 0) {
-         Formula *left2 = formula("LEFTNOT");
+         Formula *left2 = formula("NOT");
          left->next = left2;
       }
 
