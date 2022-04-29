@@ -1242,6 +1242,8 @@ class Window(QWidget):
             msg.setText("Loop detected in tree !")
         elif(error_id == 4):
             msg.setText("Multiple Roots !")
+        elif(error_id == 5):
+            msg.setText("Node NOT with mutiple children !")
         else:
             msg.setText("This is the main text!")
         msg.setIcon(QMessageBox.Critical)

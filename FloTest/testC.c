@@ -167,9 +167,10 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
    if (node == NULL){
       printf("[Node] Malloc error\n");
    }
+   char * type_string = json_object_get_string(type);
    strcpy(node->title, json_object_get_string(action));
    strcpy(node->variable, json_object_get_string(action));
-   strcpy(node->type, json_object_get_string(type));
+   strcpy(node->type, type_string);
    node->root = root;
    
    node->CM = 0;
@@ -180,7 +181,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
       }
    }
 
-   if (strcmp(json_object_get_string(type), "LEAF" )){
+   if (strcmp(type_string, "LEAF" )){
       node->leaf = 0;
       node->prob = 1;
    }
@@ -234,6 +235,11 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
       json_object_object_get_ex(parsed_json, "Child", &children);
       n_children = json_object_array_length(children);
       Formula *left = formula("LEFT");
+      if (strcmp(type_string, "NOT") == 0) {
+         Formula *left2 = formula("LEFTNOT");
+         left->next = left2;
+      }
+
       if((*form) == NULL){
          (*form) = left;
       }
@@ -263,7 +269,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
             esp = ret->esp;
          }
          if(i<n_children-1){
-            Formula *t = formula(json_object_get_string(type));
+            Formula *t = formula(type_string);
             Formula *runner = *(form);
             while(runner->next != NULL){
                runner = runner->next;
@@ -280,7 +286,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
       }
       runner->next = right;   
 
-      if(!strcmp(json_object_get_string(type), "OR" )) {
+      if(!strcmp(type_string, "OR" )) {
          node->cost = or_cost + totCMcost;
          node->prob = or_prob;
       }
@@ -541,6 +547,8 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
          memcpy(ptr_copy, ptr, size2);
          char *ptr2 = trimwhitespace(strtok_r(ptr_copy, delim3, &saveptr2));
          replace_spaces(ptr2);
+         bool is_NOT = false;
+         int cnt = 0;
 
          if(ptr2 != NULL) {
 
@@ -568,6 +576,9 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
                }
                //memcpy(dll_node->n->type, ptr3, sizeof(dll_node->n->type));
                snprintf(dll_node->n->type, sizeof(dll_node->n->type), "%s", ptr3);
+               if(strcmp(ptr3, "NOT") == 0){
+                  is_NOT = true;
+               }
             }
 
             ptr2 = trimwhitespace(strtok_r(NULL, delim4, &saveptr2));
@@ -576,6 +587,14 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
             while (ptr2 != NULL)   {
                if (!is_empty(ptr2)) {
                   //printf("INTEP 3\n");
+                  cnt = cnt + 1;
+                  if( is_NOT && cnt > 1){
+                     free(RawText);
+                     free(ptr_copy);
+                     DLL_free_from_top(whole_list);
+                     printf("5\n");
+                     return 5;
+                  }
                   DLL_List * tmp_dll;
                   if( isInList(whole_list, ptr2) == 0 ){
                      tmp_dll = createDLLNode(ptr2, "LEAF");
@@ -636,6 +655,7 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
                
                ptr2 = trimwhitespace(strtok_r(NULL, delim4, &saveptr2));
                replace_spaces(ptr2);
+
             }
 
             parent_is_in = 0;

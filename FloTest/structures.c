@@ -167,14 +167,14 @@ Formula * formula(char* type){
    else if(!strncmp("OR",type,3)){
       new->data = " | ";
    }
-   else if(!strncmp("NOT",type,4)){
+   else if(!strncmp("LEFTNOT",type,8)){
       new->data = " ~ ";
    }
    else if(!strncmp("XOR",type,4)){
       new->data = " ^ ";
    }
-   else{
-      new->data = " & ";
+   else {
+      new->data = " ";
    }
    return new;
 }

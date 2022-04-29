@@ -26,7 +26,7 @@ def SMTformating(solutions, list_var):
     return list_var, bool_only_list
 
 def SMTcost(list_var, list_cost, formula, upper_bound=None):
-
+    formula = formula.replace('~', '!')
     list_symbols = [Symbol(s) for s in list_var]
     print(list_symbols)
     SOL = Symbol("%SOL%", REAL)
@@ -85,7 +85,7 @@ def SMTcost(list_var, list_cost, formula, upper_bound=None):
         return vars, sols, best
 
 def SMTproba(list_var, list_proba, formula, lower_bound=0):
-
+    formula = formula.replace('~', '!')
     list_symbols = [Symbol(s) for s in list_var]
     print(list_symbols)
     SOL = Symbol("%SOL%", REAL)
@@ -153,7 +153,7 @@ if __name__ == "__main__":
     list_proba = [0.7, 0.2, 0.5, 0.5]
     list_proba = [Fraction(str(x)) for x in list_proba]
 
-    formula = " (X1 | X2) & (X3 | X4) "
+    formula = " (X1 | X2) & (X3 | ~ X4) "
 
     cost_max = Fraction(str(3.6))
     proba_min = Fraction(str(0.3))
