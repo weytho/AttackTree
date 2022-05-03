@@ -554,7 +554,7 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
 
             char *ptr3 = trimwhitespace(strtok_r(NULL, delim3, &saveptr2));   
             replace_spaces(ptr3);      
-            //printf("HELLO : %s : %s\n", ptr2, ptr3);
+            printf("HELLO : (%s) : (%s)\n", ptr2, ptr3);
             DLL_List * dll_node;
             if( isInList(whole_list, ptr2) == 0){
                printf("TEP \n");
@@ -576,9 +576,10 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
                }
                //memcpy(dll_node->n->type, ptr3, sizeof(dll_node->n->type));
                snprintf(dll_node->n->type, sizeof(dll_node->n->type), "%s", ptr3);
-               if(strcmp(ptr3, "NOT") == 0){
-                  is_NOT = true;
-               }
+            }
+
+            if(strcmp(ptr3, "NOT") == 0){
+               is_NOT = true;
             }
 
             ptr2 = trimwhitespace(strtok_r(NULL, delim4, &saveptr2));

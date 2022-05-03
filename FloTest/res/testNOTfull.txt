@@ -1,0 +1,8 @@
+RELATIONS
+A -NOT-> {B}
+B -OR-> {C, D}
+C -NOT-> {E}
+D -NOT-> {F}
+F -NOT-> {G}
+COUNTERMEASURES
+PROPERTIES

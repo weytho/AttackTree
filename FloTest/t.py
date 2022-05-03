@@ -394,8 +394,10 @@ class Window(QWidget):
                     logic_nodes.append(node_nor)
 
                     name = u + '_' + "LOGIC"
-                    if d['type'] == 'OR' :
+                    if d['type'] == 'OR' or d['type'] == 'XOR':
                         node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -1})
+                    elif d['type'] == 'NOT':
+                        node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -2})
                     else:
                         node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': 0})
                     logic_nodes.append(node)
@@ -411,8 +413,10 @@ class Window(QWidget):
                 else:
                     nodes_not_leaf.append(u)
                     name = u + '_' + "LOGIC"
-                    if d['type'] == 'OR' :
+                    if d['type'] == 'OR' or d['type'] == 'XOR':
                         node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -1})
+                    elif d['type'] == 'NOT':
+                        node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -2})
                     else:
                         node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': 0})
                     logic_nodes.append(node)
@@ -442,6 +446,8 @@ class Window(QWidget):
             for (u, d) in logic_nodes:
                 if u == edge[0]:
                     if d['inputNbr'] >= 0 :
+                        print("WHUT")
+                        print(d)
                         d['inputNbr'] = d['inputNbr'] + 1
                     break
             new_le.append(edge)
@@ -606,17 +612,20 @@ class Window(QWidget):
                     item.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
                     self.tableSol.setItem(0, pos2, item)
                 #self.tracesFound.repaint()
-                list = []
+                ok_list = []
+                not_list = []
                 old_nodes = copy.deepcopy(self.current_network.nodes)
                 for i, v in enumerate(self.sol_array[index]) :
                     if v >= 0 :
-                        list.append(self.var_array[i])
+                        ok_list.append(self.var_array[i])
+                    else:
+                        not_list.append(self.var_array[i])
 
                 disabled_node = set()
 
                 path_count_set = {}
                 for n in self.current_network.nodes :
-                    if 'group' in n and n['group'] == 'cm' and n['label'] in list:
+                    if 'group' in n and n['group'] == 'cm' and n['label'] in ok_list:
                         n['group'] = 'model_leaf'
                         l = n['id'].split("_", 1)
                         disabled_node.add(l[1])
@@ -626,12 +635,27 @@ class Window(QWidget):
                                     if n2['id'] == e['from']:
                                         n2['group'] = 'model'
 
+                self.cur_net_nodes_dict = {d['id']: d for d in self.current_network.nodes}
+                self.cur_digraph_nodes_dict = dict(self.current_digraph.nodes(data=True))
+                print(self.cur_net_nodes_dict)
+                print(self.current_network.nodes)
+                print("######")
+                print(ok_list)
+                print("######")
+                print(not_list)
+                print("######")
+                print(disabled_node)
+
                 for n in self.current_network.nodes :
-                    if n['id'] in list or (n['id'][0] == '~' and n['id'][1:] not in list):
+                    if n['id'] in ok_list or (n['id'][0] == '~' and n['id'][1:] not in ok_list):
                         n['group'] = 'model_leaf'
                         for e in self.current_network.edges :
                             if e['to'] == n['id']:
-                                self.recur_path(e, path_count_set, disabled_node)
+                                self.recur_path(e, path_count_set, disabled_node, true)
+                    elif n['id'] in not_list or (n['id'][0] == '~' and n['id'][1:] not in not_list):
+                        for e in self.current_network.edges :
+                            if e['to'] == n['id']:
+                                self.recur_path(e, path_count_set, disabled_node, false)
 
                 self.current_network.save_graph('res/nx_with_sol.html')
                 self.current_network.nodes = old_nodes
@@ -652,34 +676,130 @@ class Window(QWidget):
     #  @param path_count_set Dictionary of nodes found with a counter 
     #           to enable them if needed or block the recursion.
     #  @param disabled_node Set of nodes which can be used.   
-    def recur_path(self, current_edge, path_count_set, disabled_node):
+    def recur_path(self, current_edge, path_count_set, disabled_node, taken):
+        ''' 
         current = current_edge['from']
         print("node is jjdjdjdjd :" + current)
-        for n in self.current_network.nodes :
-            if n['id'] == current :
+        n = self.cur_net_nodes_dict[current]
+            
+        print("TYPE IS " + str(type(self.current_digraph.nodes(data=True))))
+        print(self.current_digraph.nodes(data=True))
+        print(dict(self.current_digraph.nodes(data=True)))
+        d = self.cur_digraph_nodes_dict[current]
+        print("@@@@@@")
+        print(d)
 
-                for (u, d) in self.current_digraph.nodes(data=True) :
-                    if u == current :
-                        if d['type'] == 'logic' or d['type'] == 'cmlogic' :
-                            if current in path_count_set :
-                                path_count_set[current].add(current_edge['to'])
-                            else:
-                                path_count_set[current] = {current_edge['to']}
+        if d['type'] == 'logic' or d['type'] == 'cmlogic' :
+            if current in path_count_set :
+                path_count_set[current].add(current_edge['to'])
+            else:
+                path_count_set[current] = {current_edge['to']}
 
-                            if d['inputNbr'] < 0 or d['inputNbr'] == len(path_count_set[current]) :
-                                if 'group' not in n or n['group'] != 'model':
-                                    n['group'] = 'model'
-                                    for e in self.current_network.edges :
-                                        if e['to'] == n['id']:
-                                            self.recur_path(e, path_count_set, disabled_node)
-                        else :
-                            if n['id'] not in disabled_node and ('group' not in n or n['group'] != 'model'):
-                                n['group'] = 'model'
-                                for e in self.current_network.edges :
-                                    if e['to'] == n['id']:
-                                        self.recur_path(e, path_count_set, disabled_node)
-                        break
-                break
+            if d['inputNbr'] < 0 or d['inputNbr'] == len(path_count_set[current]) :
+                if 'group' not in n or n['group'] != 'model' :
+                    n['group'] = 'model'
+                    for e in self.current_network.edges :
+                        if e['to'] == n['id']:
+                            self.recur_path(e, path_count_set, disabled_node)
+        else :
+            if n['id'] not in disabled_node and ('group' not in n or n['group'] != 'model') :
+                n['group'] = 'model'
+                for e in self.current_network.edges :
+                    if e['to'] == n['id']:
+                        self.recur_path(e, path_count_set, disabled_node)
+        '''
+
+        '''
+        current = current_edge['from']
+        print("node is jjdjdjdjd :" + current)
+        n = self.cur_net_nodes_dict[current]
+            
+        print("TYPE IS " + str(type(self.current_digraph.nodes(data=True))))
+        print(self.current_digraph.nodes(data=True))
+        print(dict(self.current_digraph.nodes(data=True)))
+        d = self.cur_digraph_nodes_dict[current]
+        print("@@@@@@")
+        print(d)
+
+        if d['type'] == 'logic' or d['type'] == 'cmlogic' :
+            if current in path_count_set :
+                path_count_set[current].add(current_edge['to'])
+            else:
+                path_count_set[current] = {current_edge['to']}
+
+            if d['inputNbr'] == -1 or d['inputNbr'] == len(path_count_set[current]) :
+                if 'group' not in n or n['group'] != 'model' :
+                    n['group'] = 'model'
+                    for e in self.current_network.edges :
+                        if e['to'] == n['id']:
+                            self.recur_path(e, path_count_set, disabled_node)
+            
+        else :
+            if n['id'] not in disabled_node and ('group' not in n or n['group'] != 'model') :
+                n['group'] = 'model'
+                for e in self.current_network.edges :
+                    if e['to'] == n['id']:
+                        self.recur_path(e, path_count_set, disabled_node)
+
+
+        '''
+        current = current_edge['from']
+        print("@@@@@@")
+        print("node is DDDDDD :" + current)
+        n = self.cur_net_nodes_dict[current]
+            
+        #print("TYPE IS " + str(type(self.current_digraph.nodes(data=True))))
+        #print(self.current_digraph.nodes(data=True))
+        #print(dict(self.current_digraph.nodes(data=True)))
+        d = self.cur_digraph_nodes_dict[current]
+        
+        print(d)
+        print(taken)
+        
+        next_taken = false
+        if taken:
+            if d['type'] == 'logic' or d['type'] == 'cmlogic' :
+                if current in path_count_set :
+                    path_count_set[current].add(current_edge['to'])
+                else:
+                    path_count_set[current] = {current_edge['to']}
+
+                if d['inputNbr'] == -1 or d['inputNbr'] == len(path_count_set[current]) :
+                    next_taken = true
+                    if 'group' not in n or n['group'] != 'model' :
+                        n['group'] = 'model'
+                    #else:
+                    #    n['group'] = 'logic'
+                    #    return
+                elif d['inputNbr'] == -2:
+                    n['group'] = 'logic'
+                    next_taken = false
+            else :
+                if n['id'] not in disabled_node :
+                    next_taken = true
+                    if 'group' not in n or n['group'] != 'model' :
+                        n['group'] = 'model'
+                    #else:
+                     #   n['group'] = None
+                        #return
+
+        else:
+            if d['type'] == 'logic' or d['type'] == 'cmlogic' :
+                if d['inputNbr'] == -2 :
+                    next_taken = true
+                    if 'group' not in n or n['group'] != 'model' :
+                        n['group'] = 'model'
+                    else:
+                        n['group'] = 'logic'
+                elif 'group' in n and n['group'] == 'model':
+                    return
+            else:
+                n['group'] = None
+
+        for e in self.current_network.edges :
+            if e['to'] == n['id']:
+                self.recur_path(e, path_count_set, disabled_node, next_taken)
+            
 
     ## Action called by the Clear button :
     #   Clear the output and reload the graph from the HTML file
