@@ -73,7 +73,7 @@ class Window(QWidget):
         self.cancelImport = QPushButton('Stop')
         self.cancelImport.setFixedWidth(50)
         self.cancelImport.setEnabled(False)
-        self.cancelImport.clicked.connect(lambda: self.stopImport(False))
+        self.cancelImport.clicked.connect(lambda: self.worker.stop())
 
         base_layout = QVBoxLayout()
 
@@ -552,6 +552,7 @@ class Window(QWidget):
 
         self.thread.started.connect(self.worker.run)
         self.worker.finished.connect(self.thread.quit)
+        self.worker.finishedWithError.connect(self.thread.quit)
         self.worker.finishedWithError.connect(lambda: self.stopImport(False))
         self.worker.finished.connect(lambda: self.cleaning(0))
         self.thread.finished.connect(self.thread.deleteLater)
@@ -567,9 +568,11 @@ class Window(QWidget):
         )
 
     def stopImport(self, proper_close):
+        print("STOPPING IMPORT...")
+        print(proper_close)
         if not proper_close:
             print("STOPPING THREAD...")
-            self.worker.stop()
+            #self.worker.stop()
             print("0")
             self.thread.quit()
             print("1")

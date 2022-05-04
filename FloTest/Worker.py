@@ -16,6 +16,19 @@ from tseitin import *
 from SATsolver import sat_solver
 from threading import Thread
 
+class RaisingThread(Thread):
+  def run(self):
+    self._exc = None
+    try:
+      super().run()
+    except Exception as e:
+      self._exc = e
+
+  def join(self):
+    super().join()
+    if self._exc:
+      raise self._exc
+
 class Worker(QObject):
     finished = pyqtSignal()
     finishedWithError = pyqtSignal()
@@ -30,25 +43,22 @@ class Worker(QObject):
             raise Exception('manual close...')
 
     def stop(self):
+        print("pressed stop")
         self.threadactive = False
 
     def run(self):
         try:
-            t1 = Thread(target=self.end_loop)
+            t1 = RaisingThread(target=self.end_loop)
             t1.start()
             print("SHOULD END !!!!!! ")
-            try:
-                self.working()
-                self.proper_close = True
-                self.threadactive = False
-            except Exception:
-                print("IN ERROR 0")
-                self.proper_close = True
-                self.finishedWithError.emit()
-            finally:
-                print("FINALLY 0")
+            self.working()
+            self.proper_close = True
+            self.threadactive = False
         except Exception:
             print("OUT ERROR 0")
+            self.proper_close = True
+            self.threadactive = False
+            self.finishedWithError.emit()
         finally:
             print("SHOULD END ?????????????????")
             t1.join()
