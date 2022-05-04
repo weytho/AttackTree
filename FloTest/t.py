@@ -70,6 +70,11 @@ class Window(QWidget):
         self.buttonReload.setFixedWidth(180)
         self.buttonReload.clicked.connect(lambda: self.getfileJSON(True))
 
+        self.cancelImport = QPushButton('Stop')
+        self.cancelImport.setFixedWidth(50)
+        self.cancelImport.setEnabled(False)
+        self.cancelImport.clicked.connect(lambda: self.stopImport(False))
+
         base_layout = QVBoxLayout()
 
         layout = QHBoxLayout()
@@ -90,6 +95,7 @@ class Window(QWidget):
         reload_and_path.setLayout(reload_and_path_layout)
         reload_and_path_layout.addWidget(self.buttonReload)
         reload_and_path_layout.addWidget(self.pathFile)
+        reload_and_path_layout.addWidget(self.cancelImport)
         reload_and_path.setFixedSize(self.width, 24)
 
         Vlayout_left.addWidget(reload_and_path)
@@ -394,10 +400,12 @@ class Window(QWidget):
                     logic_nodes.append(node_nor)
 
                     name = u + '_' + "LOGIC"
-                    if d['type'] == 'OR' or d['type'] == 'XOR':
+                    if d['type'] == 'OR':
                         node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -1})
                     elif d['type'] == 'NOT':
                         node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -2})
+                    elif d['type'] == 'XOR':
+                        node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -3})
                     else:
                         node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': 0})
                     logic_nodes.append(node)
@@ -413,10 +421,12 @@ class Window(QWidget):
                 else:
                     nodes_not_leaf.append(u)
                     name = u + '_' + "LOGIC"
-                    if d['type'] == 'OR' or d['type'] == 'XOR':
+                    if d['type'] == 'OR':
                         node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -1})
                     elif d['type'] == 'NOT':
                         node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -2})
+                    elif d['type'] == 'XOR':
+                        node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -3})
                     else:
                         node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': 0})
                     logic_nodes.append(node)
@@ -534,6 +544,7 @@ class Window(QWidget):
         self.thread = QThread()
         self.worker = Worker()
 
+        self.worker.threadactive = True
         self.worker.pathFile = fileName
         self.worker.useTseitin = self.useTseitin
         self.worker.max_val = self.max_spin.value()
@@ -541,16 +552,35 @@ class Window(QWidget):
 
         self.thread.started.connect(self.worker.run)
         self.worker.finished.connect(self.thread.quit)
+        self.worker.finishedWithError.connect(lambda: self.stopImport(False))
         self.worker.finished.connect(lambda: self.cleaning(0))
         self.thread.finished.connect(self.thread.deleteLater)
 
+        self.thread.setTerminationEnabled(True)
         self.thread.start()
 
         # Final resets
+        self.cancelImport.setEnabled(True)
         self.buttonImportJson.setEnabled(False)
         self.thread.finished.connect(
-            lambda: self.buttonImportJson.setEnabled(True)
+            lambda: self.stopImport(True)
         )
+
+    def stopImport(self, proper_close):
+        if not proper_close:
+            print("STOPPING THREAD...")
+            self.worker.stop()
+            print("0")
+            self.thread.quit()
+            print("1")
+            self.thread.wait()
+            print("11")
+            self.worker.deleteLater
+            self.thread.deleteLater
+            print("111")
+       
+        self.buttonImportJson.setEnabled(True)
+        self.cancelImport.setEnabled(False)
 
     ## Action called by the import Grammar button :
     #   Use a file explorer to choose the TXT file to import
@@ -677,84 +707,9 @@ class Window(QWidget):
     #           to enable them if needed or block the recursion.
     #  @param disabled_node Set of nodes which can be used.   
     def recur_path(self, current_edge, path_count_set, disabled_node, taken):
-        ''' 
         current = current_edge['from']
-        print("node is jjdjdjdjd :" + current)
         n = self.cur_net_nodes_dict[current]
-            
-        print("TYPE IS " + str(type(self.current_digraph.nodes(data=True))))
-        print(self.current_digraph.nodes(data=True))
-        print(dict(self.current_digraph.nodes(data=True)))
         d = self.cur_digraph_nodes_dict[current]
-        print("@@@@@@")
-        print(d)
-
-        if d['type'] == 'logic' or d['type'] == 'cmlogic' :
-            if current in path_count_set :
-                path_count_set[current].add(current_edge['to'])
-            else:
-                path_count_set[current] = {current_edge['to']}
-
-            if d['inputNbr'] < 0 or d['inputNbr'] == len(path_count_set[current]) :
-                if 'group' not in n or n['group'] != 'model' :
-                    n['group'] = 'model'
-                    for e in self.current_network.edges :
-                        if e['to'] == n['id']:
-                            self.recur_path(e, path_count_set, disabled_node)
-        else :
-            if n['id'] not in disabled_node and ('group' not in n or n['group'] != 'model') :
-                n['group'] = 'model'
-                for e in self.current_network.edges :
-                    if e['to'] == n['id']:
-                        self.recur_path(e, path_count_set, disabled_node)
-        '''
-
-        '''
-        current = current_edge['from']
-        print("node is jjdjdjdjd :" + current)
-        n = self.cur_net_nodes_dict[current]
-            
-        print("TYPE IS " + str(type(self.current_digraph.nodes(data=True))))
-        print(self.current_digraph.nodes(data=True))
-        print(dict(self.current_digraph.nodes(data=True)))
-        d = self.cur_digraph_nodes_dict[current]
-        print("@@@@@@")
-        print(d)
-
-        if d['type'] == 'logic' or d['type'] == 'cmlogic' :
-            if current in path_count_set :
-                path_count_set[current].add(current_edge['to'])
-            else:
-                path_count_set[current] = {current_edge['to']}
-
-            if d['inputNbr'] == -1 or d['inputNbr'] == len(path_count_set[current]) :
-                if 'group' not in n or n['group'] != 'model' :
-                    n['group'] = 'model'
-                    for e in self.current_network.edges :
-                        if e['to'] == n['id']:
-                            self.recur_path(e, path_count_set, disabled_node)
-            
-        else :
-            if n['id'] not in disabled_node and ('group' not in n or n['group'] != 'model') :
-                n['group'] = 'model'
-                for e in self.current_network.edges :
-                    if e['to'] == n['id']:
-                        self.recur_path(e, path_count_set, disabled_node)
-
-
-        '''
-        current = current_edge['from']
-        print("@@@@@@")
-        print("node is DDDDDD :" + current)
-        n = self.cur_net_nodes_dict[current]
-            
-        #print("TYPE IS " + str(type(self.current_digraph.nodes(data=True))))
-        #print(self.current_digraph.nodes(data=True))
-        #print(dict(self.current_digraph.nodes(data=True)))
-        d = self.cur_digraph_nodes_dict[current]
-        
-        print(d)
-        print(taken)
         
         next_taken = false
         if taken:
@@ -764,24 +719,19 @@ class Window(QWidget):
                 else:
                     path_count_set[current] = {current_edge['to']}
 
-                if d['inputNbr'] == -1 or d['inputNbr'] == len(path_count_set[current]) :
+                if d['inputNbr'] == -1 or d['inputNbr'] == len(path_count_set[current]) or (d['inputNbr'] == -3 and len(path_count_set[current]) % 2 != 0) :
                     next_taken = true
                     if 'group' not in n or n['group'] != 'model' :
                         n['group'] = 'model'
-                    #else:
-                    #    n['group'] = 'logic'
-                    #    return
+
                 elif d['inputNbr'] == -2:
                     n['group'] = 'logic'
-                    next_taken = false
+
             else :
                 if n['id'] not in disabled_node :
                     next_taken = true
                     if 'group' not in n or n['group'] != 'model' :
                         n['group'] = 'model'
-                    #else:
-                     #   n['group'] = None
-                        #return
 
         else:
             if d['type'] == 'logic' or d['type'] == 'cmlogic' :
@@ -967,6 +917,7 @@ class Window(QWidget):
 
         self.thread = QThread()
         self.worker = Worker()
+        self.worker.threadactive = True
         self.worker.max_val = self.max_spin.value()
 
         if self.mandatory_cm_counter > 0:
@@ -1336,6 +1287,8 @@ class Window(QWidget):
         self.parser_thread.start()
         # Final resets
         self.buttonParse.setEnabled(False)
+        self.rndtree_button.setEnabled(False)
+        self.buttonImportJson.setEnabled(False)
         self.parser_thread.finished.connect(
             lambda: self.enable_parser()
         )
@@ -1345,6 +1298,7 @@ class Window(QWidget):
     def enable_parser(self):
         self.buttonParse.setEnabled(True)
         self.rndtree_button.setEnabled(True)
+        self.buttonImportJson.setEnabled(True)
 
     ## Show Error Pop-up QMessageBox :
     #   Message of a detected error and its type

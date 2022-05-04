@@ -14,11 +14,47 @@ from Struct import *
 from collections import OrderedDict
 from tseitin import *
 from SATsolver import sat_solver
+from threading import Thread
 
 class Worker(QObject):
     finished = pyqtSignal()
+    finishedWithError = pyqtSignal()
+    proper_close = False
+
+    def end_loop(self):
+        while(self.threadactive):
+            pass
+        print("SHOULD END")
+        if not self.proper_close:
+            print("EXCEPT")
+            raise Exception('manual close...')
+
+    def stop(self):
+        self.threadactive = False
 
     def run(self):
+        try:
+            t1 = Thread(target=self.end_loop)
+            t1.start()
+            print("SHOULD END !!!!!! ")
+            try:
+                self.working()
+                self.proper_close = True
+                self.threadactive = False
+            except Exception:
+                print("IN ERROR 0")
+                self.proper_close = True
+                self.finishedWithError.emit()
+            finally:
+                print("FINALLY 0")
+        except Exception:
+            print("OUT ERROR 0")
+        finally:
+            print("SHOULD END ?????????????????")
+            t1.join()
+            print('ended')
+
+    def working(self):
         print("WORKER")
         self.node_list= []
         self.edge_list = []
@@ -29,10 +65,10 @@ class Worker(QObject):
         my_function = ctypes.CDLL(so_file)
 
         s = ctypes.create_string_buffer(self.pathFile.encode('utf-8'))
-     
+    
         my_function.mainfct.restype = ctypes.c_void_p
         my_function.mainfct.argtypes = [ctypes.c_char_p]
- 
+
         fulllist = FullList.from_address(my_function.mainfct(s, 0))
         newlist = CustomList.from_address(fulllist.nl)
 

@@ -50,7 +50,7 @@ void freeForm(Formula *l) {
 
 
 CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edges, Formula **form, Node *parent, int root, int CMformula){
-
+   printf("FUNCTION : JsonReader \n");
    // READ THE JSON //
    struct json_object *action;
    struct json_object *type;
@@ -64,6 +64,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
    // Compute CM 
    int totCMcost = 0;
    int cnt = 0;
+   printf("FUNCTION : 1 \n");
    if(CM != NULL){
    int CMlength = json_object_array_length(CM);
       while (cnt < CMlength){
@@ -161,26 +162,32 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
          cnt++;
       }
    }
-
+   printf("FUNCTION : 12 \n");
    // CREATE + FILL THE NODE
    Node *node = malloc(sizeof(Node));
    if (node == NULL){
       printf("[Node] Malloc error\n");
    }
    char * type_string = (char*) json_object_get_string(type);
+   printf("FUNCTION : 120 \n");
+   printf("###%s###\n", json_object_get_string(action));
    strcpy(node->title, json_object_get_string(action));
+   printf("FUNCTION : 121a \n");
    strcpy(node->variable, json_object_get_string(action));
+   printf("FUNCTION : 121b \n");
    strcpy(node->type, type_string);
+   printf("FUNCTION : 121c \n");
    node->root = root;
-   
+   printf("FUNCTION : 121 \n");
    node->CM = 0;
    if(CM != NULL){
       int CMlength = json_object_array_length(CM);
+      printf("FUNCTION : 122 \n");
       if(CMlength >0){
          node->CM = 1;
       }
    }
-
+   printf("FUNCTION : 13 \n");
    if (strcmp(type_string, "LEAF" )){
       node->leaf = 0;
       node->prob = 1;
@@ -318,6 +325,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
 
 
 FList * mainfct(char * path, int with_cm) {
+   printf("FUNCTION : mainfct \n");
 	//path = "/home/flo/Desktop/Github/AttackTree/FloTest/StructureGraph.json";
 	printf("Path to file is : %s \n", path);
 
@@ -328,10 +336,24 @@ FList * mainfct(char * path, int with_cm) {
    fseek(fp, 0, SEEK_END);
    long size = ftell(fp);
    fseek(fp, 0, SEEK_SET);
-   char buffer[size];
+   char* buffer = malloc(sizeof(char)*size);
 	fread(buffer, size, 1, fp);
 	fclose(fp);
-	parsed_json = json_tokener_parse(buffer);
+
+   enum json_tokener_error jerr;
+   struct json_tokener *tokener = json_tokener_new();
+
+   do {
+      parsed_json = json_tokener_parse_ex(tokener, buffer, size);
+   } while ((jerr = json_tokener_get_error(tokener)) == json_tokener_continue);
+   if (jerr != json_tokener_success)
+   {
+         fprintf(stderr, "Error: %s\n", json_tokener_error_desc(jerr));
+         free(buffer);
+         return NULL;
+   }
+   
+   free(buffer);
 
 	EList *edges = NULL;
 	List *list = NULL;
@@ -408,7 +430,7 @@ FList * mainfct(char * path, int with_cm) {
 }
 
 json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mode, HashTable *ht_CM){
-
+   printf("FUNCTION : build_json \n");
    //printDLL_total(tree);
 
    json_object_object_add(parent, "Action", json_object_new_string(tree->n->title));
@@ -469,6 +491,7 @@ json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mod
 }
 
 void create_Json_file(DLL_List * wholeTree, int boolean_mode, HashTable *ht_CM, char *filename){
+   printf("FUNCTION : create_Json_file \n");
 
    printf(" NAME FINAL IS %s\n", wholeTree->n->title);
    //const char *filename = "res/StructureTestingParser.json";
@@ -492,6 +515,7 @@ void create_Json_file(DLL_List * wholeTree, int boolean_mode, HashTable *ht_CM, 
 
 ///////////////////////
 int parser(char * toParse, char * prop_text, char * counter_text, char * filename) {
+   printf("FUNCTION : parser \n");
    if(toParse == NULL || is_empty(toParse)){
       return 1;
    }
