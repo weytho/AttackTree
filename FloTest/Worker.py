@@ -4,6 +4,7 @@
 # Retrieve the tree boolean formula
 # Use a Sat-Solver to solve the formula
 from json.encoder import INFINITY
+import multiprocessing
 import time
 from PyQt5.QtCore import QObject, pyqtSignal
 import ctypes
@@ -14,57 +15,36 @@ from Struct import *
 from collections import OrderedDict
 from tseitin import *
 from SATsolver import sat_solver
-from threading import Thread
+import threading
+import ctypes
+import time
+from multiprocessing import Process, Manager, Pipe
+from multiprocessing.managers import BaseManager
+from PyQt5.QtCore import QTimer,QDateTime
+import signal
+from contextlib import contextmanager
 
-class RaisingThread(Thread):
-  def run(self):
-    self._exc = None
-    try:
-      super().run()
-    except Exception as e:
-      self._exc = e
-
-  def join(self):
-    super().join()
-    if self._exc:
-      raise self._exc
+import threading
+import ctypes
+import time
+import sys
+import trace
+import threading
+import time
 
 class Worker(QObject):
     finished = pyqtSignal()
     finishedWithError = pyqtSignal()
-    proper_close = False
-
-    def end_loop(self):
-        while(self.threadactive):
-            pass
-        print("SHOULD END")
-        if not self.proper_close:
-            print("EXCEPT")
-            raise Exception('manual close...')
-
-    def stop(self):
-        print("pressed stop")
-        self.threadactive = False
 
     def run(self):
         try:
-            t1 = RaisingThread(target=self.end_loop)
-            t1.start()
-            print("SHOULD END !!!!!! ")
             self.working()
-            self.proper_close = True
-            self.threadactive = False
-        except Exception:
-            print("OUT ERROR 0")
-            self.proper_close = True
-            self.threadactive = False
+        except Exception as e:
+            print(e)
             self.finishedWithError.emit()
-        finally:
-            print("SHOULD END ?????????????????")
-            t1.join()
-            print('ended')
 
     def working(self):
+        
         print("WORKER")
         self.node_list= []
         self.edge_list = []
@@ -202,6 +182,8 @@ class Worker(QObject):
         #time.sleep(2)
         #self.data.emit(node_list, edge_list)
         self.finished.emit()
+
+        print("HAS ENDED WORKER")
         #self.plot
 
     def start_with_assumptions(self):

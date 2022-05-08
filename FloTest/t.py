@@ -4,7 +4,7 @@
 # Create GUI using PyQt5
 
 import sys
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, sip
 from PyQt5.QtGui import QIntValidator, QDoubleValidator
 from PyQt5.QtWidgets import QMessageBox, QToolBar, QToolButton
 from PyQt5.QtWebEngineWidgets import QWebEngineView
@@ -70,10 +70,6 @@ class Window(QWidget):
         self.buttonReload.setFixedWidth(180)
         self.buttonReload.clicked.connect(lambda: self.getfileJSON(True))
 
-        self.cancelImport = QPushButton('Stop')
-        self.cancelImport.setFixedWidth(50)
-        self.cancelImport.setEnabled(False)
-        self.cancelImport.clicked.connect(lambda: self.worker.stop())
 
         base_layout = QVBoxLayout()
 
@@ -95,7 +91,6 @@ class Window(QWidget):
         reload_and_path.setLayout(reload_and_path_layout)
         reload_and_path_layout.addWidget(self.buttonReload)
         reload_and_path_layout.addWidget(self.pathFile)
-        reload_and_path_layout.addWidget(self.cancelImport)
         reload_and_path.setFixedSize(self.width, 24)
 
         Vlayout_left.addWidget(reload_and_path)
@@ -456,8 +451,8 @@ class Window(QWidget):
             for (u, d) in logic_nodes:
                 if u == edge[0]:
                     if d['inputNbr'] >= 0 :
-                        print("WHUT")
-                        print(d)
+                        #print("WHUT")
+                        #print(d)
                         d['inputNbr'] = d['inputNbr'] + 1
                     break
             new_le.append(edge)
@@ -561,29 +556,19 @@ class Window(QWidget):
         self.thread.start()
 
         # Final resets
-        self.cancelImport.setEnabled(True)
         self.buttonImportJson.setEnabled(False)
         self.thread.finished.connect(
             lambda: self.stopImport(True)
         )
 
     def stopImport(self, proper_close):
-        print("STOPPING IMPORT...")
-        print(proper_close)
         if not proper_close:
-            print("STOPPING THREAD...")
-            #self.worker.stop()
-            print("0")
             self.thread.quit()
-            print("1")
             self.thread.wait()
-            print("11")
             self.worker.deleteLater
             self.thread.deleteLater
-            print("111")
-       
-        self.buttonImportJson.setEnabled(True)
-        self.cancelImport.setEnabled(False)
+        else:
+            self.buttonImportJson.setEnabled(True)
 
     ## Action called by the import Grammar button :
     #   Use a file explorer to choose the TXT file to import
