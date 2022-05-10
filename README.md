@@ -12,6 +12,7 @@ sudo apt install libjson-c-dev
 
 gcc -shared -Wl,-soname,testlib -o testlib.so -fPIC testC.c -ljson-c
 /bin/python3 /home/flo/Desktop/Github/AttackTree/t.py
+/bin/python3 /home/thomas/UCL/AttackTree/FloTest/t.py
 
 # https://stackoverflow.com/questions/38661635/ctypes-struct-returned-from-library
 
@@ -22,3 +23,8 @@ gcc -shared -Wl,-soname,testlib -o testlib.so -fPIC testC.c -ljson-c
 
 # https://networkx.org/documentation/stable/_modules/networkx/drawing/nx_agraph.html#pygraphviz_layout
 # https://visjs.github.io/vis-network/docs/network/nodes.html
+
+
+
+# For requirements :
+pip install -r requirements.txt
