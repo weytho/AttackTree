@@ -231,8 +231,12 @@ class Comparison():
                     logic_nodes.append(node_nor)
 
                     name = u + '_' + "LOGIC"
-                    if d['type'] == 'OR' :
+                    if d['type'] == 'OR':
                         node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -1})
+                    elif d['type'] == 'NOT':
+                        node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -2})
+                    elif d['type'] == 'XOR':
+                        node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -3})
                     else:
                         node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': 0})
                     logic_nodes.append(node)
@@ -248,8 +252,12 @@ class Comparison():
                 else:
                     nodes_not_leaf.append(u)
                     name = u + '_' + "LOGIC"
-                    if d['type'] == 'OR' :
+                    if d['type'] == 'OR':
                         node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -1})
+                    elif d['type'] == 'NOT':
+                        node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -2})
+                    elif d['type'] == 'XOR':
+                        node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -3})
                     else:
                         node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': 0})
                     logic_nodes.append(node)

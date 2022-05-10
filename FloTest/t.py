@@ -13,6 +13,7 @@ import networkx as nx
 from PyQt5.QtCore import QThread, QUrl, Qt
 import os
 from pyvis.network import Network
+from FreqComparator import frequency_comparator
 from randomTree import *
 import json
 # From Folder
@@ -23,6 +24,8 @@ from SMTWorker import *
 import copy
 from functools import partial
 import csv
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 
 dirname = os.path.dirname(__file__)
 os.chdir(dirname)
@@ -255,6 +258,12 @@ class Window(QWidget):
         toolBar.addWidget(toolButton)
 
         toolBar.addSeparator()
+        toolButton = QToolButton()
+        toolButton.setText("Nodes Frequencies")
+        toolButton.clicked.connect(lambda: self.compareFrequency())
+        toolBar.addWidget(toolButton)
+
+        toolBar.addSeparator()
         section_output = QLabel("SMT solver")
         section_output.setAlignment(Qt.AlignHCenter)
         section_output.setStyleSheet("font-weight: bold")
@@ -351,6 +360,8 @@ class Window(QWidget):
         self.useTseitin = False
         self.max_cost = None
         self.min_proba = None
+
+        self.is_First_toolbar = True
 
     ## Creation of the Digraph using Networkx and Pyvis :
     #   Create graph from given information by adding logic nodes,
@@ -513,7 +524,7 @@ class Window(QWidget):
     def plot(self, node_list, edge_list):
         # clearing old figure
         self.figure.clear()
-        self.get_canvas(node_list, edge_list)    
+        self.get_canvas(node_list, edge_list)
         #self.canvas.setContextMenuPolicy(Qt.NoContextMenu)
         html_file = os.path.join(dirname, 'res/nx.html')
         local_url = QUrl.fromLocalFile(html_file)
@@ -669,11 +680,11 @@ class Window(QWidget):
                         n['group'] = 'model_leaf'
                         for e in self.current_network.edges :
                             if e['to'] == n['id']:
-                                self.recur_path(e, path_count_set, disabled_node, true)
+                                self.recur_path(e, path_count_set, disabled_node, True)
                     elif n['id'] in not_list or (n['id'][0] == '~' and n['id'][1:] not in not_list):
                         for e in self.current_network.edges :
                             if e['to'] == n['id']:
-                                self.recur_path(e, path_count_set, disabled_node, false)
+                                self.recur_path(e, path_count_set, disabled_node, False)
 
                 self.current_network.save_graph('res/nx_with_sol.html')
                 self.current_network.nodes = old_nodes
@@ -699,7 +710,7 @@ class Window(QWidget):
         n = self.cur_net_nodes_dict[current]
         d = self.cur_digraph_nodes_dict[current]
         
-        next_taken = false
+        next_taken = False
         if taken:
             if d['type'] == 'logic' or d['type'] == 'cmlogic' :
                 if current in path_count_set :
@@ -708,7 +719,7 @@ class Window(QWidget):
                     path_count_set[current] = {current_edge['to']}
 
                 if d['inputNbr'] == -1 or d['inputNbr'] == len(path_count_set[current]) or (d['inputNbr'] == -3 and len(path_count_set[current]) % 2 != 0) :
-                    next_taken = true
+                    next_taken = True
                     if 'group' not in n or n['group'] != 'model' :
                         n['group'] = 'model'
 
@@ -717,14 +728,14 @@ class Window(QWidget):
 
             else :
                 if n['id'] not in disabled_node :
-                    next_taken = true
+                    next_taken = True
                     if 'group' not in n or n['group'] != 'model' :
                         n['group'] = 'model'
 
         else:
             if d['type'] == 'logic' or d['type'] == 'cmlogic' :
                 if d['inputNbr'] == -2 :
-                    next_taken = true
+                    next_taken = True
                     if 'group' not in n or n['group'] != 'model' :
                         n['group'] = 'model'
                     else:
@@ -1149,6 +1160,9 @@ class Window(QWidget):
         self.comp.resize(1400,800)
         self.comp.show()
 
+    def compareFrequency(self):
+
+        frequency_comparator(self.basic_nodes, self.basic_edges, self.current_network, self.current_digraph, self.sol_array, self.var_array)
     
     def showResults(self):
         if hasattr(self.comparator, 'var_array3'):
@@ -1254,6 +1268,8 @@ class Window(QWidget):
             self.uniq_node_list = self.worker.uniq_node_list
             self.uniq_node_list_cm = self.worker.uniq_node_list_cm
 
+            self.basic_nodes = self.worker.node_list
+            self.basic_edges = self.worker.edge_list
             self.plot(self.worker.node_list, self.worker.edge_list)
 
         self.worker.deleteLater
