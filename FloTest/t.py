@@ -24,8 +24,6 @@ from SMTWorker import *
 import copy
 from functools import partial
 import csv
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 
 dirname = os.path.dirname(__file__)
 os.chdir(dirname)
@@ -284,11 +282,12 @@ class Window(QWidget):
         symbol.setFixedHeight(24)
         sol_layout.addWidget(symbol)
 
-        value = QtWidgets.QLineEdit(self)
+        value = QtWidgets.QLineEdit()
         value.setValidator(QIntValidator())
         value.setFixedHeight(24)
-        sol_layout.addWidget(value)
         self.max_cost = value
+
+        sol_layout.addWidget(value)
 
         toolBar.addWidget(solution)
 
@@ -312,11 +311,11 @@ class Window(QWidget):
         symbol.setFixedHeight(24)
         sol_layout.addWidget(symbol)
 
-        value = QtWidgets.QLineEdit(self)
+        value = QtWidgets.QLineEdit()
         value.setValidator(QDoubleValidator())
         value.setFixedHeight(24)
-        sol_layout.addWidget(value)
         self.min_proba = value
+        sol_layout.addWidget(value)
 
         toolBar.addWidget(solution)
 
@@ -358,10 +357,6 @@ class Window(QWidget):
         self.uniq_node_list = None
         self.uniq_node_list_cm = None   
         self.useTseitin = False
-        self.max_cost = None
-        self.min_proba = None
-
-        self.is_First_toolbar = True
 
     ## Creation of the Digraph using Networkx and Pyvis :
     #   Create graph from given information by adding logic nodes,
@@ -1039,9 +1034,13 @@ class Window(QWidget):
 
         self.worker.type = type
         if type == 0:
-            self.worker.limit = self.max_cost
+            print("HERE")
+            print(self.max_cost)
+            self.worker.limit = self.max_cost.text()
         else:
-            self.worker.limit = self.min_proba
+            print("HARE")
+            print(self.min_proba)
+            self.worker.limit = self.min_proba.text()
 
         self.worker.var_list = var_list
         self.worker.cost_list = cost_list

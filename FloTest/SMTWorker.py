@@ -23,26 +23,22 @@ class SMTWorker(QObject):
         if not formula:
             return
 
-        cost_max = Fraction(str(3.6))
-        proba_min = Fraction(str(0.3))
-
         if self.type == 0:
             print("COST")
-            #SMTcost(self.var_list, list_cost, formula, cost_max)
-            self.var_array, self.sol_array, self.best_value = SMTcost(self.var_list, list_cost, formula)
+            print(self.limit)
+            if self.limit:
+                print("With Limits")
+                print(self.limit)
+                self.var_array, self.sol_array, self.best_value = SMTcost(self.var_list, list_cost, formula, Fraction(str(self.limit)))
+            else:
+                self.var_array, self.sol_array, self.best_value = SMTcost(self.var_list, list_cost, formula)
         else:
             print("PROBA")
-            #SMTproba(self.var_list, list_proba, formula, proba_min)
-            self.var_array, self.sol_array, self.best_value = SMTproba(self.var_list, list_proba, formula)
+            if self.limit:
+                print("With Limits")
+                print(self.limit)
+                self.var_array, self.sol_array, self.best_value = SMTcost(self.var_list, list_cost, formula, Fraction(str(self.limit)))
+            else:
+                self.var_array, self.sol_array, self.best_value = SMTproba(self.var_list, list_proba, formula)
 
         self.finished.emit()
-
-    '''
-    def start_with_assumptions(self):
-        glob = {}
-        exec('from sympy.core import Symbol', glob) # ok for I, E, S, N, C, O, or Q
-        tmp_formula = to_cnf(parse_expr(self.str_formula, global_dict=glob))
-
-        self.var_array, self.sol_array = sat_solver(tmp_formula, self.uniq_node_list, self.assumptions, self.max_val)
-        self.finished.emit()
-    '''

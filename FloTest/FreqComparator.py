@@ -1,19 +1,21 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-from sympy import factor
 
 def frequency_comparator(nodes, edges, current_network, current_digraph, sol_array, var_array):
 
     values = compute_values(nodes, current_network, current_digraph, sol_array, var_array)
     maximum = len(sol_array)
-    print(len(values))
+
     node_max_size = 3000
     font_max_size = 15
 
     if len(values) > 20:
         factor = len(values) / 15
+        factor = min(2, factor)
     else:
         factor = 1
+
+    print(factor)
 
     current_l = round(15 * factor)
     current_w = round(7 * factor)
@@ -54,19 +56,14 @@ def frequency_comparator(nodes, edges, current_network, current_digraph, sol_arr
     ax2.bar(range(len(values)), values, tick_label=names)
     plt.gca().set(title='Frequency Histogram', ylabel='Frequency')
     plt.xticks(rotation=45, ha='right')
-
+    
     fig.tight_layout()
-
-    #time.sleep(2)
-    #zoom(fig, 2)
-
-    return None, None
 
 
 def compute_values(nodes, current_network, current_digraph, sol_array, var_array):
 
     #print(nodes)
-    counter = {i[0]:0 for i in nodes if i[1]["type"] != "CntMs"} #and i[0][0] != '~'}
+    counter = {i[0]:0 for i in nodes if i[1]["type"] != "CntMs"}
 
     for index in range(len(sol_array)):
         values = {i[0]:False for i in nodes if i[1]["type"] != "CntMs"}
@@ -102,7 +99,6 @@ def compute_values(nodes, current_network, current_digraph, sol_array, var_array
             if values[key] == True:
                 counter[key] = counter[key] + 1
 
-    print(counter)
     return counter
 
 def recur_path(current_edge, path_count_set, taken, cur_net_nodes_dict, cur_digraph_nodes_dict, current_network, values, values_logic):

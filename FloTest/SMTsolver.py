@@ -37,9 +37,11 @@ def SMTcost(list_var, list_cost, formula, upper_bound=None):
     sum = Plus(list_cond_cost)
     print(sum)
     f = And(problem, Equals(SOL, sum))
+    get_all = False
 
     if upper_bound != None:
         f = And(f, LE(SOL, Real(upper_bound)))
+        get_all = True
     print("")
     print("@@@@@@@@@@ SMT SOLVER Z3 @@@@@@@@@@")
 
@@ -70,7 +72,7 @@ def SMTcost(list_var, list_cost, formula, upper_bound=None):
                 first = False
                 # MODEL COMPLETION OPTION TO GET EVERY VARIABLE
                 model.eval(Z3_form, model_completion=True)
-            elif z3.simplify(new_best > best):
+            elif not get_all and z3.simplify(new_best > best):
                 break
 
             print(model)
@@ -97,9 +99,11 @@ def SMTproba(list_var, list_proba, formula, lower_bound=0):
     sum = Times(list_and_proba)
     print(sum)
     f = And(problem, Equals(SOL, sum))
+    get_all = False
 
     if lower_bound > 0:
         f = And(f, GE(SOL, Real(lower_bound)))
+        get_all = True
     print("")
     print("@@@@@@@@@@ SMT SOLVER Z3 @@@@@@@@@@")
 
@@ -130,7 +134,7 @@ def SMTproba(list_var, list_proba, formula, lower_bound=0):
                 first = False
                 # MODEL COMPLETION OPTION TO GET EVERY VARIABLE
                 model.eval(Z3_form, model_completion=True)
-            elif z3.simplify(new_best < best):
+            elif not get_all and z3.simplify(new_best < best):
                 break
 
             print(model)
@@ -155,11 +159,17 @@ if __name__ == "__main__":
 
     formula = " (X1 | X2) & (X3 | ~ X4) "
 
-    cost_max = Fraction(str(3.6))
-    proba_min = Fraction(str(0.3))
+    cost_max = Fraction(str(6))
+    proba_min = Fraction(str(0.8))
 
     print("COST")
     print(SMTcost(list_var, list_cost, formula, cost_max))
 
+    print()
+    #print(SMTcost(list_var, list_cost, formula))
+
     print("PROBA")
-    print(SMTproba(list_var, list_proba, formula, proba_min))
+    #print(SMTproba(list_var, list_proba, formula, proba_min))
+
+    print()
+    #print(SMTproba(list_var, list_proba, formula))
