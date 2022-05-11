@@ -1,5 +1,5 @@
-import random
-
+# This solution sorter reduce the solution space by removing non minimal solutions
+# @param l : The list of solutions to reduce
 def sorter(l):
     if len(l)<2:
         return l
@@ -8,34 +8,28 @@ def sorter(l):
     slist.append(l[0])
     l.remove(l[0])
     for e in l:
-        print("========================")
-        print("Looking for new entry : ",e)
-        print("len slist : ",len(slist))
         rmlist = []
         toadd = 1
         for e2 in slist:
             ret = cmp(e,e2,ln)
             if ret == 1:
                 rmlist.append(e2)
-                print("Removed old entry")
             if ret == 2:
-                print("Entry not better")
                 toadd = 2
         for erm in rmlist:
             slist.remove(erm)
         if toadd==1:
             slist.append(e)
-            print("Added that entry")
-        else:
-            print("NOT Added that entry")
     return slist
 
-# return 1 : l1 should replace that entry
-# return 2 : l1 not better than l2
-# return 3 : l1 new possible best path
+# Compare two solutions 
+# return 1 : l1 should replace old entry l2
+# return 2 : l1 is not better than entry l2
+# return 3 : l1 is a new possible best path
+# @param l1 : The new entry solution to compare
+# @param l2 : The old entry solution to compare with
+# @param ln : The length of any solution 
 def cmp(l1,l2,ln):
-    print("Cmp l1: ",l1)
-    print("Cmp l2: ",l2)
     flag1 = 1
     flag2 = 1
     for i in range(0,ln):
@@ -46,24 +40,7 @@ def cmp(l1,l2,ln):
         if l1[i]==True and l2[i]==False:
             flag1 = 0
     if flag1:
-        print("should replace that entry")
         return 1
     if flag2:
-        print("l1 not better than l2")
         return 2
-    print("l1 new possible best path")   
     return 3
-
-
-Test_instance = []
-Test_instance.append([False, True, False, True])
-Test_instance.append([True, False, False, True])
-Test_instance.append([False, False, False, True])
-Test_instance.append([False, False, True, False])
-Test_instance.append([False, True, True, False])
-Test_instance.append([True, True, True, False])
-Test_instance.append([True, True, False, False])
-
-random.shuffle(Test_instance)
-
-print(sorter(Test_instance))
