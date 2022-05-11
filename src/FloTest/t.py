@@ -13,14 +13,14 @@ import networkx as nx
 from PyQt5.QtCore import QThread, QUrl, Qt
 import os
 from pyvis.network import Network
-from FreqComparator import frequency_comparator
-from randomTree import *
 import json
 # From Folder
-from Worker import *
-from ParserWorker import *
-from Comparison import *
-from SMTWorker import *
+from FloTest.Worker import *
+from FloTest.ParserWorker import *
+from FloTest.Comparison import *
+from FloTest.SMTWorker import *
+from FloTest.randomTree import *
+from FloTest.FreqComparator import frequency_comparator
 import copy
 from functools import partial
 import csv
@@ -1156,8 +1156,8 @@ class Window(QWidget):
         self.comp.show()
 
     def compareFrequency(self):
-
-        frequency_comparator(self.basic_nodes, self.basic_edges, self.current_network, self.current_digraph, self.sol_array, self.var_array)
+        pass
+        #frequency_comparator(self.basic_nodes, self.basic_edges, self.current_network, self.current_digraph, self.sol_array, self.var_array)
     
     def showResults(self):
         if hasattr(self.comparator, 'var_array3'):
@@ -1324,8 +1324,11 @@ class Window(QWidget):
         msg.exec_()
 
 ## driver code
-if __name__ == '__main__':
+def start():
     app = QApplication(sys.argv)
     win = Window()
     win.show()
     sys.exit(app.exec())
+
+if __name__ == '__main__':
+    start()

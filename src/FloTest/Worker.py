@@ -4,33 +4,15 @@
 # Retrieve the tree boolean formula
 # Use a Sat-Solver to solve the formula
 from json.encoder import INFINITY
-import multiprocessing
-import time
 from PyQt5.QtCore import QObject, pyqtSignal
 import ctypes
 import os
 from sympy.parsing.sympy_parser import parse_expr
 # From folder 
-from Struct import *
+from FloTest.Struct import *
 from collections import OrderedDict
-from tseitin import *
-from SATsolver import sat_solver
-import threading
-import ctypes
-import time
-from multiprocessing import Process, Manager, Pipe
-from multiprocessing.managers import BaseManager
-from PyQt5.QtCore import QTimer,QDateTime
-import signal
-from contextlib import contextmanager
-
-import threading
-import ctypes
-import time
-import sys
-import trace
-import threading
-import time
+from FloTest.tseitin import *
+from FloTest.SATsolver import sat_solver
 
 class Worker(QObject):
     finished = pyqtSignal()

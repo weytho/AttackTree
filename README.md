@@ -36,3 +36,7 @@ pip install --upgrade urllib3
 pipreqs
 
 pip install -r requirements.txt
+
+sudo python3 setup.py clean --all
+
+pip install .

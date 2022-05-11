@@ -1,4 +1,4 @@
-from Worker import *
+from FloTest.Worker import *
 from PyQt5.QtCore import QThread, QUrl
 from PyQt5 import QtGui
 from sympy.parsing.sympy_parser import parse_expr
@@ -6,7 +6,7 @@ from threading import Semaphore
 import networkx as nx
 from pyvis.network import Network
 import json
-from SATsolver import sat_solver
+from FloTest.SATsolver import sat_solver
 
 dirname = os.path.dirname(__file__)
 os.chdir(dirname)

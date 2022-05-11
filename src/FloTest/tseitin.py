@@ -1,6 +1,6 @@
 from sympy import *
 import time
-from SATsolver import sat_solver
+from FloTest.SATsolver import sat_solver
 
 def recur_formula(formula, list_subformulas, dict_subs, var_cnt, set_var):
     #print("Current Formula : " + str(formula))
@@ -107,7 +107,7 @@ def tseitin(formula):
 
     return list_and_cnf, set_var, index_expr
 
-def main():
+def test():
     # pas E I N O Q en première lettre ! 
     #str_formula = "(a & b) | (~(a & c) & (a | c | d))"
     str_formula = "(~((p | q) & r)) | (~s) "
@@ -154,4 +154,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    test()

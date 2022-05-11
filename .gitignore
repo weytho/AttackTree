@@ -1,5 +1,5 @@
 
-FloTest/trash/*
-FloTest/html/*
-FloTest/latex/*
-FloTest/__pycache__/*
+trash/*
+html/*
+latex/*
+src/FloTest/__pycache__/*

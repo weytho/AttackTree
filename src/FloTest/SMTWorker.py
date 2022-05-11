@@ -3,11 +3,11 @@ from PyQt5.QtCore import QObject, pyqtSignal
 import os
 from sympy.parsing.sympy_parser import parse_expr
 # From folder 
-from Struct import *
+from FloTest.Struct import *
 from collections import OrderedDict
-from tseitin import *
-from SATsolver import sat_solver
-from SMTsolver import SMTcost, SMTproba
+from FloTest.tseitin import *
+from FloTest.SATsolver import sat_solver
+from FloTest.SMTsolver import SMTcost, SMTproba
 from fractions import Fraction
 
 class SMTWorker(QObject):
