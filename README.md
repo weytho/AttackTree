@@ -28,3 +28,11 @@ gcc -shared -Wl,-soname,testlib -o testlib.so -fPIC testC.c -ljson-c
 
 # For requirements :
 pip install -r requirements.txt
+
+
+python setup.py sdist
+
+pip install --upgrade urllib3
+pipreqs
+
+pip install -r requirements.txt

@@ -1034,12 +1034,8 @@ class Window(QWidget):
 
         self.worker.type = type
         if type == 0:
-            print("HERE")
-            print(self.max_cost)
             self.worker.limit = self.max_cost.text()
         else:
-            print("HARE")
-            print(self.min_proba)
             self.worker.limit = self.min_proba.text()
 
         self.worker.var_list = var_list

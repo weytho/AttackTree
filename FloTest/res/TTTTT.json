@@ -1,0 +1,30 @@
+{
+  "Action":"node",
+  "Type":"OR",
+  "Cost":0,
+  "Prob":0.0,
+  "Child":[
+    {
+      "Action":"node0",
+      "Type":"LEAF",
+      "Cost":8,
+      "Prob":1.0,
+      "CM":[
+        {
+          "CMtitle":"CM1"
+        }
+      ]
+    },
+    {
+      "Action":"node1",
+      "Type":"LEAF",
+      "Cost":9,
+      "Prob":1.0,
+      "CM":[
+        {
+          "CMtitle":"CM1"
+        }
+      ]
+    }
+  ]
+}

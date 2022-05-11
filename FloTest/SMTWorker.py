@@ -25,18 +25,13 @@ class SMTWorker(QObject):
 
         if self.type == 0:
             print("COST")
-            print(self.limit)
             if self.limit:
-                print("With Limits")
-                print(self.limit)
                 self.var_array, self.sol_array, self.best_value = SMTcost(self.var_list, list_cost, formula, Fraction(str(self.limit)))
             else:
                 self.var_array, self.sol_array, self.best_value = SMTcost(self.var_list, list_cost, formula)
         else:
             print("PROBA")
             if self.limit:
-                print("With Limits")
-                print(self.limit)
                 self.var_array, self.sol_array, self.best_value = SMTcost(self.var_list, list_cost, formula, Fraction(str(self.limit)))
             else:
                 self.var_array, self.sol_array, self.best_value = SMTproba(self.var_list, list_proba, formula)

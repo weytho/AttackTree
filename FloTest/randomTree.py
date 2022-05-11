@@ -478,13 +478,3 @@ def TreeGen(maxdepth, branching_factor, complexity):
     else:
         print("Wrong complexity : [0:3]")
     return Relations,CounterMeasures,Properties
-
-
-'''
-Gen = 5
-Re,Co,Pr= TreeGen(3,3,Gen)
-print("Gen "+str(Gen))
-print(Re)
-print(Co)
-print(Pr)
-'''

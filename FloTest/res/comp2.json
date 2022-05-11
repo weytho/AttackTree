@@ -7,7 +7,7 @@
       "Type":"LEAF"
     },
     {
-      "Action":"B",
+      "Action":"D",
       "Type":"OR",
       "Child":[
         {
@@ -15,7 +15,7 @@
           "Type":"LEAF"
         },
         {
-          "Action":"D",
+          "Action":"B",
           "Type":"LEAF"
         }
       ]
