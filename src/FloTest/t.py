@@ -20,15 +20,28 @@ import csv
 
 dirname = os.path.dirname(__file__)
 os.chdir(dirname)
+with open('resources_directory.txt') as f:
+    dirname = f.readline()
+    dirname = dirname.rstrip("\n")
+    os.chdir(dirname)
 print(dirname)
 
-# From Folder
-from FloTest.Worker import *
-from FloTest.ParserWorker import *
-from FloTest.Comparison import *
-from FloTest.SMTWorker import *
-from FloTest.randomTree import *
-from FloTest.FreqComparator import frequency_comparator
+try:
+    # From folder
+    from Worker import *
+    from ParserWorker import *
+    from Comparison import *
+    from SMTWorker import *
+    from randomTree import *
+    from FreqComparator import frequency_comparator
+except ImportError:
+    # From package
+    from FloTest.Worker import *
+    from FloTest.ParserWorker import *
+    from FloTest.Comparison import *
+    from FloTest.SMTWorker import *
+    from FloTest.randomTree import *
+    from FloTest.FreqComparator import frequency_comparator
 
 from PyQt5.QtWidgets import (
     QApplication, QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QLabel, QSpinBox, QWidget, QGridLayout, QListWidget, QListWidgetItem
@@ -1158,8 +1171,7 @@ class Window(QWidget):
         self.comp.show()
 
     def compareFrequency(self):
-        pass
-        #frequency_comparator(self.basic_nodes, self.basic_edges, self.current_network, self.current_digraph, self.sol_array, self.var_array)
+        frequency_comparator(self.basic_nodes, self.basic_edges, self.current_network, self.current_digraph, self.sol_array, self.var_array)
     
     def showResults(self):
         if hasattr(self.comparator, 'var_array3'):

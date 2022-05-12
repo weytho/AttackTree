@@ -1,4 +1,3 @@
-from FloTest.Worker import *
 from PyQt5.QtCore import QThread, QUrl
 from PyQt5 import QtGui
 from sympy.parsing.sympy_parser import parse_expr
@@ -6,10 +5,22 @@ from threading import Semaphore
 import networkx as nx
 from pyvis.network import Network
 import json
-from FloTest.SATsolver import sat_solver
+
+try:
+    # From folder
+    from Worker import *
+    from SATsolver import sat_solver
+except ImportError:
+    # From package
+    from FloTest.Worker import *
+    from FloTest.SATsolver import sat_solver
 
 dirname = os.path.dirname(__file__)
 os.chdir(dirname)
+with open('resources_directory.txt') as f:
+    dirname = f.readline()
+    dirname = dirname.rstrip("\n")
+    os.chdir(dirname)
 
 class Comparison():
 

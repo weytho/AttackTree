@@ -8,11 +8,18 @@ from PyQt5.QtCore import QObject, pyqtSignal
 import ctypes
 import os
 from sympy.parsing.sympy_parser import parse_expr
-# From folder 
-from FloTest.Struct import *
 from collections import OrderedDict
-from FloTest.tseitin import *
-from FloTest.SATsolver import sat_solver
+
+try:
+    # From folder
+    from Struct import *
+    from tseitin import *
+    from SATsolver import sat_solver
+except ImportError:
+    # From package
+    from FloTest.Struct import *
+    from FloTest.tseitin import *
+    from FloTest.SATsolver import sat_solver
 
 class Worker(QObject):
     finished = pyqtSignal()

@@ -1,6 +1,12 @@
 from sympy import *
 import time
-from FloTest.SATsolver import sat_solver
+
+try:
+    # From folder
+    from SATsolver import sat_solver
+except ImportError:
+    # From package
+    from FloTest.SATsolver import sat_solver
 
 def recur_formula(formula, list_subformulas, dict_subs, var_cnt, set_var):
     #print("Current Formula : " + str(formula))

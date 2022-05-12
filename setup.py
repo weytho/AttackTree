@@ -1,15 +1,6 @@
 from setuptools import setup, Extension
-from setuptools.command.install import install
-import subprocess
-import os
-'''
-class CustomInstall(install):
-    def run(self):
-        command = "git clone https://mygit.com/myAwesomeCLibrary.git"
-        process = subprocess.Popen(command, shell=True, cwd="packageName")
-        process.wait()
-        install.run(self)
-'''
+
+# install ljson
 
 C_utils = Extension("FloTest.testlib",
                     sources=["src/FloTest/C_utils/testC.c"],
@@ -28,9 +19,9 @@ def run_setup():
         license = '',
         package_dir={"": "src"},
         packages=["FloTest"],
-        #package_data = {
-        #    '': ['*.txt', '*.json', '*.html', '*.csv', '*.conf'],
-        #},
+        package_data = {
+            '': ['src/FloTest/resources_directory.txt'],
+        },
         python_requires=">=3",
         #install_requires=[
         #    'matplotlib>=3.4.3',

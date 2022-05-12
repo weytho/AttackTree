@@ -497,6 +497,8 @@ void create_Json_file(DLL_List * wholeTree, int boolean_mode, HashTable *ht_CM, 
    //const char *filename = "res/StructureTestingParser.json";
    json_object *root = json_object_new_object();
 
+   printf("CREATING FILE\n");
+
    // Clean file
    fclose(fopen(filename, "w"));
 

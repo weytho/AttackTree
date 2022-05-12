@@ -2,13 +2,21 @@ from json.encoder import INFINITY
 from PyQt5.QtCore import QObject, pyqtSignal
 import os
 from sympy.parsing.sympy_parser import parse_expr
-# From folder 
-from FloTest.Struct import *
 from collections import OrderedDict
-from FloTest.tseitin import *
-from FloTest.SATsolver import sat_solver
-from FloTest.SMTsolver import SMTcost, SMTproba
 from fractions import Fraction
+
+try:
+    # From folder
+    from Struct import *
+    from tseitin import *
+    from SATsolver import sat_solver
+    from SMTsolver import SMTcost, SMTproba
+except ImportError:
+    # From package 
+    from FloTest.Struct import *
+    from FloTest.tseitin import *
+    from FloTest.SATsolver import sat_solver
+    from FloTest.SMTsolver import SMTcost, SMTproba
 
 class SMTWorker(QObject):
     finished = pyqtSignal()
@@ -23,17 +31,24 @@ class SMTWorker(QObject):
         if not formula:
             return
 
+        list_without_not = []
+        for s in self.var_list:
+            if(s[0] == '~'):
+                list_without_not.append(s[1:])
+            else:
+                list_without_not.append(s)
+
         if self.type == 0:
             print("COST")
             if self.limit:
-                self.var_array, self.sol_array, self.best_value = SMTcost(self.var_list, list_cost, formula, Fraction(str(self.limit)))
+                self.var_array, self.sol_array, self.best_value = SMTcost(list_without_not, list_cost, formula, Fraction(str(self.limit)))
             else:
-                self.var_array, self.sol_array, self.best_value = SMTcost(self.var_list, list_cost, formula)
+                self.var_array, self.sol_array, self.best_value = SMTcost(list_without_not, list_cost, formula)
         else:
             print("PROBA")
             if self.limit:
-                self.var_array, self.sol_array, self.best_value = SMTcost(self.var_list, list_cost, formula, Fraction(str(self.limit)))
+                self.var_array, self.sol_array, self.best_value = SMTcost(list_without_not, list_cost, formula, Fraction(str(self.limit)))
             else:
-                self.var_array, self.sol_array, self.best_value = SMTproba(self.var_list, list_proba, formula)
+                self.var_array, self.sol_array, self.best_value = SMTproba(list_without_not, list_proba, formula)
 
         self.finished.emit()
