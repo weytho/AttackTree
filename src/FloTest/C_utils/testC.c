@@ -78,6 +78,8 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
          bool hasProb = json_object_object_get_ex(CMchild, "CMprob", &CMprob);
          //totCMcost += json_object_get_int(CMcost);
 
+         printf("FUNCTION : 1a \n");
+
          // ADD CM to nodes
          Node *CMnode = malloc(sizeof(Node));
          if (CMnode == NULL){
@@ -93,6 +95,9 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
          } else {
             CMnode->cost = 0;
          }
+
+         printf("FUNCTION : 1b \n");
+
          CMnode->leaf = 1;
          CMnode->root = 0;
          CMnode->CM = 0;
@@ -114,6 +119,8 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
             *edges = elist_create(CMed);
          else
             *edges = elist_add(*edges, CMed);
+
+         printf("FUNCTION : 1c \n");
 
          if(CMformula == 1){
             // ADD CM to formula
@@ -158,6 +165,8 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
             }
             runner->next = next;
          }
+
+         printf("FUNCTION : 1d \n");
 
          cnt++;
       }

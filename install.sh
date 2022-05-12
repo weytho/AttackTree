@@ -13,8 +13,8 @@ echo "path file: ${FULLFILE}"
 
 echo ${FULLDIR} > ${FULLFILE}
 
-#sudo apt-get update  # To get the latest package lists
-#sudo apt-get install libjson-c-dev -y
+sudo apt-get update  # To get the latest package lists
+sudo apt-get install libjson-c-dev -y
 
-#pip install -r requirements.txt
-#pip install .
+pip install -r requirements.txt
+pip install .

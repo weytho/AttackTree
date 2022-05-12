@@ -1,7 +1,5 @@
-node00,node01,node1000,node1001,node101,node102,node110,node111,node12,node2000,node2001,node201,node202,node21,node220,node221,node222
-True,True,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
-True,True,False,False,False,False,False,False,False,False,False,False,False,False,False,False,True
-True,True,False,False,False,False,True,False,False,False,False,False,False,False,False,False,False
-True,True,False,False,False,True,False,False,False,False,False,False,False,False,False,False,False
-True,True,False,False,False,False,False,False,False,False,False,False,False,False,True,False,False
-True,True,False,False,False,False,True,False,False,False,False,False,False,False,False,False,True
+node00,node01,node10,node11
+True,True,False,False
+True,True,False,True
+True,True,True,False
+True,True,True,True

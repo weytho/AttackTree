@@ -12,7 +12,9 @@ class ParserWorker(QObject):
     finished = pyqtSignal(int)
 
     def get_file_so(self):
-        for file in os.listdir('.'):
+        dirname = os.path.dirname(__file__)
+        for file in os.listdir(dirname):
+            print(file)
             if file.startswith("testlib") and file.endswith(".so"):
                 self.file_so = file
                 break

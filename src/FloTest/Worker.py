@@ -33,7 +33,8 @@ class Worker(QObject):
             self.finishedWithError.emit()
 
     def get_file_so(self):
-        for file in os.listdir('.'):
+        dirname = os.path.dirname(__file__)
+        for file in os.listdir(dirname):
             if file.startswith("testlib") and file.endswith(".so"):
                 self.file_so = file
                 break
