@@ -44,3 +44,14 @@ def cmp(l1,l2,ln):
     if flag2:
         return 2
     return 3
+
+if __name__ == "__main__":
+    test = []
+    test.append([True, False, False, True])
+    test.append([True, True, False, True])
+    test.append([False, False, True, False])
+    test.append([True, False, True, False])
+    test.append([True, False, True, True])
+    test.append([True, True, True, False])
+
+    print(sorter(test))

@@ -11,12 +11,19 @@ import os
 class ParserWorker(QObject):
     finished = pyqtSignal(int)
 
+    def get_file_so(self):
+        for file in os.listdir('.'):
+            if file.startswith("testlib") and file.endswith(".so"):
+                self.file_so = file
+                break
+
     def run(self):
+        self.get_file_so()
 
         self.node_list= []
 
         dirname = os.path.dirname(__file__)
-        so_file = os.path.join(dirname, 'testlib.so')
+        so_file = os.path.join(dirname, self.file_so)
         my_function = ctypes.CDLL(so_file)
 
         strTest = self.fullText

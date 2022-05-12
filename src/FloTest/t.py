@@ -14,6 +14,14 @@ from PyQt5.QtCore import QThread, QUrl, Qt
 import os
 from pyvis.network import Network
 import json
+import copy
+from functools import partial
+import csv
+
+dirname = os.path.dirname(__file__)
+os.chdir(dirname)
+print(dirname)
+
 # From Folder
 from FloTest.Worker import *
 from FloTest.ParserWorker import *
@@ -21,12 +29,6 @@ from FloTest.Comparison import *
 from FloTest.SMTWorker import *
 from FloTest.randomTree import *
 from FloTest.FreqComparator import frequency_comparator
-import copy
-from functools import partial
-import csv
-
-dirname = os.path.dirname(__file__)
-os.chdir(dirname)
 
 from PyQt5.QtWidgets import (
     QApplication, QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QLabel, QSpinBox, QWidget, QGridLayout, QListWidget, QListWidgetItem

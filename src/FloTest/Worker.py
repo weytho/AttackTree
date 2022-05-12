@@ -25,7 +25,14 @@ class Worker(QObject):
             print(e)
             self.finishedWithError.emit()
 
+    def get_file_so(self):
+        for file in os.listdir('.'):
+            if file.startswith("testlib") and file.endswith(".so"):
+                self.file_so = file
+                break
+
     def working(self):
+        self.get_file_so()
         
         print("WORKER")
         self.node_list= []
@@ -33,7 +40,7 @@ class Worker(QObject):
         self.formula = []
         self.formula_cm = []
         dirname = os.path.dirname(__file__)
-        so_file = os.path.join(dirname, 'testlib.so')
+        so_file = os.path.join(dirname, self.file_so)
         my_function = ctypes.CDLL(so_file)
 
         s = ctypes.create_string_buffer(self.pathFile.encode('utf-8'))

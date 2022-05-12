@@ -29,7 +29,6 @@ gcc -shared -Wl,-soname,testlib -o testlib.so -fPIC testC.c -ljson-c
 # For requirements :
 pip install -r requirements.txt
 
-
 python setup.py sdist
 
 pip install --upgrade urllib3
@@ -39,4 +38,8 @@ pip install -r requirements.txt
 
 sudo python3 setup.py clean --all
 
-pip install .
+pip install . --versbose
+
+tree_launch
+
+pyinstaller --onefile hello.py
