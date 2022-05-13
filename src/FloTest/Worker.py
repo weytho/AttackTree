@@ -56,8 +56,12 @@ class Worker(QObject):
         my_function.mainfct.restype = ctypes.c_void_p
         my_function.mainfct.argtypes = [ctypes.c_char_p]
 
+        print("WHUT")
+
         fulllist = FullList.from_address(my_function.mainfct(s, 0))
         newlist = CustomList.from_address(fulllist.nl)
+
+        print("WHAT")
 
         node_list_uniq = []
         node_list_uniq_cm = []
@@ -65,12 +69,15 @@ class Worker(QObject):
         # .decode('utf-8') better way ?
         if newlist != None :
             tmp_node = CustomNode.from_address(newlist.data)
+            print("WOAOOOW")
             newdict = {'type': tmp_node.type.decode('utf-8'),'leaf': tmp_node.leaf, 'root': tmp_node.root, 'cost': tmp_node.cost, 'prob': tmp_node.prob, 'CM': tmp_node.CM, 'variable': tmp_node.variable.decode('utf-8')}
 
+            print("WOAW")
             newtuple = (tmp_node.title.decode('utf-8'), newdict)
+            print("WOW")
             self.node_list.append(newtuple)
 
-            if( newdict['type'] == 'CntMs' ):
+            if( newdict['type'] == 'CtMs' ):
                 if newdict['variable'] not in node_list_uniq_cm:
                     node_list_uniq_cm.append(newdict['variable'])
             elif( newdict['leaf'] == 1 ):
@@ -83,12 +90,13 @@ class Worker(QObject):
                 newlist = CustomList.from_address(newlist.next)
                 tmp_node = CustomNode.from_address(newlist.data)
                 newdict = {'type': tmp_node.type.decode('utf-8'),'leaf': tmp_node.leaf, 'root': tmp_node.root, 'cost': tmp_node.cost, 'prob': tmp_node.prob, 'CM': tmp_node.CM, 'variable': tmp_node.variable.decode('utf-8')}
-
+                print("AAAAAAAAAAAAAAAAAAAAA")
                 newtuple = (tmp_node.title.decode('utf-8'), newdict)
+                print("BBBBBBBBBBBBBBBBBBBBBBBBB")
                 if newtuple not in self.node_list:
                     self.node_list.append(newtuple)
 
-                if( newdict['type'] == 'CntMs' ):
+                if( newdict['type'] == 'CtMs' ):
                     if newdict['variable'] not in node_list_uniq_cm:
                         node_list_uniq_cm.append(newdict['variable'])
                 elif( newdict['leaf'] == 1 ):
@@ -98,6 +106,8 @@ class Worker(QObject):
                         node_list_uniq.append(newtuple[0])
 
         newEdgeList = CustomList.from_address(fulllist.el)
+
+        print("CCCCCCCCCCCCCCCCCCCc")
 
         if newEdgeList != None :
             tmp_node = EdgeNode.from_address(newEdgeList.data)

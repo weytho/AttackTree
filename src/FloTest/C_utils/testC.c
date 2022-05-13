@@ -87,9 +87,12 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
          }
          char buf[101];
          snprintf(buf, sizeof(buf), "%s_%s", json_object_get_string(CMtitle), json_object_get_string(action));
+         printf("FUNCTION : 1ba \n");
          strcpy(CMnode->title, buf);
          strcpy(CMnode->variable, json_object_get_string(CMtitle));
-         strcpy(CMnode->type, "CntMs");
+         printf("FUNCTION : 1bb \n");
+         strncpy(CMnode->type, "CtMs", (sizeof CMnode->type));
+         printf("FUNCTION : 1bc \n");
          if (hasCost){
             CMnode->cost = json_object_get_int(CMcost);
          } else {

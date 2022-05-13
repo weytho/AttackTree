@@ -34,6 +34,7 @@ try:
     from SMTWorker import *
     from randomTree import *
     from FreqComparator import frequency_comparator
+    from SolutionSorter import sorter
 except ImportError:
     # From package
     from FloTest.Worker import *
@@ -42,6 +43,7 @@ except ImportError:
     from FloTest.SMTWorker import *
     from FloTest.randomTree import *
     from FloTest.FreqComparator import frequency_comparator
+    from FloTest.SolutionSorter import sorter
 
 from PyQt5.QtWidgets import (
     QApplication, QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QLabel, QSpinBox, QWidget, QGridLayout, QListWidget, QListWidgetItem
@@ -188,6 +190,14 @@ class Window(QWidget):
         toolButton.clicked.connect(self.outputClear)
         toolBar.addWidget(toolButton)
         self.clear_button = toolButton
+
+        toolButton = QToolButton()
+        toolButton.setText("Use reduced solutions")
+        toolButton.setCheckable(True)
+        toolButton.setAutoExclusive(False)
+        toolButton.clicked.connect(self.reduceSolutions)
+        toolBar.addWidget(toolButton)
+        self.reduce_button = toolButton
 
         toolBar.addSeparator()
         toolButton = QToolButton()
@@ -372,6 +382,7 @@ class Window(QWidget):
         self.uniq_node_list = None
         self.uniq_node_list_cm = None   
         self.useTseitin = False
+        self.values_array = None
 
     ## Creation of the Digraph using Networkx and Pyvis :
     #   Create graph from given information by adding logic nodes,
@@ -387,11 +398,11 @@ class Window(QWidget):
 
         g = nx.DiGraph()
         g.add_nodes_from(ln)
-        #print(ln)
-        #print(le)
+        print(ln)
+        print(le)
 
         types = [(u, d['type']) for (u, d) in g.nodes(data=True)]
-        counter_list = [u for (u, d) in g.nodes(data=True) if d['type'] == 'CntMs']
+        counter_list = [u for (u, d) in g.nodes(data=True) if d['type'] == 'CtMs']
        
         types_dict= {}
 
@@ -495,7 +506,7 @@ class Window(QWidget):
             title_str = n + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob'])
             #if d['CM'] == 1:
             #    nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str, group="test")
-            if d['type'] == 'CntMs':
+            if d['type'] == 'CtMs':
                 nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=d['variable'], shape='box', title=d['variable'] + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob']), group="cm")
             elif (d['leaf'] == 1):
                 nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str, group="leaf")
@@ -554,7 +565,7 @@ class Window(QWidget):
             self.pathFile.setText(fileName)
         else:
             fileName = self.pathFile.toPlainText()
-            if not fileName :
+            if not fileName or not os.path.isfile(fileName):
                 return
 
         self.thread = QThread()
@@ -637,25 +648,36 @@ class Window(QWidget):
                 self.result_layout.setCurrentWidget(self.tableSol)
                 
                 self.tableSol.clear()
+
+                full_header = copy.deepcopy(self.var_array)
+                if self.values_array is not None:
+                    full_header.insert(0,"%SOL%")
+
                 #Row count
                 self.tableSol.setRowCount(1) 
                 #Column count
-                self.tableSol.setColumnCount(len(self.var_array))
+                self.tableSol.setColumnCount(len(full_header))
 
-                self.tableSol.setHorizontalHeaderLabels(self.var_array)
-                for pos2, row in enumerate(self.sol_array[index]):
-                    if row >= 0:
-                        item = QtWidgets.QTableWidgetItem(("True"))
-                    else:
-                        item = QtWidgets.QTableWidgetItem(("False"))
+                self.tableSol.setHorizontalHeaderLabels(full_header)
+
+                if self.values_array is not None:
+                    item = QtWidgets.QTableWidgetItem(str(self.values_array[index]))
                     item.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
-                    self.tableSol.setItem(0, pos2, item)
+                    self.tableSol.setItem(0, 0, item)
+
+                for pos2, row in enumerate(self.boolean_sol_arr[index]):
+                    item = QtWidgets.QTableWidgetItem(row)
+                    item.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    if self.values_array is not None:
+                        self.tableSol.setItem(0, pos2 + 1, item)
+                    else:
+                        self.tableSol.setItem(0, pos2, item)
                 #self.tracesFound.repaint()
                 ok_list = []
                 not_list = []
                 old_nodes = copy.deepcopy(self.current_network.nodes)
-                for i, v in enumerate(self.sol_array[index]) :
-                    if v >= 0 :
+                for i, v in enumerate(self.boolean_sol_arr[index]) :
+                    if v == "True" :
                         ok_list.append(self.var_array[i])
                     else:
                         not_list.append(self.var_array[i])
@@ -1012,6 +1034,7 @@ class Window(QWidget):
             i = QListWidgetItem(str(self.var_array))
             i.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled|Qt.ItemIsEditable)
             list.addItem(i)
+            print(self.boolean_sol_arr)
             for i in self.boolean_sol_arr:
                 item = QListWidgetItem(str(i))
                 item.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled|Qt.ItemIsEditable)
@@ -1074,6 +1097,7 @@ class Window(QWidget):
     def SMTcleaning(self, type):
         self.sol_array = self.worker.sol_array
         self.var_array = self.worker.var_array
+        self.values_array = self.worker.values_array
 
         boolean_array = []
         for l1 in self.sol_array:
@@ -1085,6 +1109,9 @@ class Window(QWidget):
                     l.append("False")
             boolean_array.append(l)
         self.boolean_sol_arr = boolean_array
+        self.boolean_sol_array_full = boolean_array
+        self.boolean_sol_array_reduced = sorter(boolean_array)
+        self.reduce_button.setChecked(False)
 
         # to csv file
         with open("res/solutionsSMT.csv", "wt") as fp:
@@ -1104,7 +1131,7 @@ class Window(QWidget):
 
     def compareTrees(self):
         self.comp = QDialog()
-        self.comp.setWindowTitle("Left Tree Implies Right Tree")
+        self.comp.setWindowTitle("Left Tree Included In Right Tree")
 
         layout = QHBoxLayout()
 
@@ -1171,7 +1198,7 @@ class Window(QWidget):
         self.comp.show()
 
     def compareFrequency(self):
-        frequency_comparator(self.basic_nodes, self.basic_edges, self.current_network, self.current_digraph, self.sol_array, self.var_array)
+        frequency_comparator(self.basic_nodes, self.basic_edges, self.current_network, self.current_digraph, self.boolean_sol_arr, self.var_array)
     
     def showResults(self):
         if hasattr(self.comparator, 'var_array3'):
@@ -1244,6 +1271,7 @@ class Window(QWidget):
     def cleaning(self, bool_plot=0):
         self.sol_array = self.worker.sol_array
         self.var_array = self.worker.var_array
+        self.values_array = None
 
         boolean_array = []
         for l1 in self.sol_array:
@@ -1255,6 +1283,9 @@ class Window(QWidget):
                     l.append("False")
             boolean_array.append(l)
         self.boolean_sol_arr = boolean_array
+        self.boolean_sol_array_full = boolean_array
+        self.boolean_sol_array_reduced = sorter(boolean_array)
+        self.reduce_button.setChecked(False)
 
         # to csv file
         with open("res/solutions.csv", "wt") as fp:
@@ -1312,6 +1343,18 @@ class Window(QWidget):
         self.buttonParse.setEnabled(True)
         self.rndtree_button.setEnabled(True)
         self.buttonImportJson.setEnabled(True)
+
+    def reduceSolutions(self):
+        if self.reduce_button.isChecked():
+            used_array = self.boolean_sol_array_reduced
+            print(used_array)
+        else:
+            used_array = self.boolean_sol_array_full
+            print(used_array)
+        self.boolean_sol_arr = used_array
+        self.sol_spin.setMinimum(0)
+        self.sol_spin.setMaximum(len(used_array) - 1)
+        self.sol_button.setText("Solve (" + str(len(used_array)) + ")")
 
     ## Show Error Pop-up QMessageBox :
     #   Message of a detected error and its type

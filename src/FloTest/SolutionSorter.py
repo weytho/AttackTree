@@ -6,8 +6,7 @@ def sorter(l):
     ln = len(l[0])
     slist = []
     slist.append(l[0])
-    l.remove(l[0])
-    for e in l:
+    for e in l[1:]:
         rmlist = []
         toadd = 1
         for e2 in slist:
@@ -34,10 +33,10 @@ def cmp(l1,l2,ln):
     flag2 = 1
     for i in range(0,ln):
         # Can not be worse
-        if l1[i]==False and l2[i]==True:
+        if l1[i]=='False' and l2[i]=='True':
             flag2 = 0
         # Not better OU autre sol 
-        if l1[i]==True and l2[i]==False:
+        if l1[i]=='True' and l2[i]=='False':
             flag1 = 0
     if flag1:
         return 1
@@ -47,11 +46,22 @@ def cmp(l1,l2,ln):
 
 if __name__ == "__main__":
     test = []
-    test.append([True, False, False, True])
-    test.append([True, True, False, True])
-    test.append([False, False, True, False])
-    test.append([True, False, True, False])
-    test.append([True, False, True, True])
-    test.append([True, True, True, False])
+    test.append(['True', 'False', 'False', 'True'])
+    test.append(['True', 'True', 'False', 'True'])
+    test.append(['False', 'False', 'True', 'False'])
+    test.append(['True', 'False', 'True', 'False'])
+    test.append(['True', 'False', 'True', 'True'])
+    test.append(['True', 'True', 'True', 'False'])
 
     print(sorter(test))
+
+    test2 = []
+    test2.append(['True', 'False', 'False'])
+    test2.append(['False', 'False', 'True'])
+    test2.append(['False', 'True', 'False'])
+    test2.append(['True', 'False', 'True'])
+    test2.append(['False', 'True', 'True'])
+    test2.append(['True', 'True', 'False'])
+    test2.append(['True', 'True', 'True'])
+
+    print(sorter(test2))

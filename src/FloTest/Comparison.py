@@ -217,7 +217,7 @@ class Comparison():
         g.add_nodes_from(ln)
 
         types = [(u, d['type']) for (u, d) in g.nodes(data=True)]
-        counter_list = [u for (u, d) in g.nodes(data=True) if d['type'] == 'CntMs']
+        counter_list = [u for (u, d) in g.nodes(data=True) if d['type'] == 'CtMs']
        
         types_dict= {}
 
@@ -312,7 +312,7 @@ class Comparison():
         for (n, d) in ln:
             title_str = n + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob'])
 
-            if d['type'] == 'CntMs':
+            if d['type'] == 'CtMs':
                 nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=d['variable'], shape='box', title=d['variable'] + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob']), group="cm")
             elif (d['leaf'] == 1):
                 nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str, group="leaf")

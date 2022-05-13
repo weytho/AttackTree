@@ -30,7 +30,7 @@ def frequency_comparator(nodes, edges, current_network, current_digraph, sol_arr
 
     g = nx.DiGraph()
 
-    good_to_show = [i[0] for i in nodes if i[1]["type"] != "CntMs"]
+    good_to_show = [i[0] for i in nodes if i[1]["type"] != "CtMs"]
     g.add_nodes_from(good_to_show)
     g.add_edges_from([i for i in edges if i[1] in good_to_show and i[0] in good_to_show])
     pos1 = nx.nx_agraph.graphviz_layout(g, prog='dot', args='')
@@ -63,10 +63,10 @@ def frequency_comparator(nodes, edges, current_network, current_digraph, sol_arr
 def compute_values(nodes, current_network, current_digraph, sol_array, var_array):
 
     #print(nodes)
-    counter = {i[0]:0 for i in nodes if i[1]["type"] != "CntMs"}
+    counter = {i[0]:0 for i in nodes if i[1]["type"] != "CtMs"}
 
     for index in range(len(sol_array)):
-        values = {i[0]:False for i in nodes if i[1]["type"] != "CntMs"}
+        values = {i[0]:False for i in nodes if i[1]["type"] != "CtMs"}
         
         values_logic = {i[0]:False for i in current_digraph.nodes(data=True) if i[0] not in values}
 
@@ -74,7 +74,7 @@ def compute_values(nodes, current_network, current_digraph, sol_array, var_array
         not_list = []
         
         for i, v in enumerate(sol_array[index]) :
-            if v >= 0 :
+            if v == "True" :
                 ok_list.append(var_array[i])
             else:
                 not_list.append(var_array[i])

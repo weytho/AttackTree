@@ -7,7 +7,7 @@
 # 3. Pass results from one solver to another
 #
 from math import inf
-from pysmt.shortcuts import Solver, Symbol, Real, Plus, And, Equals, Ite, Times, GE, LE
+from pysmt.shortcuts import Solver, Symbol, Real, Plus, And, Equals, Ite, Times, GT, LT
 from pysmt.typing import REAL
 from pysmt.parsing import parse
 import z3
@@ -17,13 +17,24 @@ from fractions import Fraction
 
 def SMTformating(solutions, list_var):
     bool_only_list = []
+    values_array = []
     for l in solutions:
         tmp = [-1]*len(list_var)
         for e in l:
+            print(e)
+            print(type(e))
             if z3.is_true(l[e]):
                 tmp[list_var.index(str(e()))] = 1
+            elif e.name() == "%SOL%":
+                values_array.append(l[e].as_long())
         bool_only_list.append(tmp)
-    return list_var, bool_only_list
+
+    print(list_var)
+    print()
+    print(bool_only_list)
+    print()
+    print(values_array)
+    return list_var, bool_only_list, values_array
 
 def SMTcost(list_var, list_cost, formula, upper_bound=None):
     formula = formula.replace('~', '!')
@@ -40,7 +51,7 @@ def SMTcost(list_var, list_cost, formula, upper_bound=None):
     get_all = False
 
     if upper_bound != None:
-        f = And(f, LE(SOL, Real(upper_bound)))
+        f = And(f, LT(SOL, Real(upper_bound)))
         get_all = True
     print("")
     print("@@@@@@@@@@ SMT SOLVER Z3 @@@@@@@@@@")
@@ -83,8 +94,8 @@ def SMTcost(list_var, list_cost, formula, upper_bound=None):
                 block.append(c != model[d])
             o.add(z3.Or(block))
 
-        vars, sols = SMTformating(solutions, list_var)
-        return vars, sols, best
+        vars, sols, values = SMTformating(solutions, list_var)
+        return vars, sols, best, values
 
 def SMTproba(list_var, list_proba, formula, lower_bound=0):
     formula = formula.replace('~', '!')
@@ -102,7 +113,7 @@ def SMTproba(list_var, list_proba, formula, lower_bound=0):
     get_all = False
 
     if lower_bound > 0:
-        f = And(f, GE(SOL, Real(lower_bound)))
+        f = And(f, GT(SOL, Real(lower_bound)))
         get_all = True
     print("")
     print("@@@@@@@@@@ SMT SOLVER Z3 @@@@@@@@@@")
@@ -145,8 +156,8 @@ def SMTproba(list_var, list_proba, formula, lower_bound=0):
                 block.append(c != model[d])
             o.add(z3.Or(block))
 
-        vars, sols = SMTformating(solutions, list_var)
-        return vars, sols, best
+        vars, sols, values = SMTformating(solutions, list_var)
+        return vars, sols, best, values
 
 if __name__ == "__main__":
 
