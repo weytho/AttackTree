@@ -398,8 +398,6 @@ class Window(QWidget):
 
         g = nx.DiGraph()
         g.add_nodes_from(ln)
-        print(ln)
-        print(le)
 
         types = [(u, d['type']) for (u, d) in g.nodes(data=True)]
         counter_list = [u for (u, d) in g.nodes(data=True) if d['type'] == 'CtMs']
@@ -483,8 +481,6 @@ class Window(QWidget):
             for (u, d) in logic_nodes:
                 if u == edge[0]:
                     if d['inputNbr'] >= 0 :
-                        #print("WHUT")
-                        #print(d)
                         d['inputNbr'] = d['inputNbr'] + 1
                     break
             new_le.append(edge)
@@ -698,14 +694,6 @@ class Window(QWidget):
 
                 self.cur_net_nodes_dict = {d['id']: d for d in self.current_network.nodes}
                 self.cur_digraph_nodes_dict = dict(self.current_digraph.nodes(data=True))
-                print(self.cur_net_nodes_dict)
-                print(self.current_network.nodes)
-                print("######")
-                print(ok_list)
-                print("######")
-                print(not_list)
-                print("######")
-                print(disabled_node)
 
                 for n in self.current_network.nodes :
                     if n['id'] in ok_list or (n['id'][0] == '~' and n['id'][1:] not in ok_list):
@@ -907,8 +895,6 @@ class Window(QWidget):
             if l[0] == cm_name:
                 list_to_toggle.append(u.rsplit('_', 1)[0])
 
-        print(list_to_toggle)
-
         for n in list_to_toggle:
             # TODO Voir quoi faire pour
             # les noeuds qui ne sont pas des leafs !!
@@ -944,7 +930,6 @@ class Window(QWidget):
     #  Launch a new Worker with the assumptions list
     #  @param self The object pointer.
     def computeUsingAssumptions(self):
-        print(self.mandatory_cm_counter)
 
         self.thread = QThread()
         self.worker = Worker()
@@ -1034,7 +1019,7 @@ class Window(QWidget):
             i = QListWidgetItem(str(self.var_array))
             i.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled|Qt.ItemIsEditable)
             list.addItem(i)
-            print(self.boolean_sol_arr)
+
             for i in self.boolean_sol_arr:
                 item = QListWidgetItem(str(i))
                 item.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled|Qt.ItemIsEditable)
@@ -1291,7 +1276,6 @@ class Window(QWidget):
         with open("res/solutions.csv", "wt") as fp:
             writer = csv.writer(fp, delimiter=",")
             writer.writerow(self.var_array)  # write header
-            #print(boolean_array)
             writer.writerows(boolean_array)
 
         self.sol_spin.setMinimum(0)
@@ -1347,10 +1331,8 @@ class Window(QWidget):
     def reduceSolutions(self):
         if self.reduce_button.isChecked():
             used_array = self.boolean_sol_array_reduced
-            print(used_array)
         else:
             used_array = self.boolean_sol_array_full
-            print(used_array)
         self.boolean_sol_arr = used_array
         self.sol_spin.setMinimum(0)
         self.sol_spin.setMaximum(len(used_array) - 1)

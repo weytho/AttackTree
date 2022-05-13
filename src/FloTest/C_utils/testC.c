@@ -64,7 +64,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
    // Compute CM 
    int totCMcost = 0;
    int cnt = 0;
-   printf("FUNCTION : 1 \n");
+
    if(CM != NULL){
    int CMlength = json_object_array_length(CM);
       while (cnt < CMlength){
@@ -78,8 +78,6 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
          bool hasProb = json_object_object_get_ex(CMchild, "CMprob", &CMprob);
          //totCMcost += json_object_get_int(CMcost);
 
-         printf("FUNCTION : 1a \n");
-
          // ADD CM to nodes
          Node *CMnode = malloc(sizeof(Node));
          if (CMnode == NULL){
@@ -87,19 +85,15 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
          }
          char buf[101];
          snprintf(buf, sizeof(buf), "%s_%s", json_object_get_string(CMtitle), json_object_get_string(action));
-         printf("FUNCTION : 1ba \n");
          strcpy(CMnode->title, buf);
          strcpy(CMnode->variable, json_object_get_string(CMtitle));
-         printf("FUNCTION : 1bb \n");
          strncpy(CMnode->type, "CtMs", (sizeof CMnode->type));
-         printf("FUNCTION : 1bc \n");
+
          if (hasCost){
             CMnode->cost = json_object_get_int(CMcost);
          } else {
             CMnode->cost = 0;
          }
-
-         printf("FUNCTION : 1b \n");
 
          CMnode->leaf = 1;
          CMnode->root = 0;
@@ -122,8 +116,6 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
             *edges = elist_create(CMed);
          else
             *edges = elist_add(*edges, CMed);
-
-         printf("FUNCTION : 1c \n");
 
          if(CMformula == 1){
             // ADD CM to formula
@@ -169,37 +161,30 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
             runner->next = next;
          }
 
-         printf("FUNCTION : 1d \n");
-
          cnt++;
       }
    }
-   printf("FUNCTION : 12 \n");
+
    // CREATE + FILL THE NODE
    Node *node = malloc(sizeof(Node));
    if (node == NULL){
       printf("[Node] Malloc error\n");
    }
    char * type_string = (char*) json_object_get_string(type);
-   printf("FUNCTION : 120 \n");
-   printf("###%s###\n", json_object_get_string(action));
+
    strcpy(node->title, json_object_get_string(action));
-   printf("FUNCTION : 121a \n");
    strcpy(node->variable, json_object_get_string(action));
-   printf("FUNCTION : 121b \n");
    strcpy(node->type, type_string);
-   printf("FUNCTION : 121c \n");
    node->root = root;
-   printf("FUNCTION : 121 \n");
+
    node->CM = 0;
    if(CM != NULL){
       int CMlength = json_object_array_length(CM);
-      printf("FUNCTION : 122 \n");
       if(CMlength >0){
          node->CM = 1;
       }
    }
-   printf("FUNCTION : 13 \n");
+
    if (strcmp(type_string, "LEAF" )){
       node->leaf = 0;
       node->prob = 1;
@@ -392,11 +377,11 @@ FList * mainfct(char * path, int with_cm) {
 	int count = 0;
 	while(runner != NULL){
 		count ++;
-		printf("count : %d \n", count);
-		printf("Node title : %s \n", runner->data->title);
-		printf("Node type  : %s \n", runner->data->type);
-		printf("Node root  : %d \n", runner->data->root);
-		printf("Node leaf  : %d \n", runner->data->leaf);
+		//printf("count : %d \n", count);
+		//printf("Node title : %s \n", runner->data->title);
+		//printf("Node type  : %s \n", runner->data->type);
+		//printf("Node root  : %d \n", runner->data->root);
+		//printf("Node leaf  : %d \n", runner->data->leaf);
 		runner = runner->next;
 	}
 
@@ -404,9 +389,9 @@ FList * mainfct(char * path, int with_cm) {
    count = 0;
    while(runner2 != NULL){
       count ++;
-      printf("count : %d \n", count);
-      printf("Edges parent : %s \n", runner2->data->parent);
-      printf("Edges child  : %s \n", runner2->data->child);
+      //printf("count : %d \n", count);
+      //printf("Edges parent : %s \n", runner2->data->parent);
+      //printf("Edges child  : %s \n", runner2->data->child);
       runner2 = runner2->next;
    }
 
@@ -434,9 +419,9 @@ FList * mainfct(char * path, int with_cm) {
    }
    *fl = init;
 
-   printf("Total cost is %d\n",ret->cost);
-   printf("Proba  is %f\n",ret->prob);
-   printf("Esp  is %f\n",ret->esp);
+   //printf("Total cost is %d\n",ret->cost);
+   //printf("Proba  is %f\n",ret->prob);
+   //printf("Esp  is %f\n",ret->esp);
 
    return fl;
 }
@@ -457,10 +442,10 @@ json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mod
    //json_object_object_add(parent, "CM", json_object_new_array());
 
    if(ht_CM != NULL){
-      int i = NameIndex(ht_CM, tree->n->title);//current->n->title);
-      printf("NAME IS  :: = ((%s)) \n", tree->n->title);
+      int i = NameIndex(ht_CM, tree->n->title);
+
       NodeP * Nn = getH(ht_CM, i);
-      printf("NAME NODE P IS  :: = ((%s)) \n", Nn->Name);
+ 
       if(Nn != NULL){
 
          NodeCM * CM_list = Nn->CMlist;
@@ -472,10 +457,8 @@ json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mod
                //char buf[101];
                //snprintf(buf, sizeof(buf), "%s_%s", CM_list->CMtitle, Nn->Name);
                json_object_object_add(tmp_root_cm, "CMtitle", json_object_new_string(CM_list->CMtitle));
-               printf("NAME :: = (%s) \n", CM_list->CMtitle);
+
                if(boolean_mode == 0){
-                  printf("COST = %d \n", CM_list->cost);
-                  printf("PROB = %f \n", CM_list->prob);
                   json_object_object_add(tmp_root_cm, "CMcost", json_object_new_int(CM_list->cost));
                   json_object_object_add(tmp_root_cm, "CMprob", json_object_new_double(CM_list->prob));
                }
@@ -527,7 +510,6 @@ void create_Json_file(DLL_List * wholeTree, int boolean_mode, HashTable *ht_CM, 
    json_object_put(root);
 }
 
-///////////////////////
 int parser(char * toParse, char * prop_text, char * counter_text, char * filename) {
    printf("FUNCTION : parser \n");
    if(toParse == NULL || is_empty(toParse)){
@@ -545,16 +527,12 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
    struct HashTable *ht_CM = NULL;
 
    if(boolean_mode == 0){
-      printf("BOOLEAN MODE 000\n");
       ht_properties = parse_properties(prop_text);
-
    }
 
 
    if(!is_empty(counter_text)){
-
       ht_CM = parse_countermeasures(counter_text, ht_properties);
-
    }
 
 
@@ -592,15 +570,15 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
 
             char *ptr3 = trimwhitespace(strtok_r(NULL, delim3, &saveptr2));   
             replace_spaces(ptr3);      
-            printf("HELLO : (%s) : (%s)\n", ptr2, ptr3);
+
             DLL_List * dll_node;
             if( isInList(whole_list, ptr2) == 0){
-               printf("TEP \n");
+
                dll_node = createDLLNode(ptr2, ptr3);
                whole_list = addToEndList(whole_list, dll_node);
                //printDLL_List(whole_list);
             } else {
-               printf("TEP2 \n");
+
                parent_is_in = 1;
                dll_node = getFromList(whole_list, ptr2);
                // TODO CHECK FOR REWRITE
@@ -625,7 +603,7 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
 
             while (ptr2 != NULL)   {
                if (!is_empty(ptr2)) {
-                  //printf("INTEP 3\n");
+
                   cnt = cnt + 1;
                   if( is_NOT && cnt > 1){
                      free(RawText);
@@ -638,7 +616,6 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
                   if( isInList(whole_list, ptr2) == 0 ){
                      tmp_dll = createDLLNode(ptr2, "LEAF");
                   } else {
-                     printf("TEP 4\n");
                      
                      tmp_dll = getFromList(whole_list, ptr2);
 
@@ -666,28 +643,19 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
                         // Pas suffisant
                         tmp_dll->next = NULL;
                      } else {
-                        printf("TEP 8\n");
                         DLL_List * new_tmp_dll = malloc(sizeof(DLL_List));
                         new_tmp_dll->n = tmp_dll->n; //copy_node(tmp_dll->n); //tmp_dll->n;
                         new_tmp_dll->children = tmp_dll->children;
                         new_tmp_dll->parents = tmp_dll->parents;
                         new_tmp_dll->next = NULL;
                         tmp_dll = new_tmp_dll;
-
                      }
                      
                   }
 
-                  //printf("DLLL 3\n");
-                  printf("we have : %s with : %s\n", dll_node->n->title, tmp_dll->n->title);
-                  
-                  // TODO REFAIRE PLUS PROPREMENT
-                  //printf("ADD CHILDREN\n");
-
                   addChildren(dll_node, tmp_dll, whole_list);
 
                   //printDLL_total(whole_list);
-                  //printf("ADD PARENTS\n");
                   
                   addParents(tmp_dll, dll_node);
                }
@@ -707,7 +675,6 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
 
    free(RawText);
 
-   printf("ENNNNNNNND\n");
    printDLL_total(whole_list);
 
    if(whole_list->next != NULL){
@@ -737,7 +704,7 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
 
    DLL_free_from_top(whole_list);
 
-   printf("ENNNNNNNND222222222222\n");
+   printf("END\n");
 
 	return 0;
 }
@@ -749,9 +716,6 @@ int main (int argc, char * argv[]) {
 	//mainfct(path);
 	//CustomList * l = getList();
 	//CustomNode * n = getNode();
-	//printf("START");
-	//printf("l pointer : %p", (void *) l);
-	//printf("HHHHHHHHHHHHHH %s, ",l->data->name);
 	//freeNode(n);
 	//freeList(l);
 

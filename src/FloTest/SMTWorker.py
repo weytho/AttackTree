@@ -22,7 +22,6 @@ class SMTWorker(QObject):
     finished = pyqtSignal()
 
     def run(self):
-        print("SMT WORKER")
 
         list_cost = [Fraction(str(x)) for x in self.cost_list]
         list_proba = [Fraction(str(x)) for x in self.proba_list]
@@ -39,13 +38,13 @@ class SMTWorker(QObject):
                 list_without_not.append(s)
 
         if self.type == 0:
-            print("COST")
+            print("SMT WORKER : COST")
             if self.limit:
                 self.var_array, self.sol_array, self.best_value, self.values_array = SMTcost(list_without_not, list_cost, formula, Fraction(str(self.limit)))
             else:
                 self.var_array, self.sol_array, self.best_value, self.values_array = SMTcost(list_without_not, list_cost, formula)
         else:
-            print("PROBA")
+            print("SMT WORKER : PROBA")
             if self.limit:
                 self.var_array, self.sol_array, self.best_value, self.values_array = SMTcost(list_without_not, list_cost, formula, Fraction(str(self.limit)))
             else:

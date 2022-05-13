@@ -21,32 +21,25 @@ def SMTformating(solutions, list_var):
     for l in solutions:
         tmp = [-1]*len(list_var)
         for e in l:
-            print(e)
-            print(type(e))
             if z3.is_true(l[e]):
                 tmp[list_var.index(str(e()))] = 1
             elif e.name() == "%SOL%":
                 values_array.append(l[e].as_long())
         bool_only_list.append(tmp)
 
-    print(list_var)
-    print()
-    print(bool_only_list)
-    print()
-    print(values_array)
     return list_var, bool_only_list, values_array
 
 def SMTcost(list_var, list_cost, formula, upper_bound=None):
     formula = formula.replace('~', '!')
     list_symbols = [Symbol(s) for s in list_var]
-    print(list_symbols)
+
     SOL = Symbol("%SOL%", REAL)
     zero = Real(0)
     list_cond_cost = [Ite(s, Real(c), zero) for s, c in zip(list_symbols, list_cost)]
-    print(list_cond_cost)
+
     problem = parse(formula)
     sum = Plus(list_cond_cost)
-    print(sum)
+
     f = And(problem, Equals(SOL, sum))
     get_all = False
 
@@ -100,15 +93,15 @@ def SMTcost(list_var, list_cost, formula, upper_bound=None):
 def SMTproba(list_var, list_proba, formula, lower_bound=0):
     formula = formula.replace('~', '!')
     list_symbols = [Symbol(s) for s in list_var]
-    print(list_symbols)
+
     SOL = Symbol("%SOL%", REAL)
     one = Real(1)
     list_and_proba = [Ite(s, Real(c), one) for s, c in zip(list_symbols, list_proba)]
-    print(list_and_proba)
+
     problem = parse(formula)
     # TODO CHANGE TO ENABLE PROBA
     sum = Times(list_and_proba)
-    print(sum)
+
     f = And(problem, Equals(SOL, sum))
     get_all = False
 

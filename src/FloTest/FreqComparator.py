@@ -15,14 +15,9 @@ def frequency_comparator(nodes, edges, current_network, current_digraph, sol_arr
     else:
         factor = 1
 
-    print(factor)
-
     current_l = round(15 * factor)
     current_w = round(7 * factor)
     current_dpi = round(100 / factor)
-    print(current_l)
-    print(current_w)
-    print(current_dpi)
 
     plt.ion()
     plt.clf()
@@ -62,7 +57,6 @@ def frequency_comparator(nodes, edges, current_network, current_digraph, sol_arr
 
 def compute_values(nodes, current_network, current_digraph, sol_array, var_array):
 
-    #print(nodes)
     counter = {i[0]:0 for i in nodes if i[1]["type"] != "CtMs"}
 
     for index in range(len(sol_array)):

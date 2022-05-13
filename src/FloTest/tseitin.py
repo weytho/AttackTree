@@ -9,7 +9,7 @@ except ImportError:
     from FloTest.SATsolver import sat_solver
 
 def recur_formula(formula, list_subformulas, dict_subs, var_cnt, set_var):
-    #print("Current Formula : " + str(formula))
+
     if(type(formula) is Symbol):
         set_var.add(str(formula))
         return var_cnt

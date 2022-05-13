@@ -14,7 +14,6 @@ class ParserWorker(QObject):
     def get_file_so(self):
         dirname = os.path.dirname(__file__)
         for file in os.listdir(dirname):
-            print(file)
             if file.startswith("testlib") and file.endswith(".so"):
                 self.file_so = file
                 break
@@ -51,10 +50,6 @@ class ParserWorker(QObject):
             my_function.parser.argtypes = [ctypes.c_char_p]
             ret = my_function.parser(s, "", s2, file)
         else:
-            #print(new_s2[0])
-            #print(new_s3[0])
-            #print(new_s3[1])
-
             # sanitize and check input
             s = ctypes.create_string_buffer(new_s2[0].encode('utf-8'))
             s2 = ctypes.create_string_buffer(new_s3[0].encode('utf-8'))
@@ -64,13 +59,12 @@ class ParserWorker(QObject):
             my_function.parser.argtypes = [ctypes.c_char_p]
             ret = my_function.parser(s, s3, s2, file)
 
-        #time.sleep(2)
         self.finished.emit(ret)
 
         if ret == 0 :
-            print("NICE WE GOT HERE")
-            pass
+            print("Parser is OK")
+            #pass
         else:
-            print("ERROR IN PARSER")
+            print("Error in Parser")
             print("Code : " + str(ret))
-            pass
+            #pass

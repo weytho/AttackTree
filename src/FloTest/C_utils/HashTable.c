@@ -222,8 +222,7 @@ int deleteH(HashTable *h, NodeP *n) {
       printf("Negative key for NodeP\n");
       return -1;
    }
-   int hashIndex = hashCodeH(h,key);  
-   //printf("[deleteH] hashIndex : %d\n",hashIndex);
+   int hashIndex = hashCodeH(h,key);
 
    //move in array until an empty
    while(h->hashArray[hashIndex] !=-1) {
@@ -333,7 +332,6 @@ void freeH(HashTable *h){
    displayH(h);
 
    printf("Index : %d\n",NodeIndex(h,n5));
-
 
    freeH(h);
    free(n);

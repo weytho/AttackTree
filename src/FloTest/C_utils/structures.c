@@ -200,6 +200,6 @@ double esp(int cost, double prob)
       last = last * (1-prob);
       esp = esp + last; 
    }
-   printf("[ESP] Cost : %d | Prob : %f | Esp : %f \n", cost, prob, esp);
+   //printf("[ESP] Cost : %d | Prob : %f | Esp : %f \n", cost, prob, esp);
    return esp;
 }
