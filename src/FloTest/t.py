@@ -529,8 +529,6 @@ class Window(QWidget):
 
         self.current_network = nt
         self.current_digraph = g
-        
-        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
     ## Action called at the end of the import process :
     #   Clear the figure of the GUI, launch the html graph creation from
@@ -597,6 +595,7 @@ class Window(QWidget):
             self.thread.deleteLater
         else:
             self.buttonImportJson.setEnabled(True)
+            self.buttonReload.setEnabled(True)
 
     ## Action called by the import Grammar button :
     #   Use a file explorer to choose the TXT file to import
@@ -1317,6 +1316,7 @@ class Window(QWidget):
         self.buttonParse.setEnabled(False)
         self.rndtree_button.setEnabled(False)
         self.buttonImportJson.setEnabled(False)
+        self.buttonReload.setEnabled(False)
         self.parser_thread.finished.connect(
             lambda: self.enable_parser()
         )
@@ -1327,6 +1327,7 @@ class Window(QWidget):
         self.buttonParse.setEnabled(True)
         self.rndtree_button.setEnabled(True)
         self.buttonImportJson.setEnabled(True)
+        self.buttonReload.setEnabled(True)
 
     def reduceSolutions(self):
         if self.reduce_button.isChecked():

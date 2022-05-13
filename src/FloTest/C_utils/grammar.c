@@ -413,7 +413,6 @@ void DLL_free_from_top(DLL_List *list){
       return;
    }
 
-   printf("YE PRINTING NOW !\n");
    init_flatten(list);
 }
 
@@ -546,7 +545,7 @@ HashTable * parse_properties(char * prop_text){
       ptr_prop = strtok_r(NULL, delim5, &saveptr3); 
    }
 
-   displayH(ht_properties);
+   //displayH(ht_properties);
    return ht_properties;
 }
 
@@ -674,7 +673,7 @@ HashTable * parse_countermeasures(char * counter_text, HashTable *ht_properties)
    }
 
    printf("END OF PARSER CM ! \n");
-   displayH(ht_CM);
+   //displayH(ht_CM);
    return ht_CM;
 
 }

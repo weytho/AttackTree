@@ -1,2 +1,2 @@
-node0000,node0001,node0002,node001,node002,node010,node011,node100,node1010,node1011,node1012,node11,node200,node201,node210,node211,node220,node221,node222
-True,True,True,True,True,False,False,True,True,False,False,True,True,True,True,True,True,True,True
+node000,node001,node01,node100,node101,node102,node11
+True,False,True,False,False,False,False

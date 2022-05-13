@@ -50,7 +50,7 @@ void freeForm(Formula *l) {
 
 
 CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edges, Formula **form, Node *parent, int root, int CMformula){
-   printf("FUNCTION : JsonReader \n");
+   //printf("FUNCTION : JsonReader \n");
    // READ THE JSON //
    struct json_object *action;
    struct json_object *type;
@@ -427,7 +427,7 @@ FList * mainfct(char * path, int with_cm) {
 }
 
 json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mode, HashTable *ht_CM){
-   printf("FUNCTION : build_json \n");
+   //printf("FUNCTION : build_json \n");
    //printDLL_total(tree);
 
    json_object_object_add(parent, "Action", json_object_new_string(tree->n->title));
@@ -675,7 +675,7 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
 
    free(RawText);
 
-   printDLL_total(whole_list);
+   //printDLL_total(whole_list);
 
    if(whole_list->next != NULL){
       DLL_free_from_top(whole_list);
@@ -687,7 +687,7 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
 
    if( boolean_mode == 0 ){
       printf("BOOLEAN MODE\n");
-      displayH(ht_properties);
+      //displayH(ht_properties);
       set_properties_total(whole_list, ht_properties);
       //freeH(ht_properties);
    }

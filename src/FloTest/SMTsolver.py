@@ -79,7 +79,7 @@ def SMTcost(list_var, list_cost, formula, upper_bound=None):
             elif not get_all and z3.simplify(new_best > best):
                 break
 
-            print(model)
+            #print(model)
             solutions.append(model)
             block = []
             for d in model:
@@ -141,7 +141,7 @@ def SMTproba(list_var, list_proba, formula, lower_bound=0):
             elif not get_all and z3.simplify(new_best < best):
                 break
 
-            print(model)
+            #print(model)
             solutions.append(model)
             block = []
             for d in model:
