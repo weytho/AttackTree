@@ -16,5 +16,6 @@ echo ${FULLDIR} > ${FULLFILE}
 sudo apt-get update  # To get the latest package lists
 sudo apt-get install libjson-c-dev -y
 
-pip install -r requirements.txt
-pip install .
+sudo apt install python3-pip
+sudo pip install -r requirements.txt
+sudo pip install .
