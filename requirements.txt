@@ -1,9 +1,16 @@
+numpy
+cython
+pandas
 matplotlib==3.4.3
 networkx==2.6.3
 PyQt5==5.15.6
+PyQtWebEngine
 pysat==3.0.1
+python-sat
 PySMT==0.9.0
 pyvis==0.1.9
+graphviz
+pygraphviz
 setuptools==52.0.0
 sympy==1.9
 z3-solver==4.8.17.0
