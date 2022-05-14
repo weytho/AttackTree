@@ -17,5 +17,6 @@ sudo apt-get update  # To get the latest package lists
 sudo apt-get install libjson-c-dev -y
 
 sudo apt install python3-pip
-sudo pip install -r requirements.txt
-sudo pip install .
+pip install --upgrade pip
+pip install -r requirements.txt
+pip install .
