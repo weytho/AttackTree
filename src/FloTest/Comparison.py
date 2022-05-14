@@ -148,7 +148,7 @@ class Comparison(QObject):
             self.var_array3 = self.worker3.var_array
             self.sol_array3 = self.worker3.sol_array
             self.boolean_sol_arr3 = []
-            print(self.sol_array3)
+
             # Show on screen
             if len(self.sol_array3) > 0:
                 boolean_array = []
@@ -167,7 +167,7 @@ class Comparison(QObject):
             self.var_array4 = self.worker4.var_array
             self.sol_array4 = self.worker4.sol_array
             self.boolean_sol_arr4 = []
-            print(self.sol_array4)
+
             # Show on screen
             if len(self.sol_array4) > 0:
                 boolean_array = []
