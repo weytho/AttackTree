@@ -353,5 +353,5 @@ class cmpWorker(QObject):
             if var not in self.list_var:
                 self.list_var.append(var)
 
-        self.var_array, self.sol_array = sat_solver(cnf_formula, self.list_var)
+        self.var_array, self.sol_array = sat_solver(cnf_formula, self.list_var, [], -1)
         self.finished.emit()

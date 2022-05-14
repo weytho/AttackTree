@@ -71,6 +71,12 @@ def sat_solver(formula, list_var, assumptions=[], max_val=20):
         l.append(-dict_var[val])
         g.add_clause(l)
 
+    else:
+        l = []
+        val = str(formula)
+        l.append(dict_var[val])
+        g.add_clause(l)
+
     b = g.solve(assumptions=assumptions)
     print(b)
     sol_array = []
@@ -88,3 +94,22 @@ def sat_solver(formula, list_var, assumptions=[], max_val=20):
         sol_array = sorted(sol_array, key=sorter)
 
     return list_var, sol_array
+
+if __name__ == "__main__":
+
+    list_var = ["node", "node2"]
+
+    formula = " ( ( node ) & ( node2 ) ) "
+    #formula = " ( node & node2 ) "
+
+    glob = {}
+    exec('from sympy.core import Symbol', glob) # ok for I, E, S, N, C, O, or Q
+    parsed_formula = parse_expr(formula, global_dict=glob)
+    print("PARSED")
+    print(parsed_formula)
+    cnf_formula = to_cnf(parsed_formula)
+    print("CNF")
+    print(cnf_formula)
+
+    print("SAT SOLVER")
+    print(sat_solver(cnf_formula, list_var, [], -1))

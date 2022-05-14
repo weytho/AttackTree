@@ -113,41 +113,45 @@ class Window(QWidget):
 
         Vlayout_left.addWidget(reload_and_path)
 
+        ##################################
         # Create pyqt toolbar
+        ##################################
         toolBar = QToolBar()
         toolBar.setOrientation(Qt.Vertical)
         toolBar.setFixedWidth(170)
-        
-        toolBar.addSeparator()
-        section_output = QLabel("Output Format")
+
+        section_output = QLabel("SOLVER")
         section_output.setAlignment(Qt.AlignHCenter)
-        section_output.setStyleSheet("font-weight: bold")
+        section_output.setStyleSheet("font-weight: bold; border: 1px solid black;")
         toolBar.addWidget(section_output)
 
-        # Add buttons to toolbar
+        # Generate Random Tree Grammar
         toolButton = QToolButton()
-        toolButton.setText("CNF Formula")
-        toolButton.setCheckable(False)
-        toolButton.setAutoExclusive(True)
-        toolButton.clicked.connect(self.outputCNFformula)
+        toolButton.setText("Random Tree")
+        toolButton.clicked.connect(self.getRandomTree)
         toolBar.addWidget(toolButton)
-        self.cnf_button = toolButton
+        self.rndtree_button = toolButton
 
-        toolButton = QToolButton()
-        toolButton.setText("Complete Formula")
-        toolButton.setCheckable(False)
-        toolButton.setAutoExclusive(True)
-        toolButton.toggle()
-        toolButton.clicked.connect(self.outputCompleteformula)
-        toolBar.addWidget(toolButton)
-        self.complete_button = toolButton
+        random_tree = QWidget()
+        rnd_layout = QHBoxLayout()
+        rnd_layout.setContentsMargins(0, 0, 0, 0)
+        random_tree.setLayout(rnd_layout)
+        toolSpin = QSpinBox()
+        toolSpin.setValue(3)
+        rnd_layout.addWidget(toolSpin)
+        self.rnd_spin_1 = toolSpin
+        toolSpin = QSpinBox()
+        toolSpin.setValue(3)
+        rnd_layout.addWidget(toolSpin)
+        self.rnd_spin_2 = toolSpin
+        toolSpin = QSpinBox()
+        toolSpin.setValue(2)
+        rnd_layout.addWidget(toolSpin)
+        self.rnd_spin_3 = toolSpin
+        toolBar.addWidget(random_tree)
 
+        # Solve Button
         toolBar.addSeparator()
-        section_output = QLabel("SAT solver")
-        section_output.setAlignment(Qt.AlignHCenter)
-        section_output.setStyleSheet("font-weight: bold")
-        toolBar.addWidget(section_output)
-
         solution = QWidget()
         sol_layout = QHBoxLayout()
         sol_layout.setContentsMargins(0, 0, 0, 0)
@@ -165,24 +169,9 @@ class Window(QWidget):
         toolSpinSol = QSpinBox()
         sol_layout.addWidget(toolSpinSol)
         self.sol_spin = toolSpinSol
-
         toolBar.addWidget(solution)
 
-        solver = QWidget()
-        max_layout = QHBoxLayout()
-        solver.setLayout(max_layout)
-
-        toolButton = QLabel("Max SAT Sol")
-        toolButton.setFixedWidth(110)
-        max_layout.addWidget(toolButton)
-        toolSpinMax = QSpinBox()
-        toolSpinMax.setValue(20)
-        toolSpinMax.setRange(-1, 99)
-        max_layout.addWidget(toolSpinMax)
-        self.max_spin = toolSpinMax
-
-        toolBar.addWidget(solver)
-
+        # Clear Button
         toolButton = QToolButton()
         toolButton.setText("Clear")
         toolButton.setCheckable(False)
@@ -191,6 +180,7 @@ class Window(QWidget):
         toolBar.addWidget(toolButton)
         self.clear_button = toolButton
 
+        # Reduced Solutions Button
         toolButton = QToolButton()
         toolButton.setText("Use reduced solutions")
         toolButton.setCheckable(True)
@@ -198,33 +188,78 @@ class Window(QWidget):
         toolButton.clicked.connect(self.reduceSolutions)
         toolBar.addWidget(toolButton)
         self.reduce_button = toolButton
-
+        
+        # Output Format Choice
         toolBar.addSeparator()
+        section_output = QLabel("Output Format")
+        section_output.setAlignment(Qt.AlignHCenter)
+        section_output.setStyleSheet("font-weight: bold")
+        toolBar.addWidget(section_output)
+
+        # CNF Formula
         toolButton = QToolButton()
-        toolButton.setText("Random Tree")
-        toolButton.clicked.connect(self.getRandomTree)
+        toolButton.setText("CNF Formula")
+        toolButton.setCheckable(False)
+        toolButton.setAutoExclusive(True)
+        toolButton.clicked.connect(self.outputCNFformula)
         toolBar.addWidget(toolButton)
-        self.rndtree_button = toolButton
+        self.cnf_button = toolButton
 
-        random_tree = QWidget()
-        rnd_layout = QHBoxLayout()
-        random_tree.setLayout(rnd_layout)
+        toolButton = QToolButton()
+        toolButton.setText("Complete Formula")
+        toolButton.setCheckable(False)
+        toolButton.setAutoExclusive(True)
+        toolButton.toggle()
+        toolButton.clicked.connect(self.outputCompleteformula)
+        toolBar.addWidget(toolButton)
+        self.complete_button = toolButton
 
-        toolSpin = QSpinBox()
-        toolSpin.setValue(3)
-        rnd_layout.addWidget(toolSpin)
-        self.rnd_spin_1 = toolSpin
-        toolSpin = QSpinBox()
-        toolSpin.setValue(3)
-        rnd_layout.addWidget(toolSpin)
-        self.rnd_spin_2 = toolSpin
-        toolSpin = QSpinBox()
-        toolSpin.setValue(2)
-        rnd_layout.addWidget(toolSpin)
-        self.rnd_spin_3 = toolSpin
+        # SAT Solver
+        # Max number of solutions
+        toolBar.addSeparator()
+        section_output = QLabel("SAT SOLVER")
+        section_output.setAlignment(Qt.AlignHCenter)
+        section_output.setStyleSheet("font-weight: bold; border: 1px solid black;")
+        toolBar.addWidget(section_output)
 
-        toolBar.addWidget(random_tree)
+        solver = QWidget()
+        max_layout = QHBoxLayout()
+        max_layout.setContentsMargins(0,0,0,0)
+        solver.setLayout(max_layout)
+        toolButton = QLabel("Max SAT Sol")
+        toolButton.setFixedWidth(110)
+        max_layout.addWidget(toolButton)
+        toolSpinMax = QSpinBox()
+        toolSpinMax.setValue(20)
+        toolSpinMax.setRange(-1, 99)
+        max_layout.addWidget(toolSpinMax)
+        self.max_spin = toolSpinMax
+        toolBar.addWidget(solver)
 
+        # CNF Transform
+        toolBar.addSeparator()
+        section_output = QLabel("CNF Transform")
+        section_output.setAlignment(Qt.AlignHCenter)
+        section_output.setStyleSheet("font-weight: bold")
+        toolBar.addWidget(section_output)
+
+        # Add buttons to toolbar
+        toolButton = QToolButton()
+        toolButton.setText("Tseitin")
+        toolButton.setCheckable(True)
+        toolButton.setAutoExclusive(True)
+        toolButton.clicked.connect(lambda: self.setCNFTransform(True))
+        toolBar.addWidget(toolButton)
+
+        toolButton = QToolButton()
+        toolButton.setText("Quine-McCluskey")
+        toolButton.setCheckable(True)
+        toolButton.setAutoExclusive(True)
+        toolButton.toggle()
+        toolButton.clicked.connect(lambda: self.setCNFTransform(False))
+        toolBar.addWidget(toolButton)
+
+        # Fix Input
         toolBar.addSeparator()
         toolButton = QToolButton()
         toolButton.setText("Fix Input")
@@ -232,6 +267,84 @@ class Window(QWidget):
         toolBar.addWidget(toolButton)
         self.ouputAssumption_button = toolButton
 
+        # SMT Solver
+        # Cost and Proba
+        toolBar.addSeparator()
+        section_output = QLabel("SMT SOLVER")
+        section_output.setAlignment(Qt.AlignHCenter)
+        section_output.setStyleSheet("font-weight: bold; border: 1px solid black;")
+        toolBar.addWidget(section_output)
+
+        solution = QWidget()
+        sol_layout = QHBoxLayout()
+        sol_layout.setContentsMargins(0,0,0,0)
+        solution.setLayout(sol_layout)
+        toolButton = QToolButton()
+        toolButton.setText("Min Cost")
+        toolButton.clicked.connect(lambda: self.callSMT(0))
+        sol_layout.addWidget(toolButton)
+        self.cost_button = toolButton
+        symbol = QLabel("<")
+        symbol.setFixedHeight(24)
+        sol_layout.addWidget(symbol)
+        value = QtWidgets.QLineEdit()
+        value.setValidator(QIntValidator())
+        value.setFixedHeight(24)
+        self.max_cost = value
+        sol_layout.addWidget(value)
+        toolBar.addWidget(solution)
+
+        cost = QLabel("= ")
+        cost.setFixedHeight(24)
+        self.cost_label = cost
+        toolBar.addWidget(cost)
+
+        solution = QWidget()
+        sol_layout = QHBoxLayout()
+        sol_layout.setContentsMargins(0,0,0,0)
+        solution.setLayout(sol_layout)
+        toolButton = QToolButton()
+        toolButton.setText("Max Proba")
+        toolButton.clicked.connect(lambda: self.callSMT(1))
+        sol_layout.addWidget(toolButton)
+        self.proba_button = toolButton
+        symbol = QLabel(">")
+        symbol.setFixedHeight(24)
+        sol_layout.addWidget(symbol)
+        value = QtWidgets.QLineEdit()
+        value.setValidator(QDoubleValidator())
+        value.setFixedHeight(24)
+        self.min_proba = value
+        sol_layout.addWidget(value)
+        toolBar.addWidget(solution)
+
+        proba = QLabel("= ")
+        proba.setFixedHeight(24)
+        self.proba_label = proba
+        toolBar.addWidget(proba)
+
+        # Others
+        toolBar.addSeparator()
+        section_output = QLabel("OTHER MODULES")
+        section_output.setAlignment(Qt.AlignHCenter)
+        section_output.setStyleSheet("font-weight: bold; border: 1px solid black;")
+        toolBar.addWidget(section_output)
+        
+        # Comparison
+        toolBar.addSeparator()
+        toolButton = QToolButton()
+        toolButton.setText("Comparison")
+        toolButton.clicked.connect(lambda: self.compareTrees())
+        toolBar.addWidget(toolButton)
+
+        # Frenquencies
+        toolBar.addSeparator()
+        toolButton = QToolButton()
+        toolButton.setText("Nodes Frequencies")
+        toolButton.clicked.connect(lambda: self.compareFrequency())
+        toolBar.addWidget(toolButton)
+
+        # Variables
         toolBar.addSeparator()
         toolButton = QToolButton()
         toolButton.setText("nx nodes")
@@ -246,112 +359,9 @@ class Window(QWidget):
         toolButton.clicked.connect(self.show_sol)
         toolBar.addWidget(toolButton)
 
-        toolBar.addSeparator()
-        section_output = QLabel("CNF Transform")
-        section_output.setAlignment(Qt.AlignHCenter)
-        section_output.setStyleSheet("font-weight: bold")
-        toolBar.addWidget(section_output)
-
-        # Add buttons to toolbar
-        cnf_form = QWidget()
-        cnf_layout = QVBoxLayout()
-        cnf_form.setLayout(cnf_layout)
-
-        toolButton = QToolButton()
-        toolButton.setText("Tseitin")
-        toolButton.setCheckable(True)
-        toolButton.setAutoExclusive(True)
-        toolButton.clicked.connect(lambda: self.setCNFTransform(True))
-        cnf_layout.addWidget(toolButton)
-
-        toolButton = QToolButton()
-        toolButton.setText("Quine-McCluskey")
-        toolButton.setCheckable(True)
-        toolButton.setAutoExclusive(True)
-        toolButton.toggle()
-        toolButton.clicked.connect(lambda: self.setCNFTransform(False))
-        cnf_layout.addWidget(toolButton)
-
-        toolBar.addWidget(cnf_form)
-
-        toolBar.addSeparator()
-        toolButton = QToolButton()
-        toolButton.setText("Comparison")
-        toolButton.clicked.connect(lambda: self.compareTrees())
-        toolBar.addWidget(toolButton)
-
-        toolBar.addSeparator()
-        toolButton = QToolButton()
-        toolButton.setText("Nodes Frequencies")
-        toolButton.clicked.connect(lambda: self.compareFrequency())
-        toolBar.addWidget(toolButton)
-
-        toolBar.addSeparator()
-        section_output = QLabel("SMT solver")
-        section_output.setAlignment(Qt.AlignHCenter)
-        section_output.setStyleSheet("font-weight: bold")
-        toolBar.addWidget(section_output)
-
-        solution = QWidget()
-        sol_layout = QHBoxLayout()
-        sol_layout.setContentsMargins(0,0,0,0)
-        solution.setLayout(sol_layout)
-
-        toolButton = QToolButton()
-        toolButton.setText("Min Cost")
-        toolButton.clicked.connect(lambda: self.callSMT(0))
-        sol_layout.addWidget(toolButton)
-        self.cost_button = toolButton
-
-        symbol = QLabel("<")
-        symbol.setFixedHeight(24)
-        sol_layout.addWidget(symbol)
-
-        value = QtWidgets.QLineEdit()
-        value.setValidator(QIntValidator())
-        value.setFixedHeight(24)
-        self.max_cost = value
-
-        sol_layout.addWidget(value)
-
-        toolBar.addWidget(solution)
-
-        cost = QLabel("= ")
-        cost.setFixedHeight(24)
-        self.cost_label = cost
-        toolBar.addWidget(cost)
-
-        solution = QWidget()
-        sol_layout = QHBoxLayout()
-        sol_layout.setContentsMargins(0,0,0,0)
-        solution.setLayout(sol_layout)
-
-        toolButton = QToolButton()
-        toolButton.setText("Max Proba")
-        toolButton.clicked.connect(lambda: self.callSMT(1))
-        sol_layout.addWidget(toolButton)
-        self.proba_button = toolButton
-
-        symbol = QLabel(">")
-        symbol.setFixedHeight(24)
-        sol_layout.addWidget(symbol)
-
-        value = QtWidgets.QLineEdit()
-        value.setValidator(QDoubleValidator())
-        value.setFixedHeight(24)
-        self.min_proba = value
-        sol_layout.addWidget(value)
-
-        toolBar.addWidget(solution)
-
-        proba = QLabel("= ")
-        proba.setFixedHeight(24)
-        self.proba_label = proba
-        toolBar.addWidget(proba)
-
-        toolBar.addSeparator()
-
         Vlayout_toolbar.addWidget(toolBar)
+        ##################################
+        ##################################
 
         result_layout = QtWidgets.QStackedLayout()
         result_layout.addWidget(self.tracesFound,)
@@ -583,6 +593,7 @@ class Window(QWidget):
 
         # Final resets
         self.buttonImportJson.setEnabled(False)
+        self.buttonReload.setEnabled(False)
         self.thread.finished.connect(
             lambda: self.stopImport(True)
         )
@@ -1074,8 +1085,9 @@ class Window(QWidget):
 
         # Final resets
         self.buttonImportJson.setEnabled(False)
+        self.buttonReload.setEnabled(False)
         self.thread.finished.connect(
-            lambda: self.buttonImportJson.setEnabled(True)
+            lambda: self.stopImport(True)
         )
 
     def SMTcleaning(self, type):
@@ -1156,9 +1168,14 @@ class Window(QWidget):
         tree1.setLayout(VlayoutFirst)
         tree2 = QWidget()
         tree2.setLayout(VlayoutSecond)
+        list_sol = QWidget()
+        twocolumns = QHBoxLayout()
+        list_sol.setLayout(twocolumns)
+        list_sol.resize(500,500)
 
         layout.addWidget(tree1)
         layout.addWidget(tree2)
+        layout.addWidget(list_sol)
 
         tot_compare = QWidget()
         tot_compare.setLayout(layout)
@@ -1166,7 +1183,8 @@ class Window(QWidget):
         Vlayout.addWidget(tot_compare)
 
         buttonResults = QPushButton('Print Results')
-        buttonResults.clicked.connect(self.showResults)
+        #buttonResults.clicked.connect(lambda : self.showResults(twocolumns))
+ 
         Vlayout.addWidget(buttonResults)
         full_sol = QtWidgets.QTextEdit()
         full_sol.setFixedHeight(60)
@@ -1175,7 +1193,10 @@ class Window(QWidget):
         full_form.setFixedHeight(40)
         Vlayout.addWidget(full_form)
 
-        self.call_compare(form1, form2, full_form, first, second, path1, path2, full_sol, sol1, sol2, buttonResults)
+        self.call_compare(form1, form2, full_form, first, second, path1, path2, full_sol, sol1, sol2, twocolumns)
+
+        self.showResults(twocolumns)
+
 
         self.comp.setLayout(Vlayout)
         self.comp.resize(1400,800)
@@ -1184,50 +1205,54 @@ class Window(QWidget):
     def compareFrequency(self):
         frequency_comparator(self.basic_nodes, self.basic_edges, self.current_network, self.current_digraph, self.boolean_sol_arr, self.var_array)
     
-    def showResults(self):
-        if hasattr(self.comparator, 'var_array3'):
-            msg = QDialog()
-            twocolumns = QHBoxLayout()
-            
-            layout = QVBoxLayout()
-            twocolumns.addLayout(layout)
-            layout2 = QVBoxLayout()
-            twocolumns.addLayout(layout2)
+    def showResults(self, twocolumns):
+        if hasattr(self, 'comparator'):
+            if hasattr(self.comparator, 'var_array3'):
+                msg = QWidget()
+                #twocolumns = QHBoxLayout()
+                
+                layout = QVBoxLayout()
+                twocolumns.addLayout(layout)
+                layout2 = QVBoxLayout()
+                twocolumns.addLayout(layout2)
 
-            msg.setWindowTitle("Solutions")
+                msg.setWindowTitle("Solutions")
 
-            label = QLabel("Included")
-            layout.addWidget(label)
-            list = QListWidget()
-            i = QListWidgetItem(str(self.comparator.var_array3))
-            i.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled|Qt.ItemIsEditable)
-            list.addItem(i)
-            for i in self.comparator.boolean_sol_arr3:
-                item = QListWidgetItem(str(i))
-                item.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled|Qt.ItemIsEditable)
-                list.addItem(item)
-            layout.addWidget(list)
-
-            if hasattr(self.comparator, 'var_array4'):
-
-                label = QLabel("Not Included")
-                layout2.addWidget(label)
+                label = QLabel("Included")
+                layout.addWidget(label)
                 list = QListWidget()
-                i = QListWidgetItem(str(self.comparator.var_array4))
+                i = QListWidgetItem(str(self.comparator.var_array3))
                 i.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled|Qt.ItemIsEditable)
                 list.addItem(i)
-                for i in self.comparator.boolean_sol_arr4:
+                for i in self.comparator.boolean_sol_arr3:
                     item = QListWidgetItem(str(i))
                     item.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled|Qt.ItemIsEditable)
                     list.addItem(item)
-                layout2.addWidget(list)
+                layout.addWidget(list)
 
-            msg.setLayout(twocolumns)
-            msg.resize(500,500)
-            self.comparator.msg = msg
-            self.comparator.msg.show()
+                if hasattr(self.comparator, 'var_array4'):
 
-    def call_compare(self, form1, form2, form3, web1, web2, path1, path2, solutions, sol1, sol2, buttonResults):
+                    label = QLabel("Not Included")
+                    layout2.addWidget(label)
+                    list = QListWidget()
+                    i = QListWidgetItem(str(self.comparator.var_array4))
+                    i.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled|Qt.ItemIsEditable)
+                    list.addItem(i)
+                    for i in self.comparator.boolean_sol_arr4:
+                        item = QListWidgetItem(str(i))
+                        item.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled|Qt.ItemIsEditable)
+                        list.addItem(item)
+                    layout2.addWidget(list)
+
+                msg.setLayout(twocolumns)
+
+                #curr_widget.setLayout(twocolumns)
+
+                msg.resize(500,500)
+                self.comparator.msg = msg
+                self.comparator.msg.show()
+
+    def call_compare(self, form1, form2, form3, web1, web2, path1, path2, solutions, sol1, sol2, results_print):
         comparator = Comparison()
         comparator.concated_formula_text = form3
         comparator.webengine1 = web1
@@ -1235,7 +1260,7 @@ class Window(QWidget):
         comparator.solutions = solutions
         comparator.sol1 = sol1
         comparator.sol2 = sol2
-        comparator.buttonResults = buttonResults
+        comparator.results_print = results_print
         comparator.max_sol = self.max_spin.value()
         file1, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'File : Antecedent', QtCore.QDir.currentPath() + '/res' , '*.json')
         if not file1 :
