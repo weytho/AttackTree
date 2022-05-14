@@ -20,7 +20,7 @@ def run_setup():
         package_data = {
             '': ['resources_directory.txt'],
         },
-        python_requires=">=3",
+        python_requires=">=3.8",
         ext_modules=[C_utils],
         entry_points={
             "console_scripts": [
