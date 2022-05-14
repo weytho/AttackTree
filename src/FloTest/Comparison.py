@@ -22,7 +22,8 @@ with open('resources_directory.txt') as f:
     dirname = dirname.rstrip("\n")
     os.chdir(dirname)
 
-class Comparison():
+class Comparison(QObject):
+    finished = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__()
@@ -115,6 +116,7 @@ class Comparison():
         worker3.formula = self.formula3
         worker3.var_array1 = self.var_array1
         worker3.var_array2 = self.var_array2
+        worker3.max_val = self.max_sol
         thread3 = QThread()
         thread3.started.connect(worker3.run)
         worker3.finished.connect(thread3.quit)
@@ -129,6 +131,7 @@ class Comparison():
         worker4.formula = self.formula4
         worker4.var_array1 = self.var_array1
         worker4.var_array2 = self.var_array2
+        worker4.max_val = self.max_sol
         thread4 = QThread()
         thread4.started.connect(worker4.run)
         worker4.finished.connect(thread4.quit)
@@ -178,30 +181,15 @@ class Comparison():
                     boolean_array.append(l)
                 self.boolean_sol_arr4 = boolean_array
             self.worker4.deleteLater
-        self.window.raise_()
-        self.window.activateWindow()
         ### UPDATE WINDOW WITH ARGUMENT TODO ###
         self.sem.acquire()
         self.cnt += 1
         if self.cnt == 4:
             self.sem.release()
 
-            if len(self.sol_array4) > 0:
-                self.solutions.setText("Some Solution Are Not Found : " + str(len(self.sol_array3)) + " Included and " + str(len(self.sol_array4)) + " Not.")
-            elif len(self.sol_array3) > 0:
-                self.solutions.setText("")
-                cursor = self.solutions.textCursor()
-                cursor.insertTable(2, len(self.var_array3))
-                for header in self.var_array3:
-                    cursor.insertText(header)
-                    cursor.movePosition(QtGui.QTextCursor.NextCell)
-                for row in self.boolean_sol_arr3[0]:
-                    cursor.insertText(row)
-                    cursor.movePosition(QtGui.QTextCursor.NextCell)
-            else:
-                self.solutions.setText("No Solution From The First Tree Found In the Second !")
-            self.solutions.repaint()
             self.concated_formula_text.setText(self.cnf3)
+
+            self.finished.emit()
         else:
             self.sem.release()
 
@@ -343,15 +331,15 @@ class cmpWorker(QObject):
         glob = {}
         exec('from sympy.core import Symbol', glob) # ok for I, E, S, N, C, O, or Q
         parsed_formula = parse_expr(self.formula, global_dict=glob)
-        print("Parsed Formula : "+self.formula)
+        #print("Parsed Formula : "+self.formula)
         cnf_formula = to_cnf(parsed_formula)
         self.cnf = str(cnf_formula)
-        print("Cnf Formula : "+self.cnf)
+        #print("Cnf Formula : "+self.cnf)
         # Create varlist from previous ones
         self.list_var = self.var_array1
         for var in self.var_array2:
             if var not in self.list_var:
                 self.list_var.append(var)
 
-        self.var_array, self.sol_array = sat_solver(cnf_formula, self.list_var, [], -1)
+        self.var_array, self.sol_array = sat_solver(cnf_formula, self.list_var, [], self.max_val)
         self.finished.emit()

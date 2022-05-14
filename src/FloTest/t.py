@@ -1130,11 +1130,15 @@ class Window(QWidget):
         self.comp.setWindowTitle("Left Tree Included In Right Tree")
 
         layout = QHBoxLayout()
+        layout.setContentsMargins(0,0,0,0)
 
         Vlayout = QVBoxLayout()
+        Vlayout.setContentsMargins(0,0,0,0)
 
         VlayoutFirst = QVBoxLayout()
+        VlayoutFirst.setContentsMargins(0,0,0,0)
         VlayoutSecond = QVBoxLayout()
+        VlayoutSecond.setContentsMargins(0,0,0,0)
 
         path1 = QtWidgets.QTextEdit()
         path1.setFixedHeight(30)
@@ -1169,9 +1173,7 @@ class Window(QWidget):
         tree2 = QWidget()
         tree2.setLayout(VlayoutSecond)
         list_sol = QWidget()
-        twocolumns = QHBoxLayout()
-        list_sol.setLayout(twocolumns)
-        list_sol.resize(500,500)
+        list_sol.setFixedWidth(600)
 
         layout.addWidget(tree1)
         layout.addWidget(tree2)
@@ -1181,35 +1183,26 @@ class Window(QWidget):
         tot_compare.setLayout(layout)
 
         Vlayout.addWidget(tot_compare)
-
-        buttonResults = QPushButton('Print Results')
-        #buttonResults.clicked.connect(lambda : self.showResults(twocolumns))
  
-        Vlayout.addWidget(buttonResults)
-        full_sol = QtWidgets.QTextEdit()
-        full_sol.setFixedHeight(60)
-        Vlayout.addWidget(full_sol)
         full_form = QtWidgets.QTextEdit()
-        full_form.setFixedHeight(40)
+        full_form.setFixedHeight(60)
         Vlayout.addWidget(full_form)
 
-        self.call_compare(form1, form2, full_form, first, second, path1, path2, full_sol, sol1, sol2, twocolumns)
-
-        self.showResults(twocolumns)
-
+        self.call_compare(form1, form2, full_form, first, second, path1, path2, sol1, sol2, list_sol)
 
         self.comp.setLayout(Vlayout)
-        self.comp.resize(1400,800)
+        self.comp.resize(1800,800)
         self.comp.show()
 
     def compareFrequency(self):
         frequency_comparator(self.basic_nodes, self.basic_edges, self.current_network, self.current_digraph, self.boolean_sol_arr, self.var_array)
     
-    def showResults(self, twocolumns):
+    def showResults(self):
         if hasattr(self, 'comparator'):
             if hasattr(self.comparator, 'var_array3'):
-                msg = QWidget()
-                #twocolumns = QHBoxLayout()
+                msg = self.comparator.results_print
+                twocolumns = QHBoxLayout()
+                twocolumns.setContentsMargins(0, 0, 0, 0)
                 
                 layout = QVBoxLayout()
                 twocolumns.addLayout(layout)
@@ -1218,7 +1211,7 @@ class Window(QWidget):
 
                 msg.setWindowTitle("Solutions")
 
-                label = QLabel("Included")
+                label = QLabel("Included (" + str(len(self.comparator.boolean_sol_arr3)) + ")")
                 layout.addWidget(label)
                 list = QListWidget()
                 i = QListWidgetItem(str(self.comparator.var_array3))
@@ -1232,7 +1225,7 @@ class Window(QWidget):
 
                 if hasattr(self.comparator, 'var_array4'):
 
-                    label = QLabel("Not Included")
+                    label = QLabel("Not Included (" + str(len(self.comparator.boolean_sol_arr4)) + ")")
                     layout2.addWidget(label)
                     list = QListWidget()
                     i = QListWidgetItem(str(self.comparator.var_array4))
@@ -1246,18 +1239,18 @@ class Window(QWidget):
 
                 msg.setLayout(twocolumns)
 
-                #curr_widget.setLayout(twocolumns)
-
-                msg.resize(500,500)
                 self.comparator.msg = msg
-                self.comparator.msg.show()
+                #self.comparator.msg.show()
 
-    def call_compare(self, form1, form2, form3, web1, web2, path1, path2, solutions, sol1, sol2, results_print):
+                #self.comp.show()
+                self.comp.raise_()
+                self.comp.activateWindow()
+
+    def call_compare(self, form1, form2, form3, web1, web2, path1, path2, sol1, sol2, results_print):
         comparator = Comparison()
         comparator.concated_formula_text = form3
         comparator.webengine1 = web1
         comparator.webengine2 = web2
-        comparator.solutions = solutions
         comparator.sol1 = sol1
         comparator.sol2 = sol2
         comparator.results_print = results_print
@@ -1270,8 +1263,8 @@ class Window(QWidget):
         if not file2 :
             return
         path2.setText(file2)
+        comparator.finished.connect(self.showResults)
         comparator.tree_comparison(file1, file2, form1, form2)
-        comparator.window = self.comp
         self.comparator = comparator
 
     ## Get the Worker results and update them in the Window before deleting :
