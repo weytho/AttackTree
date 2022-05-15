@@ -1,2 +1,2 @@
-node000,node001,node01,node100,node101,node102,node11
-True,False,True,False,False,False,False
+node0,node1,node200,node201,node202,node203,node2100,node2101,node21020,node21021,node21022,node2103,node211,node212,node213,node30,node31000,node31001,node31002,node3101,node3102,node3110,node3111,node3112,node31130,node31131,node31132,node31133,node3200,node3201,node3202,node3203,node321,node3300,node3301,node3310,node3311,node33120,node33121,node332
+True,True,True,True,True,True,False,True,False,False,False,False,False,False,False,True,False,False,False,False,True,False,False,False,False,False,False,False,True,True,False,False,False,True,True,True,True,True,True,True

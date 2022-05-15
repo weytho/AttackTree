@@ -808,7 +808,7 @@ class Window(QWidget):
     #   Recompute the solutions for this graph with the new assumptions
     #  @param self The object pointer.
     def outputUsingAssumptions(self):
-        widget = QDialog()
+        widget = QDialog(self)
         self.popup_assumpt = widget
         self.mandatory_cm_counter = 0
         layout = QGridLayout()
@@ -989,7 +989,7 @@ class Window(QWidget):
     #  @param self The object pointer.
     def show_nx_nodes(self):
         if hasattr(self, 'current_digraph'):
-            self.msg = QDialog()
+            self.msg = QDialog(self)
             layout = QVBoxLayout(self.msg)
             list = QListWidget()
             self.msg.setWindowTitle("Networkx Nodes")
@@ -1007,7 +1007,7 @@ class Window(QWidget):
     #  @param self The object pointer.
     def show_nx_edges(self):
         if hasattr(self, 'current_digraph'):
-            self.msg = QDialog()
+            self.msg = QDialog(self)
             layout = QVBoxLayout(self.msg)
             list = QListWidget()
             self.msg.setWindowTitle("Networkx Edges")
@@ -1022,7 +1022,7 @@ class Window(QWidget):
 
     def show_sol(self):
         if hasattr(self, 'var_array'):
-            self.msg = QDialog()
+            self.msg = QDialog(self)
             layout = QVBoxLayout(self.msg)
             list = QListWidget()
             self.msg.setWindowTitle("Solutions")
@@ -1047,6 +1047,8 @@ class Window(QWidget):
         self.useTseitin = bool
 
     def callSMT(self, type=0):
+        self.cost_button.setEnabled(False)
+        self.proba_button.setEnabled(False)
         self.thread = QThread()
         self.worker = SMTWorker()
 
@@ -1120,13 +1122,17 @@ class Window(QWidget):
         self.sol_button.setText("Solve (" + str(len(self.sol_array)) + ")")
         if type == 0:
             self.cost_label.setText("= " + str(self.worker.best_value))
+            self.cost_button.setEnabled(True)
+            self.proba_button.setEnabled(True)
         elif type == 1:
             self.proba_label.setText("= " + str(self.worker.best_value))
+            self.proba_button.setEnabled(True)
+            self.cost_button.setEnabled(True)
 
         self.worker.deleteLater
 
     def compareTrees(self):
-        self.comp = QDialog()
+        self.comp = QDialog(self)
         self.comp.setWindowTitle("Left Tree Included In Right Tree")
 
         layout = QHBoxLayout()
@@ -1348,14 +1354,15 @@ class Window(QWidget):
         self.buttonReload.setEnabled(True)
 
     def reduceSolutions(self):
-        if self.reduce_button.isChecked():
-            used_array = self.boolean_sol_array_reduced
-        else:
-            used_array = self.boolean_sol_array_full
-        self.boolean_sol_arr = used_array
-        self.sol_spin.setMinimum(0)
-        self.sol_spin.setMaximum(len(used_array) - 1)
-        self.sol_button.setText("Solve (" + str(len(used_array)) + ")")
+        if hasattr(self, 'boolean_sol_array_reduced'):
+            if self.reduce_button.isChecked():
+                used_array = self.boolean_sol_array_reduced
+            else:
+                used_array = self.boolean_sol_array_full
+            self.boolean_sol_arr = used_array
+            self.sol_spin.setMinimum(0)
+            self.sol_spin.setMaximum(len(used_array) - 1)
+            self.sol_button.setText("Solve (" + str(len(used_array)) + ")")
 
     ## Show Error Pop-up QMessageBox :
     #   Message of a detected error and its type
