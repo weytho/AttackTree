@@ -62,7 +62,6 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
    json_object_object_get_ex(parsed_json, "CM", &CM);
    
    // Compute CM 
-   int totCMcost = 0;
    int cnt = 0;
 
    if(CM != NULL){
@@ -76,7 +75,6 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
          json_object_object_get_ex(CMchild, "CMtitle", &CMtitle);
          bool hasCost = json_object_object_get_ex(CMchild, "CMcost", &CMcost);
          bool hasProb = json_object_object_get_ex(CMchild, "CMprob", &CMprob);
-         //totCMcost += json_object_get_int(CMcost);
 
          // ADD CM to nodes
          Node *CMnode = malloc(sizeof(Node));
@@ -86,8 +84,8 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
          char buf[101];
          snprintf(buf, sizeof(buf), "%s_%s", json_object_get_string(CMtitle), json_object_get_string(action));
          strcpy(CMnode->title, buf);
-         strcpy(CMnode->variable, json_object_get_string(CMtitle));
-         strncpy(CMnode->type, "CtMs", (sizeof CMnode->type));
+         strncpy(CMnode->variable, json_object_get_string(CMtitle), sizeof(CMnode->variable));
+         strncpy(CMnode->type, "CtMs", sizeof(CMnode->type));
 
          if (hasCost){
             CMnode->cost = json_object_get_int(CMcost);
@@ -172,9 +170,9 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
    }
    char * type_string = (char*) json_object_get_string(type);
 
-   strcpy(node->title, json_object_get_string(action));
-   strcpy(node->variable, json_object_get_string(action));
-   strcpy(node->type, type_string);
+   strncpy(node->title, json_object_get_string(action),sizeof(node->title));
+   strncpy(node->variable, json_object_get_string(action),sizeof(node->variable));
+   strncpy(node->type, type_string,sizeof(node->type));
    node->root = root;
 
    node->CM = 0;
@@ -192,7 +190,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
    else {
       node->leaf = 1;
       json_object_object_get_ex(parsed_json, "Cost", &costleaf);
-      node->cost = json_object_get_int(costleaf) + totCMcost;
+      node->cost = json_object_get_int(costleaf);
       json_object_object_get_ex(parsed_json, "Prob", &probleaf);
       node->prob = json_object_get_double(probleaf);
    }
@@ -254,24 +252,9 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
          }
          runner->next = left;
       }
-
-      int and_cost = 0;
-      int or_cost = 0;
-      double and_prob = 1;
-      double or_prob  = 0;
-      double esp = 999999.9;
       
       for(int i=0; i<n_children; i++){
          CostProb *ret = JsonReader(json_object_array_get_idx(children, i), list, edges, form, node, 0, CMformula);
-         int cost = ret->cost;
-         double prob =ret->prob;
-         and_cost = and_cost + cost;
-         and_prob = and_prob * prob;
-         if(ret->esp < esp){
-            or_cost = cost;
-            or_prob = prob;
-            esp = ret->esp;
-         }
          if(i<n_children-1){
             Formula *t = formula(type_string);
             Formula *runner = *(form);
@@ -290,14 +273,6 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
       }
       runner->next = right;   
 
-      if(!strcmp(type_string, "OR" )) {
-         node->cost = or_cost + totCMcost;
-         node->prob = or_prob;
-      }
-      else{
-         node->cost = and_cost + totCMcost;
-         node->prob = and_prob;
-      }
    }
 
    if(CMformula == 1){
@@ -313,9 +288,9 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
 
    //printf("[Node] Title : %s\n",node->title);
    CostProb *retval = malloc(sizeof(CostProb));
-   retval->cost = node->cost;
-   retval->prob = node->prob;
-   retval->esp = esp(node->cost, node->prob);
+   retval->cost = 0;
+   retval->prob = 0;
+   retval->esp = 0;
 
    return retval;
 }
