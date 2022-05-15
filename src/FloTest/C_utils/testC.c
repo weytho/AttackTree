@@ -188,12 +188,22 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
       node->prob = 1;
       node->cost = 0;
    }
-   else {
+  else { 
       node->leaf = 1;
       json_object_object_get_ex(parsed_json, "Cost", &costleaf);
-      node->cost = json_object_get_int(costleaf);
+      if(costleaf==NULL){
+         node->cost = 0;
+      }
+      else{
+         node->cost = json_object_get_int(costleaf);
+      }
       json_object_object_get_ex(parsed_json, "Prob", &probleaf);
-      node->prob = json_object_get_double(probleaf);
+      if(probleaf==NULL){
+         node->prob = 1.0;
+      }
+      else{
+         node->prob = json_object_get_double(probleaf);
+      }
    }
 
    // ADD IT TO THE LIST
@@ -410,7 +420,7 @@ json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mod
    json_object_object_add(parent, "Type", json_object_new_string(tree->n->type));
 
    // TODO vérifier autrement
-   if(boolean_mode == 0){
+   if(boolean_mode == 0 & strncmp(tree->n->type, "LEAF", 5) == 0){
       json_object_object_add(parent, "Cost", json_object_new_int(tree->n->cost));
       json_object_object_add(parent, "Prob", json_object_new_double(tree->n->prob));
    }

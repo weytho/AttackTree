@@ -298,11 +298,13 @@ class Comparison(QObject):
         
         # Title can be html
         for (n, d) in ln:
-            title_str = n + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob'])
+            title_str = n
 
             if d['type'] == 'CtMs':
+                title_str = title_str + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob'])
                 nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=d['variable'], shape='box', title=d['variable'] + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob']), group="cm")
             elif (d['leaf'] == 1):
+                title_str = title_str + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob'])
                 nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str, group="leaf")
             else:
                 nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str)
