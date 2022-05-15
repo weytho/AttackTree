@@ -120,38 +120,13 @@ class Window(QWidget):
         toolBar.setOrientation(Qt.Vertical)
         toolBar.setFixedWidth(170)
 
+        # SOLVER
         section_output = QLabel("SOLVER")
         section_output.setAlignment(Qt.AlignHCenter)
         section_output.setStyleSheet("font-weight: bold; border: 1px solid black;")
         toolBar.addWidget(section_output)
 
-        # Generate Random Tree Grammar
-        toolButton = QToolButton()
-        toolButton.setText("Random Tree")
-        toolButton.clicked.connect(self.getRandomTree)
-        toolBar.addWidget(toolButton)
-        self.rndtree_button = toolButton
-
-        random_tree = QWidget()
-        rnd_layout = QHBoxLayout()
-        rnd_layout.setContentsMargins(0, 0, 0, 0)
-        random_tree.setLayout(rnd_layout)
-        toolSpin = QSpinBox()
-        toolSpin.setValue(3)
-        rnd_layout.addWidget(toolSpin)
-        self.rnd_spin_1 = toolSpin
-        toolSpin = QSpinBox()
-        toolSpin.setValue(3)
-        rnd_layout.addWidget(toolSpin)
-        self.rnd_spin_2 = toolSpin
-        toolSpin = QSpinBox()
-        toolSpin.setValue(2)
-        rnd_layout.addWidget(toolSpin)
-        self.rnd_spin_3 = toolSpin
-        toolBar.addWidget(random_tree)
-
         # Solve Button
-        toolBar.addSeparator()
         solution = QWidget()
         sol_layout = QHBoxLayout()
         sol_layout.setContentsMargins(0, 0, 0, 0)
@@ -188,6 +163,21 @@ class Window(QWidget):
         toolButton.clicked.connect(self.reduceSolutions)
         toolBar.addWidget(toolButton)
         self.reduce_button = toolButton
+
+        # Variables
+        toolBar.addSeparator()
+        toolButton = QToolButton()
+        toolButton.setText("nx nodes")
+        toolButton.clicked.connect(self.show_nx_nodes)
+        toolBar.addWidget(toolButton)
+        toolButton = QToolButton()
+        toolButton.setText("nx edges")
+        toolButton.clicked.connect(self.show_nx_edges)
+        toolBar.addWidget(toolButton)
+        toolButton = QToolButton()
+        toolButton.setText("solutions list")
+        toolButton.clicked.connect(self.show_sol)
+        toolBar.addWidget(toolButton)
         
         # Output Format Choice
         toolBar.addSeparator()
@@ -331,7 +321,6 @@ class Window(QWidget):
         toolBar.addWidget(section_output)
         
         # Comparison
-        toolBar.addSeparator()
         toolButton = QToolButton()
         toolButton.setText("Comparison")
         toolButton.clicked.connect(lambda: self.compareTrees())
@@ -344,20 +333,31 @@ class Window(QWidget):
         toolButton.clicked.connect(lambda: self.compareFrequency())
         toolBar.addWidget(toolButton)
 
-        # Variables
+        # Generate Random Tree Grammar
         toolBar.addSeparator()
         toolButton = QToolButton()
-        toolButton.setText("nx nodes")
-        toolButton.clicked.connect(self.show_nx_nodes)
+        toolButton.setText("Random Tree")
+        toolButton.clicked.connect(self.getRandomTree)
         toolBar.addWidget(toolButton)
-        toolButton = QToolButton()
-        toolButton.setText("nx edges")
-        toolButton.clicked.connect(self.show_nx_edges)
-        toolBar.addWidget(toolButton)
-        toolButton = QToolButton()
-        toolButton.setText("solutions list")
-        toolButton.clicked.connect(self.show_sol)
-        toolBar.addWidget(toolButton)
+        self.rndtree_button = toolButton
+
+        random_tree = QWidget()
+        rnd_layout = QHBoxLayout()
+        rnd_layout.setContentsMargins(0, 0, 0, 0)
+        random_tree.setLayout(rnd_layout)
+        toolSpin = QSpinBox()
+        toolSpin.setValue(3)
+        rnd_layout.addWidget(toolSpin)
+        self.rnd_spin_1 = toolSpin
+        toolSpin = QSpinBox()
+        toolSpin.setValue(3)
+        rnd_layout.addWidget(toolSpin)
+        self.rnd_spin_2 = toolSpin
+        toolSpin = QSpinBox()
+        toolSpin.setValue(2)
+        rnd_layout.addWidget(toolSpin)
+        self.rnd_spin_3 = toolSpin
+        toolBar.addWidget(random_tree)
 
         Vlayout_toolbar.addWidget(toolBar)
         ##################################

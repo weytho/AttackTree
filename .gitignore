@@ -3,3 +3,5 @@ trash/*
 html/*
 latex/*
 src/FloTest/__pycache__/*
+build/*
+src/attack_tree.egg-info/*

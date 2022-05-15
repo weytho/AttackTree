@@ -186,6 +186,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
    if (strcmp(type_string, "LEAF" )){
       node->leaf = 0;
       node->prob = 1;
+      node->cost = 0;
    }
    else {
       node->leaf = 1;
