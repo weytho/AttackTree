@@ -1,3 +1,10 @@
+##
+# @file
+# Plot the solutions of a Tree
+# On the left : create a tree with nodes having size corresponding to
+#   the number of times they where taken
+# On the right : a bar diagram of the number of time each node is taken
+#
 import networkx as nx
 import matplotlib.pyplot as plt
 
@@ -20,7 +27,6 @@ def frequency_comparator(nodes, edges, current_network, current_digraph, sol_arr
     current_dpi = round(100 / factor)
 
     plt.ion()
-    plt.clf()
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(current_l,current_w), dpi=current_dpi)
 
     g = nx.DiGraph()

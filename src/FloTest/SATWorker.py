@@ -3,6 +3,7 @@
 # Retrieve the ctype Structure representing the tree
 # Retrieve the tree boolean formula
 # Use a Sat-Solver to solve the formula
+#
 from PyQt5.QtCore import QObject, pyqtSignal
 import ctypes
 import os
@@ -20,7 +21,7 @@ except ImportError:
     from FloTest.tseitin import *
     from FloTest.SATsolver import sat_solver
 
-class Worker(QObject):
+class SATWorker(QObject):
     finished = pyqtSignal()
     finishedWithError = pyqtSignal()
 

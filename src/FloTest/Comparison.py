@@ -1,7 +1,10 @@
 ##
 # @file
+# Class Comparison
+# Class cmpWorker
 # Use two JSON files to compare two trees
-# Compute theme separatly then compute their conjunction and disjunction
+# Compute theme separatly then compute their conjunction and disjunction to compare their solutions
+#
 from PyQt5.QtCore import QThread, QUrl
 from sympy.parsing.sympy_parser import parse_expr
 from threading import Semaphore
@@ -11,11 +14,11 @@ import json
 
 try:
     # From folder
-    from Worker import *
+    from SATWorker import *
     from SATsolver import sat_solver
 except ImportError:
     # From package
-    from FloTest.Worker import *
+    from FloTest.SATWorker import *
     from FloTest.SATsolver import sat_solver
 
 # Set Working Directory
@@ -49,11 +52,11 @@ class Comparison(QObject):
 
     def tree_comparison(self,fileName1,fileName2,text1,text2):
         
-        worker1 = Worker()
+        worker1 = SATWorker()
         worker1.max_val = self.max_sol
         worker1.pathFile = fileName1
         worker1.useTseitin = false
-        worker2 = Worker()
+        worker2 = SATWorker()
         worker2.max_val = self.max_sol
         worker2.pathFile = fileName2
         worker2.useTseitin = false
@@ -101,7 +104,7 @@ class Comparison(QObject):
             self.sol2.setText("number of solutions found : " + str(len(self.sol_array2)))
             self.subplot(self.worker2.node_list, self.worker2.edge_list, self.webengine2, "second_comp")
             self.worker2.deleteLater
-        ### UPDATE WINDOW WITH ARGUMENT TODO ###
+        ### UPDATE WINDOW WITH ARGUMENT ###
         self.sem.acquire()
         self.cnt += 1
         if self.cnt == 2:
@@ -147,7 +150,6 @@ class Comparison(QObject):
         self.t4.start()
 
     def clean_cmpWorker(self, nbr):
-        ## TODO
         if nbr == 1:
             self.cnf3 = self.worker3.cnf
             self.var_array3 = self.worker3.var_array
@@ -186,7 +188,7 @@ class Comparison(QObject):
                     boolean_array.append(l)
                 self.boolean_sol_arr4 = boolean_array
             self.worker4.deleteLater
-        ### UPDATE WINDOW WITH ARGUMENT TODO ###
+        ### UPDATE WINDOW WITH ARGUMENT ###
         self.sem.acquire()
         self.cnt += 1
         if self.cnt == 4:
@@ -325,6 +327,7 @@ class cmpWorker(QObject):
         cnf_formula = to_cnf(parsed_formula)
         self.cnf = str(cnf_formula)
         #print("Cnf Formula : "+self.cnf)
+        
         # Create varlist from previous ones
         self.list_var = self.var_array1
         for var in self.var_array2:

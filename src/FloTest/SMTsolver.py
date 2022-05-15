@@ -1,10 +1,6 @@
-# This example requires Z3 and MathSAT to be installed (but you can
-#  replace MathSAT with any other solver for QF_LRA)
-#
-# This examples shows how to:
-# 1. Define Real valued constants using floats and fractions
-# 2. Perform quantifier elimination
-# 3. Pass results from one solver to another
+##
+# @file
+# Solve the boolean formula in term of costs or probabilities
 #
 from pysmt.shortcuts import Solver, Symbol, Real, Plus, And, Equals, Ite, Times, GT, LT
 from pysmt.typing import REAL
@@ -66,7 +62,6 @@ def SMTcost(list_var, list_cost, formula, upper_bound=None):
         best = z3.Real(0)
         solutions = []
         while o.check() == z3.sat:
-            # TODO model doesnt give every variable !!
             model = o.model()
             new_best = model[Z3_sol]
 
@@ -78,7 +73,6 @@ def SMTcost(list_var, list_cost, formula, upper_bound=None):
             elif not get_all and z3.simplify(new_best > best):
                 break
 
-            #print(model)
             solutions.append(model)
             block = []
             for d in model:
@@ -98,7 +92,6 @@ def SMTproba(list_var, list_proba, formula, lower_bound=0):
     list_and_proba = [Ite(s, Real(c), one) for s, c in zip(list_symbols, list_proba)]
 
     problem = parse(formula)
-    # TODO CHANGE TO ENABLE PROBA
     sum = Times(list_and_proba)
 
     f = And(problem, Equals(SOL, sum))

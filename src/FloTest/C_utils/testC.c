@@ -5,7 +5,6 @@
 #include<json-c/json.h>
 #include <string.h>
 #include <stdlib.h>
-//#include "structures.c"
 #include "grammar.c"
 #include <ctype.h>
 #include <locale.h>
@@ -297,7 +296,6 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
       }
    }
 
-   //printf("[Node] Title : %s\n",node->title);
    CostProb *retval = malloc(sizeof(CostProb));
    retval->cost = 0;
    retval->prob = 0;
@@ -309,7 +307,6 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
 
 FList * mainfct(char * path, int with_cm) {
    printf("FUNCTION : mainfct \n");
-	//path = "/home/flo/Desktop/Github/AttackTree/FloTest/StructureGraph.json";
 	printf("Path to file is : %s \n", path);
 
 	FILE *fp; 
@@ -414,18 +411,14 @@ FList * mainfct(char * path, int with_cm) {
 
 json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mode, HashTable *ht_CM){
    //printf("FUNCTION : build_json \n");
-   //printDLL_total(tree);
 
    json_object_object_add(parent, "Action", json_object_new_string(tree->n->title));
    json_object_object_add(parent, "Type", json_object_new_string(tree->n->type));
 
-   // TODO vérifier autrement
    if(boolean_mode == 0 & strncmp(tree->n->type, "LEAF", 5) == 0){
       json_object_object_add(parent, "Cost", json_object_new_int(tree->n->cost));
       json_object_object_add(parent, "Prob", json_object_new_double(tree->n->prob));
    }
-
-   //json_object_object_add(parent, "CM", json_object_new_array());
 
    if(ht_CM != NULL){
       int i = NameIndex(ht_CM, tree->n->title);
@@ -440,8 +433,6 @@ json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mod
             json_object_object_add(parent, "CM", counter);
             while (CM_list != NULL) {
                json_object *tmp_root_cm = json_object_new_object();
-               //char buf[101];
-               //snprintf(buf, sizeof(buf), "%s_%s", CM_list->CMtitle, Nn->Name);
                json_object_object_add(tmp_root_cm, "CMtitle", json_object_new_string(CM_list->CMtitle));
 
                if(boolean_mode == 0){
@@ -452,8 +443,6 @@ json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mod
                CM_list = CM_list->next;
             }
          }
-         //deleteH(ht_CM, Nn);
-         //displayH(ht_CM);
       }
    }
 
@@ -475,7 +464,6 @@ void create_Json_file(DLL_List * wholeTree, int boolean_mode, HashTable *ht_CM, 
    printf("FUNCTION : create_Json_file \n");
 
    printf(" NAME FINAL IS %s\n", wholeTree->n->title);
-   //const char *filename = "res/StructureTestingParser.json";
    json_object *root = json_object_new_object();
 
    printf("CREATING FILE\n");
@@ -562,12 +550,12 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
 
                dll_node = createDLLNode(ptr2, ptr3);
                whole_list = addToEndList(whole_list, dll_node);
-               //printDLL_List(whole_list);
+
             } else {
 
                parent_is_in = 1;
                dll_node = getFromList(whole_list, ptr2);
-               // TODO CHECK FOR REWRITE
+               // CHECK FOR REWRITE
                if(dll_node->children != NULL){
                   free(RawText);
                   free(ptr_copy);
@@ -576,7 +564,6 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
                   printf("2\n");
                   return 2;
                }
-               //memcpy(dll_node->n->type, ptr3, sizeof(dll_node->n->type));
                snprintf(dll_node->n->type, sizeof(dll_node->n->type), "%s", ptr3);
             }
 
@@ -630,7 +617,7 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
                         tmp_dll->next = NULL;
                      } else {
                         DLL_List * new_tmp_dll = malloc(sizeof(DLL_List));
-                        new_tmp_dll->n = tmp_dll->n; //copy_node(tmp_dll->n); //tmp_dll->n;
+                        new_tmp_dll->n = tmp_dll->n;
                         new_tmp_dll->children = tmp_dll->children;
                         new_tmp_dll->parents = tmp_dll->parents;
                         new_tmp_dll->next = NULL;
@@ -640,8 +627,6 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
                   }
 
                   addChildren(dll_node, tmp_dll, whole_list);
-
-                  //printDLL_total(whole_list);
                   
                   addParents(tmp_dll, dll_node);
                }
@@ -661,8 +646,6 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
 
    free(RawText);
 
-   //printDLL_total(whole_list);
-
    if(whole_list->next != NULL){
       DLL_free_from_top(whole_list);
       printf("4\n");
@@ -673,9 +656,7 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
 
    if( boolean_mode == 0 ){
       printf("BOOLEAN MODE\n");
-      //displayH(ht_properties);
       set_properties_total(whole_list, ht_properties);
-      //freeH(ht_properties);
    }
 
    // ADD countermeasures
@@ -705,39 +686,39 @@ int main (int argc, char * argv[]) {
 	//freeNode(n);
 	//freeList(l);
 
-   char a[]= " node -AND-> {node0,node1,node2} \
-node0 -OR-> {node00,node01,node02} \
-node00 -AND-> {node000,node001,node002} \
-node000 -SAND-> {node0000,node0001} \
-node001 -OR-> {node0010,node0011,node0012,node000} \
-node0011 -OR-> {node00110,node00111,node00112,node000} \
-node01 -SAND-> {node010,node011,node012} \
-node1 -AND-> {node10,node11} \
-node10 -SAND-> {node100,node101,node102,node000} \
-node102 -AND-> {node1020,node1021} \
-node1021 -AND-> {node10210,node10211,node10212,node02} \
-node11 -OR-> {node110,node111,node100} \
-node2 -SAND-> {node20,node21,node22,node0010} \
-node20 -AND-> {node200,node201,node202,node00110} \
-node201 -OR-> {node2010,node2011,node200} \
-node21 -OR-> {node210,node211,node212,node111} \
-node22 -SAND-> {node220,node221} \
-node221 -OR-> {node2210,node2211,node2212,node00}";
+   char a[]= " node -AND- node0,node1,node2; \
+node0 -OR- node00,node01,node02; \
+node00 -AND- node000,node001,node002; \
+node000 -SAND- node0000,node0001; \
+node001 -OR- node0010,node0011,node0012,node000; \
+node0011 -OR- node00110,node00111,node00112,node000; \
+node01 -SAND- node010,node011,node012; \
+node1 -AND- node10,node11; \
+node10 -SAND- node100,node101,node102,node000; \
+node102 -AND- node1020,node1021; \
+node1021 -AND- node10210,node10211,node10212,node02; \
+node11 -OR- node110,node111,node100; \
+node2 -SAND- node20,node21,node22,node0010; \
+node20 -AND- node200,node201,node202,node00110; \
+node201 -OR- node2010,node2011,node200; \
+node21 -OR- node210,node211,node212,node111; \
+node22 -SAND- node220,node221; \
+node221 -OR- node2210,node2211,node2212,node00;";
    char b[]= " CM1 (node20,node2) \
 CM2 (node,node2) \
 CM3 (node120,node20) \
 CM4 (node21,node01) \
 CM5 (node20,node10) ";
-   char c[]= " node00:{cost = 4,prob = 1.0} \
-node01:{cost = 2,prob = 1.0} \
-node10:{cost = 1,prob = 1.0} \
-node11:{cost = 6,prob = 1.0} \
-node1200:{cost = 8,prob = 1.0} \
-node1201:{cost = 8,prob = 1.0} \
-node121:{cost = 7,prob = 1.0} \
-node122:{cost = 9,prob = 1.0} \
-node20:{cost = 1,prob = 1.0}  \
-node21:{cost = 4,prob = 1.0} ";
+   char c[]= " node00: cost = 4,prob = 1.0; \
+node01: cost = 2,prob = 1.0; \
+node10: cost = 1,prob = 1.0; \
+node11: cost = 6,prob = 1.0; \
+node1200: cost = 8,prob = 1.0; \
+node1201: cost = 8,prob = 1.0; \
+node121: cost = 7,prob = 1.0; \
+node122: cost = 9,prob = 1.0; \
+node20: cost = 1,prob = 1.0;  \
+node21: cost = 4,prob = 1.0; ";
 
    int r = parser(a, " ", " ", "test");
 	return 0;

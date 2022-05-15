@@ -1,3 +1,8 @@
+##
+# @file
+# Retrieve the tree boolean formula
+# Use a SMT-Solver to solve the formula in term of costs or probabilities
+#
 from PyQt5.QtCore import QObject, pyqtSignal
 from fractions import Fraction
 
@@ -5,13 +10,11 @@ try:
     # From folder
     from Struct import *
     from tseitin import *
-    from SATsolver import sat_solver
     from SMTsolver import SMTcost, SMTproba
 except ImportError:
     # From package 
     from FloTest.Struct import *
     from FloTest.tseitin import *
-    from FloTest.SATsolver import sat_solver
     from FloTest.SMTsolver import SMTcost, SMTproba
 
 class SMTWorker(QObject):

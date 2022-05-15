@@ -1,3 +1,8 @@
+##
+# @file
+# Methods use to compute the Tseitin transformation
+# used to convert a boolan formula to its CNF-form
+#
 from sympy import *
 import time
 

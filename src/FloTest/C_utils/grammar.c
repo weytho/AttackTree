@@ -171,9 +171,8 @@ DLL_List * getFromList(DLL_List *head_list, char * name){
 
 void addParents(DLL_List *node, DLL_List *parent){
 
-   // TODO pas utile comme ça ?
    DLL_List * new_parent = malloc(sizeof(DLL_List));
-   new_parent->n = parent->n; //copy_node(parent->n); // = parent->n;
+   new_parent->n = parent->n;
    new_parent->children = parent->children;
    new_parent->parents = parent->parents;
    new_parent->next = NULL;
@@ -186,7 +185,6 @@ void addParents(DLL_List *node, DLL_List *parent){
          current = current->next;
       }
       current->next = new_parent;
-      //parent->next = NULL;
    }
 }
 
@@ -206,7 +204,6 @@ void addChildren(DLL_List * node, DLL_List *child, DLL_List * whole){
 
    if(node->children == NULL){
       // Pobleme modif all nodes les mêmes
-      // TODO fix double pointers
       addChildrentoAllInstances(whole, child, node);
    } else {
       DLL_List * current = node->children;
@@ -545,7 +542,6 @@ HashTable * parse_properties(char * prop_text){
       ptr_prop = strtok_r(NULL, delim5, &saveptr3); 
    }
 
-   //displayH(ht_properties);
    return ht_properties;
 }
 
@@ -649,7 +645,6 @@ HashTable * parse_countermeasures(char * counter_text, HashTable *ht_properties)
                      Nn->prob = prop_Nn->prob;
                      node->cost = prop_Nn->cost;
                      node->prob = prop_Nn->prob;
-                     //deleteH(ht_properties, prop_Nn);
                   } else {
                      Nn->cost = 0;
                      Nn->prob = 1.0;

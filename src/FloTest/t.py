@@ -2,6 +2,7 @@
 # @file
 # Main file of the python GUI interface
 # Create GUI using PyQt5
+#
 
 import sys
 from PyQt5 import QtCore, QtWidgets
@@ -29,7 +30,7 @@ print(dirname)
 
 try:
     # From folder
-    from Worker import *
+    from SATWorker import *
     from ParserWorker import *
     from Comparison import *
     from SMTWorker import *
@@ -38,7 +39,7 @@ try:
     from SolutionSorter import sorter
 except ImportError:
     # From package
-    from FloTest.Worker import *
+    from FloTest.SATWorker import *
     from FloTest.ParserWorker import *
     from FloTest.Comparison import *
     from FloTest.SMTWorker import *
@@ -501,10 +502,6 @@ class Window(QWidget):
 
         pos = nx.nx_agraph.graphviz_layout(g, prog='dot', args='-Gnodesep=0.2 -Gsize=10,6\! -Gdpi=100 -Gratio=fill')
 
-        # RESIZE figure
-        # TODO CA AVANCE
-        # CM entre noeud et noeud logic
-
         nt = Network(height="100%", width="100%")
         
         # Title can be html
@@ -568,7 +565,7 @@ class Window(QWidget):
                 return
 
         self.thread = QThread()
-        self.worker = Worker()
+        self.worker = SATWorker()
 
         self.worker.threadactive = True
         self.worker.pathFile = fileName
@@ -901,8 +898,7 @@ class Window(QWidget):
                 list_to_toggle.append(u.rsplit('_', 1)[0])
 
         for n in list_to_toggle:
-            # TODO Voir quoi faire pour
-            # les noeuds qui ne sont pas des leafs !!
+
             if n in self.uniq_node_list:
                 index = self.uniq_node_list.index(n)
                 j = index % 10
@@ -937,7 +933,7 @@ class Window(QWidget):
     def computeUsingAssumptions(self):
 
         self.thread = QThread()
-        self.worker = Worker()
+        self.worker = SATWorker()
         self.worker.threadactive = True
         self.worker.max_val = self.max_spin.value()
 

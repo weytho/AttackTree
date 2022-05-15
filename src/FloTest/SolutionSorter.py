@@ -1,3 +1,8 @@
+##
+# @file
+# Methods used to sort and filter the list of list of solutions
+#
+
 # This solution sorter reduce the solution space by removing non minimal solutions
 # @param l : The list of solutions to reduce
 def sorter(l):

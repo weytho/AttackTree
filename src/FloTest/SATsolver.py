@@ -1,8 +1,7 @@
 ##
 # @file
-# Retrieve the ctype Structure representing the tree
-# Retrieve the tree boolean formula
-# Use a Sat-Solver to solve the formula
+# Solve the boolean formula
+#
 from json.encoder import INFINITY
 from pysat.solvers import Glucose3
 from sympy import *
@@ -82,7 +81,7 @@ def sat_solver(formula, list_var, assumptions=[], max_val=20):
     sol_array = []
 
     if(b):
-        # TODO LIMIT TO 20 FOR PERFORMANCE ISSUE
+        # if no limit -> limit to 20 for performance issue
         cnt = 0
         for m in g.enum_models(assumptions=assumptions):
             if cnt >= max_val :
