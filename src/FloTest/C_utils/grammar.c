@@ -474,9 +474,9 @@ HashTable * parse_properties(char * prop_text){
    char *saveptr4;
    char *saveptr5;
 
-   char delim5[] = "}";
+   char delim5[] = ";";
    char delim6[] = ":";
-   char delim7[] = "{=";
+   char delim7[] = "=";
    char delim8[] = "=,";
 
    size_t size_prop = strlen(prop_text) + 1;

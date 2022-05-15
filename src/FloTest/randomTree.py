@@ -20,7 +20,7 @@ def nodeGeneration(Relations, CounterMeasures, Properties, node, depth, maxdepth
     rng = random.randint(0,maxdepth)
     # this node is a leaf
     if rng < depth:
-        Properties += "\n"+node+":{"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+"}"
+        Properties += "\n"+node+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
         if random.randint(0,10)<3 :
             CounterMeasures += "\nCM"+node+" ("+node+")"
         return Relations,CounterMeasures,Properties
@@ -28,27 +28,27 @@ def nodeGeneration(Relations, CounterMeasures, Properties, node, depth, maxdepth
     rnglogic = random.randint(1,3)
     Relations += "\n"+node
     if rnglogic == 1:
-        Relations += " -OR-> "
+        Relations += " -OR- "
     elif rnglogic == 2:
-        Relations += " -AND-> "
+        Relations += " -AND- "
     else:
-        Relations += " -SAND-> "
+        Relations += " -SAND- "
     # node child
     rngchild = random.randint(2,branching_factor)
-    Relations += "{"
+
     child = [node+str(i) for i in range(0,rngchild)]
     for i in range(0,rngchild):
         Relations += child[i]
         if i!=rngchild-1:
             Relations += ","
-    Relations += "}"
+    Relations += ";"
     # Add CM if unlucky
     if random.randint(0,10)<1 :
         CounterMeasures += "\nCM"+node+" ("+node+")"
     # node child
     if depth == maxdepth:
         for i in range(0,rngchild):
-            Properties += "\n"+child[i]+":{"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+"}"
+            Properties += "\n"+child[i]+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
             if random.randint(0,10)<3 :
                 CounterMeasures += "\nCM"+child[i]+" ("+child[i]+")"
         return Relations,CounterMeasures,Properties
@@ -76,20 +76,20 @@ def nodeGeneration2(NodeList, Relations, Properties, node, depth, maxdepth, bran
     NodeList.append(node)
     # this node is a leaf
     if rng < depth:
-        Properties += "\n"+node+":{"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+"}"
+        Properties += "\n"+node+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
         return Relations,Properties
     # node logic
     rnglogic = random.randint(1,3)
     Relations += "\n"+node
     if rnglogic == 1:
-        Relations += " -OR-> "
+        Relations += " -OR- "
     elif rnglogic == 2:
-        Relations += " -AND-> "
+        Relations += " -AND- "
     else:
-        Relations += " -SAND-> "
+        Relations += " -SAND- "
     # node child
     rngchild = random.randint(2,branching_factor)
-    Relations += "{"
+
     child = [node+str(i) for i in range(0,rngchild)]
     for i in range(0,rngchild):
         Relations += child[i]
@@ -104,12 +104,12 @@ def nodeGeneration2(NodeList, Relations, Properties, node, depth, maxdepth, bran
             cnt-=1
         if cnt > 0:
             Relations += ","+existingnode
-    Relations += "}"
+    Relations += ";"
     # node child
     if depth == maxdepth:
         for i in range(0,rngchild):
             NodeList.append(child[i])
-            Properties += "\n"+child[i]+":{"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+"}"
+            Properties += "\n"+child[i]+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
         return Relations,Properties
     else:
         for i in range(0,rngchild):
@@ -172,20 +172,20 @@ def nodeGeneration3(NodeList, Relations, Properties, node, depth, maxdepth, bran
     NodeList.append(node)
     # this node is a leaf
     if rng < depth:
-        Properties += "\n"+node+":{"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+"}"
+        Properties += "\n"+node+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
         return Relations,Properties
     # node logic
     rnglogic = random.randint(1,3)
     Relations += "\n"+node
     if rnglogic == 1:
-        Relations += " -OR-> "
+        Relations += " -OR- "
     elif rnglogic == 2:
-        Relations += " -AND-> "
+        Relations += " -AND- "
     else:
-        Relations += " -SAND-> "
+        Relations += " -SAND- "
     # node child
     rngchild = random.randint(2,branching_factor)
-    Relations += "{"
+
     child = [node+str(i) for i in range(0,rngchild)]
     notList = [random.randint(0,5) for i in range(0,rngchild)]
     for i in range(0,rngchild):
@@ -203,18 +203,18 @@ def nodeGeneration3(NodeList, Relations, Properties, node, depth, maxdepth, bran
             cnt-=1
         if cnt > 0:
             Relations += ","+existingnode
-    Relations += "}"
+    Relations += ";"
     # node child
     if depth == maxdepth:
         for i in range(0,rngchild):
             NodeList.append(child[i])
-            Properties += "\n"+child[i]+":{"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+"}"
+            Properties += "\n"+child[i]+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
         return Relations,Properties
     else:
         for i in range(0,rngchild):
             if notList[i]==0:
                 NodeList.append(child[i])
-                Properties += "\n"+child[i]+":{"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+"}"
+                Properties += "\n"+child[i]+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
             else:
                 Relations,Properties = nodeGeneration4(NodeList, Relations,Properties,child[i],depth+1,maxdepth,branching_factor)
     return Relations,Properties
@@ -275,21 +275,21 @@ def ShuffledNodeGeneration(NodeList, Relations, Properties, node, depth, maxdept
     NodeList.append(node)
     # this node is a leaf
     if rng < depth:
-        Properties += "\n"+node+":{"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+"}"
+        Properties += "\n"+node+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
         return Properties
     # node logic 
     rnglogic = random.randint(1,3)
     line = ""
     line += "\n"+node
     if rnglogic == 1:
-        line += " -OR-> "
+        line += " -OR- "
     elif rnglogic == 2:
-        line += " -AND-> "
+        line += " -AND- "
     else:
-        line += " -SAND-> "
+        line += " -SAND- "
     # node child
     rngchild = random.randint(2,branching_factor)
-    line += "{"
+
     child = [node+str(i) for i in range(0,rngchild)]
     notList = [random.randint(0,5) for i in range(0,rngchild)]
     for i in range(0,rngchild):
@@ -307,19 +307,19 @@ def ShuffledNodeGeneration(NodeList, Relations, Properties, node, depth, maxdept
             cnt-=1
         if cnt > 0:
             line += ","+existingnode
-    line += "}"
+    line += ";"
     Relations.append(line)
     # node child
     if depth == maxdepth:
         for i in range(0,rngchild):
             NodeList.append(child[i])
-            Properties += "\n"+child[i]+":{"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+"}"
+            Properties += "\n"+child[i]+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
         return Properties
     else:
         for i in range(0,rngchild):
             if notList[i]==0:
                 NodeList.append(child[i])
-                Properties += "\n"+child[i]+":{"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+"}"
+                Properties += "\n"+child[i]+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
             else:
                 Properties = ShuffledNodeGeneration(NodeList,Relations,Properties,child[i],depth+1,maxdepth,branching_factor)
     return Properties
@@ -379,20 +379,20 @@ def nodeGeneration4(NodeList, Relations, Properties, node, depth, maxdepth, bran
     NodeList.append(node)
     # this node is a leaf
     if rng < depth:
-        Properties += "\n"+node+":{"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+"}"
+        Properties += "\n"+node+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
         return Relations,Properties
     # node logic
     rnglogic = random.randint(1,3)
     Relations += "\n"+node
     if rnglogic == 1:
-        Relations += " -OR-> "
+        Relations += " -OR- "
     elif rnglogic == 2:
-        Relations += " -AND-> "
+        Relations += " -AND- "
     else:
-        Relations += " -SAND-> "
+        Relations += " -SAND- "
     # node child
     rngchild = random.randint(2,branching_factor)
-    Relations += "{"
+
     child = [node+str(i) for i in range(0,rngchild)]
     for i in range(0,rngchild):
         Relations += child[i]
@@ -402,12 +402,12 @@ def nodeGeneration4(NodeList, Relations, Properties, node, depth, maxdepth, bran
     if random.randint(0,10)<2:
         existingnode = random.choice(NodeList)
         Relations += ","+existingnode
-    Relations += "}"
+    Relations += ";"
     # node child
     if depth == maxdepth:
         for i in range(0,rngchild):
             NodeList.append(child[i])
-            Properties += "\n"+child[i]+":{"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+"}"
+            Properties += "\n"+child[i]+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
         return Relations,Properties
     else:
         for i in range(0,rngchild):

@@ -1,9 +1,9 @@
 RELATIONS
-m -OR-> {A, N, K}
-A -NOT-> {B}
-B -OR-> {C, H, D, I, J}
-C -NOT-> {E}
-D -NOT-> {F}
-F -NOT-> {G}
+m -OR- A, N, K;
+A -NOT- B;
+B -OR- C, H, D, I, J;
+C -NOT- E;
+D -NOT- F;
+F -NOT- G;
 COUNTERMEASURES
 PROPERTIES

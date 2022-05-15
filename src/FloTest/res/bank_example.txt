@@ -1,7 +1,7 @@
 RELATIONS
-RobBank -SAND-> {TurnOffSecurity,EnterBank,BreakChest}
-TurnOffSecurity -AND-> {StopCameraA,StopCameraB}
-EnterBank -OR-> {EnterDoorA,EnterDoorB}
+RobBank -SAND- TurnOffSecurity,EnterBank,BreakChest;
+TurnOffSecurity -AND- StopCameraA,StopCameraB;
+EnterBank -OR- EnterDoorA,EnterDoorB;
 COUNTERMEASURES
 Guards (EnterDoorA)
 PROPERTIES

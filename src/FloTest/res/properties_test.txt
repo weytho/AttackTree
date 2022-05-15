@@ -1,10 +1,10 @@
 RELATIONS
-    A -OR-> {B, C, D}
-    B -AND-> {E, F}
-    D -OR-> {G}
+    A -OR-> B, C, D;
+    B -AND- E, F;
+    D -OR-> G;
 COUNTERMEASURES
     CM1 (F)
 PROPERTIES
-    C : {cost = 10, prob = 1.0}
-    G : {cost = 1, prob = 2.5}
-    CM1 : {cost = 2}
+    C : cost = 10, prob = 1.0;
+    G : cost = 1, prob = 2.5;
+    CM1 : cost = 2;

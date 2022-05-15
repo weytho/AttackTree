@@ -1,7 +1,7 @@
 RELATIONS
-    A -OR-> {B, C, D}
-    B -NOT-> {E, F}
+    A -OR- B, C, D;
+    B -NOT- E, F;
 COUNTERMEASURES
     CM1 (F)
 PROPERTIES
-    C : {cost = 10, prob = 1.0}
+    C : cost = 10, prob = 1.0;

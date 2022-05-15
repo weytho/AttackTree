@@ -6,7 +6,6 @@
 # 2. Perform quantifier elimination
 # 3. Pass results from one solver to another
 #
-from math import inf
 from pysmt.shortcuts import Solver, Symbol, Real, Plus, And, Equals, Ite, Times, GT, LT
 from pysmt.typing import REAL
 from pysmt.parsing import parse

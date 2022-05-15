@@ -1,5 +1,8 @@
+##
+# @file
+# Use two JSON files to compare two trees
+# Compute theme separatly then compute their conjunction and disjunction
 from PyQt5.QtCore import QThread, QUrl
-from PyQt5 import QtGui
 from sympy.parsing.sympy_parser import parse_expr
 from threading import Semaphore
 import networkx as nx
@@ -15,8 +18,10 @@ except ImportError:
     from FloTest.Worker import *
     from FloTest.SATsolver import sat_solver
 
+# Set Working Directory
 dirname = os.path.dirname(__file__)
-os.chdir(dirname)
+if dirname:
+    os.chdir(dirname)
 with open('resources_directory.txt') as f:
     dirname = f.readline()
     dirname = dirname.rstrip("\n")
@@ -186,9 +191,7 @@ class Comparison(QObject):
         self.cnt += 1
         if self.cnt == 4:
             self.sem.release()
-
             self.concated_formula_text.setText(self.cnf3)
-
             self.finished.emit()
         else:
             self.sem.release()
@@ -230,14 +233,7 @@ class Comparison(QObject):
                     logic_nodes.append(node_nor)
 
                     name = u + '_' + "LOGIC"
-                    if d['type'] == 'OR':
-                        node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -1})
-                    elif d['type'] == 'NOT':
-                        node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -2})
-                    elif d['type'] == 'XOR':
-                        node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -3})
-                    else:
-                        node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': 0})
+                    node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': 0})
                     logic_nodes.append(node)
 
                     edge = (u, name_nor)
@@ -247,18 +243,10 @@ class Comparison(QObject):
                     edge = (u, name)
                     labels_logic[name] = d['type']
                     logic_edge.append(edge)
-
                 else:
                     nodes_not_leaf.append(u)
                     name = u + '_' + "LOGIC"
-                    if d['type'] == 'OR':
-                        node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -1})
-                    elif d['type'] == 'NOT':
-                        node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -2})
-                    elif d['type'] == 'XOR':
-                        node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': -3})
-                    else:
-                        node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': 0})
+                    node = (name, {'type': 'logic', 'parent': u, 'CM': 0, 'inputNbr': 0})
                     logic_nodes.append(node)
                     # if has no CM
                     edge = (u, name)

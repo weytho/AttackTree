@@ -4,11 +4,10 @@
 # Create GUI using PyQt5
 
 import sys
-from PyQt5 import QtCore, QtWidgets, sip
+from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtGui import QIntValidator, QDoubleValidator
 from PyQt5.QtWidgets import QMessageBox, QToolBar, QToolButton
 from PyQt5.QtWebEngineWidgets import QWebEngineView
-import matplotlib.pyplot as plt
 import networkx as nx
 from PyQt5.QtCore import QThread, QUrl, Qt
 import os
@@ -18,8 +17,10 @@ import copy
 from functools import partial
 import csv
 
+# Set Working Directory
 dirname = os.path.dirname(__file__)
-os.chdir(dirname)
+if dirname:
+    os.chdir(dirname)
 with open('resources_directory.txt') as f:
     dirname = f.readline()
     dirname = dirname.rstrip("\n")
@@ -56,7 +57,6 @@ class Window(QWidget):
     ## The constructor.
     def __init__(self, parent=None):
         super().__init__()
-        self.figure = plt.figure()
         self.width = 1000
         self.height = 800
         self.setGeometry(0, 0, self.width, self.height)
@@ -510,15 +510,12 @@ class Window(QWidget):
         # Title can be html
         for (n, d) in ln:
             title_str = n
-            #if d['CM'] == 1:
-            #    nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str, group="test")
             if d['type'] == 'CtMs':
                 title_str = title_str + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob'])
                 nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=d['variable'], shape='box', title=d['variable'] + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob']), group="cm")
             elif (d['leaf'] == 1):
                 title_str = title_str + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob'])
                 nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str, group="leaf")
-                # htmlTitle("Go wild <'span style='display: inline-block; animation: be-tacky 5s ease-in-out alternate infinite; margin: 5px;'>!<'/span>")
             else:
                 nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str)
 
@@ -549,14 +546,10 @@ class Window(QWidget):
     #  @param node_list List of the Nodes of the JSON file
     #  @param node_list List of the Edges of the JSON file
     def plot(self, node_list, edge_list):
-        # clearing old figure
-        self.figure.clear()
         self.get_canvas(node_list, edge_list)
-        #self.canvas.setContextMenuPolicy(Qt.NoContextMenu)
         html_file = os.path.join(dirname, 'res/nx.html')
         local_url = QUrl.fromLocalFile(html_file)
         self.canvas.load(local_url)
-        #self.canvas.draw()
         print("pressed")
 
     ## Action called by the import JSON button :
@@ -600,15 +593,18 @@ class Window(QWidget):
             lambda: self.stopImport(True)
         )
 
+    ## Action called on the worker finished or finishedWithError signals
+    #   Clean resources and enable Import and Reload Buttons
+    #  @param self The object pointer.
+    #  @param proper_close Boolean value used in case of error in the worker.
     def stopImport(self, proper_close):
         if not proper_close:
             self.thread.quit()
             self.thread.wait()
             self.worker.deleteLater
             self.thread.deleteLater
-        else:
-            self.buttonImportJson.setEnabled(True)
-            self.buttonReload.setEnabled(True)
+        self.buttonImportJson.setEnabled(True)
+        self.buttonReload.setEnabled(True)
 
     ## Action called by the import Grammar button :
     #   Use a file explorer to choose the TXT file to import
@@ -652,20 +648,17 @@ class Window(QWidget):
             index = self.sol_spin.value()
             if index > -1 :
                 self.tracesFound.setText("")
-
                 self.result_layout.setCurrentWidget(self.tableSol)
-                
                 self.tableSol.clear()
 
                 full_header = copy.deepcopy(self.var_array)
                 if self.values_array is not None:
                     full_header.insert(0,"%SOL%")
 
-                #Row count
+                # Row count
                 self.tableSol.setRowCount(1) 
-                #Column count
+                # Column count
                 self.tableSol.setColumnCount(len(full_header))
-
                 self.tableSol.setHorizontalHeaderLabels(full_header)
 
                 if self.values_array is not None:
@@ -680,7 +673,7 @@ class Window(QWidget):
                         self.tableSol.setItem(0, pos2 + 1, item)
                     else:
                         self.tableSol.setItem(0, pos2, item)
-                #self.tracesFound.repaint()
+
                 ok_list = []
                 not_list = []
                 old_nodes = copy.deepcopy(self.current_network.nodes)
@@ -1022,6 +1015,9 @@ class Window(QWidget):
             self.msg.resize(500,500)
             self.msg.show()
 
+    ## Action called by the solutions list button :
+    #   Print the list of solutions in a QDialog
+    #  @param self The object pointer.
     def show_sol(self):
         if hasattr(self, 'var_array'):
             self.msg = QDialog(self)
@@ -1048,6 +1044,10 @@ class Window(QWidget):
     def setCNFTransform(self, bool):
         self.useTseitin = bool
 
+    ## Action called by min cost and max proba buttons :
+    #   Create the Qthread and SMTWorker to compute the solutions needed
+    #  @param self The object pointer.
+    #  @param type Integer value corresponding to the type of SMT operation (0:cost 1:proba)
     def callSMT(self, type=0):
         self.cost_button.setEnabled(False)
         self.proba_button.setEnabled(False)
@@ -1094,6 +1094,10 @@ class Window(QWidget):
             lambda: self.stopImport(True)
         )
 
+    ## Called by the finished signal of the SMTWorker :
+    #   Print and Store the solutions found, then clean the resources
+    #  @param self The object pointer.
+    #  @param type Integer value corresponding to the type of SMT operation (0:cost 1:proba)
     def SMTcleaning(self, type):
         self.sol_array = self.worker.sol_array
         self.var_array = self.worker.var_array
@@ -1133,6 +1137,10 @@ class Window(QWidget):
 
         self.worker.deleteLater
 
+    ## Action called by the Comparison button :
+    #   Create a new QDialog with the needed elements to plot the trees and their comparison
+    #   Then call self.call_compare with the corresponding arguments
+    #  @param self The object pointer.
     def compareTrees(self):
         self.comp = QDialog(self)
         self.comp.setWindowTitle("Left Tree Included In Right Tree")
@@ -1202,9 +1210,41 @@ class Window(QWidget):
         self.comp.resize(1800,800)
         self.comp.show()
 
-    def compareFrequency(self):
-        frequency_comparator(self.basic_nodes, self.basic_edges, self.current_network, self.current_digraph, self.boolean_sol_arr, self.var_array)
+    ## Create the Comparison Object and call its tree_comparison method :
+    #  @param self The object pointer.
+    #  @param form1 QTextEdit for the first tree formula.
+    #  @param form2 QTextEdit for the second tree formula.
+    #  @param form3 QTextEdit for the conjunction formula of both trees.
+    #  @param web1 First QWebEngineView.
+    #  @param web2 Second QWebEngineView.
+    #  @param path1 First File Path.
+    #  @param path2 Second File Path.
+    #  @param sol1 QTextEdit for the solutions found for the first tree.
+    #  @param sol2 QTextEdit for the solutions found for the second tree.
+    #  @param results_print QWidget used for the solutions comparison.
+    def call_compare(self, form1, form2, form3, web1, web2, path1, path2, sol1, sol2, results_print):
+        comparator = Comparison()
+        comparator.concated_formula_text = form3
+        comparator.webengine1 = web1
+        comparator.webengine2 = web2
+        comparator.sol1 = sol1
+        comparator.sol2 = sol2
+        comparator.results_print = results_print
+        comparator.max_sol = self.max_spin.value()
+        file1, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'File : Antecedent', QtCore.QDir.currentPath() + '/res' , '*.json')
+        if not file1 :
+            return
+        path1.setText(file1)
+        file2, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'File : Consequent', QtCore.QDir.currentPath() + '/res' , '*.json')
+        if not file2 :
+            return
+        path2.setText(file2)
+        comparator.finished.connect(self.showResults)
+        comparator.tree_comparison(file1, file2, form1, form2)
+        self.comparator = comparator
     
+    ## Add comparator solutions to the designated QWidget :
+    #  @param self The object pointer.
     def showResults(self):
         if hasattr(self, 'comparator'):
             if hasattr(self.comparator, 'var_array3'):
@@ -1246,34 +1286,14 @@ class Window(QWidget):
                     layout2.addWidget(list)
 
                 msg.setLayout(twocolumns)
-
                 self.comparator.msg = msg
-                #self.comparator.msg.show()
-
-                #self.comp.show()
                 self.comp.raise_()
                 self.comp.activateWindow()
 
-    def call_compare(self, form1, form2, form3, web1, web2, path1, path2, sol1, sol2, results_print):
-        comparator = Comparison()
-        comparator.concated_formula_text = form3
-        comparator.webengine1 = web1
-        comparator.webengine2 = web2
-        comparator.sol1 = sol1
-        comparator.sol2 = sol2
-        comparator.results_print = results_print
-        comparator.max_sol = self.max_spin.value()
-        file1, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'File : Antecedent', QtCore.QDir.currentPath() + '/res' , '*.json')
-        if not file1 :
-            return
-        path1.setText(file1)
-        file2, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'File : Consequent', QtCore.QDir.currentPath() + '/res' , '*.json')
-        if not file2 :
-            return
-        path2.setText(file2)
-        comparator.finished.connect(self.showResults)
-        comparator.tree_comparison(file1, file2, form1, form2)
-        self.comparator = comparator
+    ## Action called by the Node Frequencies button :
+    #  @param self The object pointer.
+    def compareFrequency(self):
+        frequency_comparator(self.basic_nodes, self.basic_edges, self.current_network, self.current_digraph, self.boolean_sol_arr, self.var_array)
 
     ## Get the Worker results and update them in the Window before deleting :
     #  @param self The object pointer.
@@ -1355,6 +1375,9 @@ class Window(QWidget):
         self.buttonImportJson.setEnabled(True)
         self.buttonReload.setEnabled(True)
 
+    ## Action of the Use reduced solutions buttons
+    #   Use a new list of filtered solutions which are not redundant
+    #  @param self The object pointer.
     def reduceSolutions(self):
         if hasattr(self, 'boolean_sol_array_reduced'):
             if self.reduce_button.isChecked():

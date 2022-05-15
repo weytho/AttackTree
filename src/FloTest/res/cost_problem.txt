@@ -1,12 +1,12 @@
 RELATIONS	
-node -SAND-> {node0,node1,node2}
-node0 -OR-> {node00,node01}
-node01 -OR-> {node010,node011,node012}
-node010 -OR-> {node0100,node0101,node0102}
-node1 -OR-> {node10,node11,node011}
-node10 -SAND-> {node100,node101,node01}
-node100 -SAND-> {node1000,node1001}
-node2 -SAND-> {node20,node21,node22}
+node -SAND- node0,node1,node2;
+node0 -OR- node00,node01;
+node01 -OR- node010,node011,node012;
+node010 -OR- node0100,node0101,node0102;
+node1 -OR- node10,node11,node011;
+node10 -SAND- node100,node101,node01;
+node100 -SAND- node1000,node1001;
+node2 -SAND- node20,node21,node22;
 COUNTERMEASURES
 CM1 (node1000,node21)
 CM2 (node0102)
@@ -16,16 +16,16 @@ CM5 (node0101,node011)
 CM6 (node01,node1000)
 CM7 (node1000,node012)
 PROPERTIES
-node00:{cost = 1,prob = 1.0}
-node0100:{cost = 6,prob = 1.0}
-node0101:{cost = 8,prob = 1.0}
-node0102:{cost = 7,prob = 1.0}
-node011:{cost = 1,prob = 1.0}
-node012:{cost = 8,prob = 1.0}
-node1000:{cost = 6,prob = 1.0}
-node1001:{cost = 3,prob = 1.0}
-node101:{cost = 6,prob = 1.0}
-node11:{cost = 10,prob = 1.0}
-node20:{cost = 10,prob = 1.0}
-node21:{cost = 8,prob = 1.0}
-node22:{cost = 3,prob = 1.0}
+node00:cost = 1,prob = 1.0;
+node0100:cost = 6,prob = 1.0;
+node0101:cost = 8,prob = 1.0;
+node0102:cost = 7,prob = 1.0;
+node011:cost = 1,prob = 1.0;
+node012:cost = 8,prob = 1.0;
+node1000:cost = 6,prob = 1.0;
+node1001:cost = 3,prob = 1.0;
+node101:cost = 6,prob = 1.0;
+node11:cost = 10,prob = 1.0;
+node20:cost = 10,prob = 1.0;
+node21:cost = 8,prob = 1.0;
+node22:cost = 3,prob = 1.0;

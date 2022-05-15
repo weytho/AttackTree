@@ -3,7 +3,6 @@
 # Retrieve the ctype Structure representing the tree
 # Retrieve the tree boolean formula
 # Use a Sat-Solver to solve the formula
-from json.encoder import INFINITY
 from PyQt5.QtCore import QObject, pyqtSignal
 import ctypes
 import os

@@ -528,9 +528,9 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
 
    printf("TEXT IS HERE '%s'\n", RawText);
 
-   char delim2[] = "}";
-   char delim3[] = "->";
-   char delim4[] = "->{,";
+   char delim2[] = ";";
+   char delim3[] = "-";
+   char delim4[] = "-,";
 
    char *saveptr;
    char *saveptr2;

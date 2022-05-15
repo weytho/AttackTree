@@ -1,8 +1,4 @@
-from json.encoder import INFINITY
 from PyQt5.QtCore import QObject, pyqtSignal
-import os
-from sympy.parsing.sympy_parser import parse_expr
-from collections import OrderedDict
 from fractions import Fraction
 
 try:
