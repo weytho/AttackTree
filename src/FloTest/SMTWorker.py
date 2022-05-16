@@ -45,7 +45,7 @@ class SMTWorker(QObject):
         else:
             print("SMT WORKER : PROBA")
             if self.limit:
-                self.var_array, self.sol_array, self.best_value, self.values_array = SMTcost(list_without_not, list_cost, formula, Fraction(str(self.limit)))
+                self.var_array, self.sol_array, self.best_value, self.values_array = SMTcost(list_without_not, list_proba, formula, Fraction(str(self.limit)))
             else:
                 self.var_array, self.sol_array, self.best_value, self.values_array = SMTproba(list_without_not, list_proba, formula)
 

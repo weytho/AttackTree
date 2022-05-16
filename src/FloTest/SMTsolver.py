@@ -19,7 +19,7 @@ def SMTformating(solutions, list_var):
             if z3.is_true(l[e]):
                 tmp[list_var.index(str(e()))] = 1
             elif e.name() == "%SOL%":
-                values_array.append(l[e].as_fraction())
+                values_array.append(l[e])
         bool_only_list.append(tmp)
 
     return list_var, bool_only_list, values_array
@@ -107,7 +107,6 @@ def SMTproba(list_var, list_proba, formula, lower_bound=0):
         converter = sol_z3.converter
         # How ??
         # Dual Simplex
-        #Z3_symbols = [converter.convert(s) for s in list_symbols]
         Z3_form = converter.convert(f)
         Z3_sol = converter.convert(SOL)
         o = z3.Optimize()
@@ -142,6 +141,8 @@ def SMTproba(list_var, list_proba, formula, lower_bound=0):
             o.add(z3.Or(block))
 
         vars, sols, values = SMTformating(solutions, list_var)
+        values = [round(float(e.as_fraction()), 5) for e in values]
+        best = round(float(best.as_fraction()), 5)
         return vars, sols, best, values
 
 if __name__ == "__main__":
@@ -156,7 +157,7 @@ if __name__ == "__main__":
     formula = " (X1 | X2) & (X3 | ~ X4) "
 
     cost_max = Fraction(str(6))
-    proba_min = Fraction(str(0.8))
+    proba_min = Fraction(str(0.3))
 
     print("COST")
     print(SMTcost(list_var, list_cost, formula, cost_max))
@@ -165,20 +166,8 @@ if __name__ == "__main__":
     #print(SMTcost(list_var, list_cost, formula))
 
     print("PROBA")
-    #print(SMTproba(list_var, list_proba, formula, proba_min))
+    print(SMTproba(list_var, list_proba, formula, proba_min))
 
     print()
     #print(SMTproba(list_var, list_proba, formula))
-
-    print("TEST TSEITIN")
-
-    list_var = ["X1", "X2", "X3", "X4"]
-    list_cost = [3, 1, 2, 2]
-    list_cost = [Fraction(str(x)) for x in list_cost]
-
-    formula = " (X1 | X2) & (X3 | ~ X4) "
-    formula_tse = " %0 & (%3 | X4) & (%1 | ~%0) & (%1 | ~X1) & (%1 | ~X2) & (%2 | ~%0) & (%2 | ~%3) & (%2 | ~X3) & (~%3 | ~X4) & (%3 | X3 | ~%2) & (X1 | X2 | ~%1) & (%0 | ~%1 | ~%2) "
-
-    print("COST")
-    print(SMTcost(list_var, list_cost, formula_tse))
 
