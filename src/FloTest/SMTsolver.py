@@ -41,8 +41,8 @@ def SMTcost(list_var, list_cost, formula, upper_bound=None):
     if upper_bound != None:
         f = And(f, LT(SOL, Real(upper_bound)))
         get_all = True
-    print("")
-    print("@@@@@@@@@@ SMT SOLVER Z3 @@@@@@@@@@")
+
+    print("@@@@@@@@@@ SMT SOLVER Z3 COST @@@@@@@@@@")
 
     with Solver(name="z3") as sol_z3:
         converter = sol_z3.converter
@@ -101,7 +101,7 @@ def SMTproba(list_var, list_proba, formula, lower_bound=0):
         f = And(f, GT(SOL, Real(lower_bound)))
         get_all = True
     print("")
-    print("@@@@@@@@@@ SMT SOLVER Z3 @@@@@@@@@@")
+    print("@@@@@@@@@@ SMT SOLVER Z3 PROBA @@@@@@@@@@")
 
     with Solver(name="z3") as sol_z3:
         converter = sol_z3.converter
@@ -141,8 +141,9 @@ def SMTproba(list_var, list_proba, formula, lower_bound=0):
             o.add(z3.Or(block))
 
         vars, sols, values = SMTformating(solutions, list_var)
-        values = [round(float(e.as_fraction()), 5) for e in values]
-        best = round(float(best.as_fraction()), 5)
+        if len(solutions) > 0:
+            values = [round(float(e.as_fraction()), 5) for e in values]
+            best = round(float(best.as_fraction()), 5)
         return vars, sols, best, values
 
 if __name__ == "__main__":
