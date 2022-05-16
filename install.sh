@@ -22,4 +22,4 @@ sudo apt-get install graphviz graphviz-dev
 
 pip install --upgrade pip
 pip install -r requirements.txt
-pip install . --versbose
+pip install . --verbose
