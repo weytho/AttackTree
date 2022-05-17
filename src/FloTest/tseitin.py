@@ -5,6 +5,7 @@
 #
 from sympy import *
 import time
+from itertools import product 
 
 try:
     # From folder
@@ -33,6 +34,12 @@ def recur_formula(formula, list_subformulas, dict_subs, var_cnt, set_var):
         list_or = formula.args
         for x in list_or:
             var_cnt = recur_formula(x, list_subformulas, dict_subs, var_cnt, set_var)
+    
+    elif(type(formula) is Xor):
+        list_subformulas.append(formula)
+        list_xor = formula.args
+        for x in list_xor:
+            var_cnt = recur_formula(x, list_subformulas, dict_subs, var_cnt, set_var)
 
     elif(type(formula) is Not):
         list_subformulas.append(formula)
@@ -46,6 +53,11 @@ def recur_formula(formula, list_subformulas, dict_subs, var_cnt, set_var):
         elif(type(arg_not) is Or):
             list_or = arg_not.args
             for x in list_or:
+                var_cnt = recur_formula(x, list_subformulas, dict_subs, var_cnt, set_var)
+
+        elif(type(arg_not) is Xor):
+            list_xor = arg_not.args
+            for x in list_xor:
                 var_cnt = recur_formula(x, list_subformulas, dict_subs, var_cnt, set_var)
 
         else:
@@ -90,6 +102,22 @@ def tseitin(formula):
             list_1.append(Not(val))
             list_and_cnf.append(list_1)
 
+        elif(type(expr) is Xor):
+            comb = list(product([True, False], repeat=len(expr.args)))
+            for c in comb:
+                list_1 = []
+                cnt = sum(i for i in c)
+                for b, var in zip(c, expr.args):
+                    if b:
+                        list_1.append(var)
+                    else:
+                        list_1.append(Not(var))
+                if cnt % 2 == 0:
+                    list_1.append(Not(val))
+                else:
+                    list_1.append(val)
+                list_and_cnf.append(list_1)
+
         elif(type(expr) is Not):
             arg_not = expr.args[0]
 
@@ -109,6 +137,22 @@ def tseitin(formula):
                 list_1.append(val)
                 list_and_cnf.append(list_1)
 
+            elif(type(arg_not) is Xor):
+                comb = list(product([True, False], repeat=len(arg_not.args)))
+                for c in comb:
+                    list_1 = []
+                    cnt = sum(i for i in c)
+                    for b, var in zip(c, arg_not.args):
+                        if b:
+                            list_1.append(var)
+                        else:
+                            list_1.append(Not(var))
+                    if cnt % 2 == 0:
+                        list_1.append(val)
+                    else:
+                        list_1.append(Not(val))
+                    list_and_cnf.append(list_1)
+
             else:
                 list_and_cnf.append([Not(arg_not), Not(val)])
                 list_and_cnf.append([arg_not, val])
@@ -118,6 +162,19 @@ def tseitin(formula):
 
     return list_and_cnf, set_var, index_expr
 
+def custom_combi(full_list, list_var, index, length):
+    if index >= length:
+        return
+
+    l1 = []
+    l2 = []
+    l1.append(list_var[index])
+    l1.append(Not(list_var[index]))
+
+    custom_combi(full_list, list_var, index+1, length)
+
+    full_list.append()
+
 def test():
     # pas E I N O Q en première lettre ! 
     #str_formula = "(a & b) | (~(a & c) & (a | c | d))"
@@ -125,6 +182,9 @@ def test():
     #str_formula = "( ( ( node000 | node001 ) & node01 & ( ( node0200 & node0201 & node0202 & ( node000 | node001 ) ) | ( node0210 & node0211 & node0212 & node000 ) | node01 ) ) | ( ( node100 | node101 ) & node11 & ( node120 & ( node1210 | node1211 ) | ( node1220 & node1221 & node11 ) & node01 ) ) | ( ( node200 & node201 ) | node21 | node001 ) )"
     #str_formula = "( a | (c & (d | z | t) & ~a) | ( z & a & b & ~t) | ( b & (c | (d | ~c | (t & a & b)))))"
     str_formula = " (a & b) | (c | d) | (c & f) | (g & ~c) | (i & j & k) | z"
+    str_formula = " ~ (a ^ b) "
+
+    #str_formula = "(~((p | q) & r) & f) ^ (~s)"
 
     glob = {}
     exec('from sympy.core import Symbol', glob) # ok for I, E, S, N, C, O, or Q
