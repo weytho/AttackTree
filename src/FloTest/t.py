@@ -17,6 +17,7 @@ import json
 import copy
 from functools import partial
 import csv
+from collections import Counter
 
 # Set Working Directory
 dirname = os.path.dirname(__file__)
@@ -37,6 +38,7 @@ try:
     from randomTree import *
     from FreqComparator import frequency_comparator
     from SolutionSorter import sorter
+    from global_proba import get_global_proba
 except ImportError:
     # From package
     from FloTest.SATWorker import *
@@ -46,6 +48,7 @@ except ImportError:
     from FloTest.randomTree import *
     from FloTest.FreqComparator import frequency_comparator
     from FloTest.SolutionSorter import sorter
+    from FloTest.global_proba import get_global_proba
 
 from PyQt5.QtWidgets import (
     QApplication, QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QLabel, QSpinBox, QWidget, QGridLayout, QListWidget, QListWidgetItem
@@ -503,17 +506,29 @@ class Window(QWidget):
         pos = nx.nx_agraph.graphviz_layout(g, prog='dot', args='-Gnodesep=0.2 -Gsize=10,6\! -Gdpi=100 -Gratio=fill')
 
         nt = Network(height="100%", width="100%")
+
+        cnt = Counter(elem[1] for elem in le)
+        has_shared = cnt.most_common(1)
+        compute_prob = False
+        if has_shared[0][1] > 1:
+            # Multiple parents 
+            print("Has Shared Subtrees")
+        else:
+            print("Compute global proba")
+            global_prob = get_global_proba(ln, le)
+            compute_prob = True
         
         # Title can be html
         for (n, d) in ln:
             title_str = n
             if d['type'] == 'CtMs':
-                title_str = title_str + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob'])
-                nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=d['variable'], shape='box', title=d['variable'] + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob']), group="cm")
+                nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=d['variable'], shape='box', title=title_str, group="cm")
             elif (d['leaf'] == 1):
                 title_str = title_str + ": cost = " + str(d['cost']) + ", prob = " + str(d['prob'])
                 nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str, group="leaf")
             else:
+                if compute_prob:
+                    title_str = title_str + ": success probability = " + str(round(global_prob[n], 5))
                 nt.add_node(n_id=n, x=pos[n][0], y=-pos[n][1], label=n, shape='box', title=title_str)
 
         for (n, d) in logic_nodes:

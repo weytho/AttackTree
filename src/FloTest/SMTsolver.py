@@ -132,7 +132,6 @@ def SMTproba(list_var, list_proba, formula, lower_bound=0):
             elif not get_all and z3.simplify(new_best < best):
                 break
 
-            #print(model)
             solutions.append(model)
             block = []
             for d in model:

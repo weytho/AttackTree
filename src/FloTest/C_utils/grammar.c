@@ -345,7 +345,6 @@ void free_flat_list(BasicList *list)
    BasicList * runner = list;
    BasicList * current = NULL;
    DLL_List * parent = NULL;
-   DLL_List * child = NULL;
    DLL_List * tmp = NULL;
    while (runner != NULL) {
       current = runner;

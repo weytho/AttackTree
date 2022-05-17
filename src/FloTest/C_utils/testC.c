@@ -721,5 +721,6 @@ node20: cost = 1,prob = 1.0;  \
 node21: cost = 4,prob = 1.0; ";
 
    int r = parser(a, " ", " ", "test");
-	return 0;
+   int r2 = parser(a, b, c, "test");
+	return r;
 }
