@@ -103,7 +103,8 @@ def tseitin(formula):
             list_and_cnf.append(list_1)
 
         elif(type(expr) is Xor):
-            comb = list(product([True, False], repeat=len(expr.args)))
+            var_nbr = len(expr.args)
+            comb = list(product([True, False], repeat=var_nbr))
             for c in comb:
                 list_1 = []
                 cnt = sum(i for i in c)
@@ -113,9 +114,15 @@ def tseitin(formula):
                     else:
                         list_1.append(Not(var))
                 if cnt % 2 == 0:
-                    list_1.append(Not(val))
+                    if var_nbr % 2 == 0:
+                        list_1.append(Not(val))
+                    else:
+                        list_1.append(val)
                 else:
-                    list_1.append(val)
+                    if var_nbr % 2 == 0:
+                        list_1.append(val)
+                    else:
+                        list_1.append(Not(val))
                 list_and_cnf.append(list_1)
 
         elif(type(expr) is Not):
@@ -138,7 +145,9 @@ def tseitin(formula):
                 list_and_cnf.append(list_1)
 
             elif(type(arg_not) is Xor):
-                comb = list(product([True, False], repeat=len(arg_not.args)))
+                print("IN XOR")
+                var_nbr = len(arg_not.args)
+                comb = list(product([True, False], repeat=var_nbr))
                 for c in comb:
                     list_1 = []
                     cnt = sum(i for i in c)
@@ -148,9 +157,15 @@ def tseitin(formula):
                         else:
                             list_1.append(Not(var))
                     if cnt % 2 == 0:
-                        list_1.append(val)
+                        if var_nbr % 2 == 0:
+                            list_1.append(val)
+                        else:
+                            list_1.append(Not(val))
                     else:
-                        list_1.append(Not(val))
+                        if var_nbr % 2 == 0:
+                            list_1.append(Not(val))
+                        else:
+                            list_1.append(val)
                     list_and_cnf.append(list_1)
 
             else:
@@ -182,7 +197,8 @@ def test():
     #str_formula = "( ( ( node000 | node001 ) & node01 & ( ( node0200 & node0201 & node0202 & ( node000 | node001 ) ) | ( node0210 & node0211 & node0212 & node000 ) | node01 ) ) | ( ( node100 | node101 ) & node11 & ( node120 & ( node1210 | node1211 ) | ( node1220 & node1221 & node11 ) & node01 ) ) | ( ( node200 & node201 ) | node21 | node001 ) )"
     #str_formula = "( a | (c & (d | z | t) & ~a) | ( z & a & b & ~t) | ( b & (c | (d | ~c | (t & a & b)))))"
     str_formula = " (a & b) | (c | d) | (c & f) | (g & ~c) | (i & j & k) | z"
-    str_formula = " ~ (a ^ b) "
+    str_formula = " ~ (a ^ b ^ c ^ d) "
+    str_formula = " (a ^ b ^ c) "
 
     #str_formula = "(~((p | q) & r) & f) ^ (~s)"
 
@@ -213,13 +229,13 @@ def test():
 
     print("Solve SYMPY CNF")
     start = time.time()
-    var_array, sol_array = sat_solver(cnf_formula, list(set_var))
+    print(sat_solver(cnf_formula, list(set_var), [], -1))
     end = time.time()
     print(end - start)
 
     print("Solve TSEITIN CNF")
     start = time.time()
-    var_array, sol_array = sat_solver(list_and_cnf, list_var)
+    print(sat_solver(list_and_cnf, list_var, [], -1))
     end = time.time()
     print(end - start)
 
