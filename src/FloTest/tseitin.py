@@ -145,7 +145,6 @@ def tseitin(formula):
                 list_and_cnf.append(list_1)
 
             elif(type(arg_not) is Xor):
-                print("IN XOR")
                 var_nbr = len(arg_not.args)
                 comb = list(product([True, False], repeat=var_nbr))
                 for c in comb:
@@ -177,19 +176,6 @@ def tseitin(formula):
 
     return list_and_cnf, set_var, index_expr
 
-def custom_combi(full_list, list_var, index, length):
-    if index >= length:
-        return
-
-    l1 = []
-    l2 = []
-    l1.append(list_var[index])
-    l1.append(Not(list_var[index]))
-
-    custom_combi(full_list, list_var, index+1, length)
-
-    full_list.append()
-
 def test():
     # pas E I N O Q en première lettre ! 
     #str_formula = "(a & b) | (~(a & c) & (a | c | d))"
@@ -198,7 +184,7 @@ def test():
     #str_formula = "( a | (c & (d | z | t) & ~a) | ( z & a & b & ~t) | ( b & (c | (d | ~c | (t & a & b)))))"
     str_formula = " (a & b) | (c | d) | (c & f) | (g & ~c) | (i & j & k) | z"
     str_formula = " ~ (a ^ b ^ c ^ d) "
-    str_formula = " (a ^ b ^ c) "
+    str_formula = " ~( a ^ b ^ c ^d ^e ) "
 
     #str_formula = "(~((p | q) & r) & f) ^ (~s)"
 
