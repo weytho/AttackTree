@@ -105,6 +105,7 @@ def tseitin(formula):
         elif(type(expr) is Xor):
             var_nbr = len(expr.args)
             comb = list(product([True, False], repeat=var_nbr))
+            is_even = var_nbr % 2 == 0
             for c in comb:
                 list_1 = []
                 cnt = sum(i for i in c)
@@ -114,12 +115,12 @@ def tseitin(formula):
                     else:
                         list_1.append(Not(var))
                 if cnt % 2 == 0:
-                    if var_nbr % 2 == 0:
+                    if is_even:
                         list_1.append(Not(val))
                     else:
                         list_1.append(val)
                 else:
-                    if var_nbr % 2 == 0:
+                    if is_even:
                         list_1.append(val)
                     else:
                         list_1.append(Not(val))
@@ -147,6 +148,7 @@ def tseitin(formula):
             elif(type(arg_not) is Xor):
                 var_nbr = len(arg_not.args)
                 comb = list(product([True, False], repeat=var_nbr))
+                is_even = var_nbr % 2 == 0
                 for c in comb:
                     list_1 = []
                     cnt = sum(i for i in c)
@@ -156,12 +158,12 @@ def tseitin(formula):
                         else:
                             list_1.append(Not(var))
                     if cnt % 2 == 0:
-                        if var_nbr % 2 == 0:
+                        if is_even:
                             list_1.append(val)
                         else:
                             list_1.append(Not(val))
                     else:
-                        if var_nbr % 2 == 0:
+                        if is_even:
                             list_1.append(Not(val))
                         else:
                             list_1.append(val)
@@ -184,7 +186,7 @@ def test():
     #str_formula = "( a | (c & (d | z | t) & ~a) | ( z & a & b & ~t) | ( b & (c | (d | ~c | (t & a & b)))))"
     str_formula = " (a & b) | (c | d) | (c & f) | (g & ~c) | (i & j & k) | z"
     str_formula = " ~ (a ^ b ^ c ^ d) "
-    str_formula = " ~( a ^ b ^ c ^d ^e ) "
+    str_formula = " ~( a ^ b ^ c ^d ) "
 
     #str_formula = "(~((p | q) & r) & f) ^ (~s)"
 
@@ -225,6 +227,23 @@ def test():
     end = time.time()
     print(end - start)
 
+    '''
+    formula = parse_expr("P & (~P | (A ^ B)) & (P | ~(A ^ B))", global_dict=glob)
+    print(to_cnf(formula))
+    formula = parse_expr("P & (~P | (A ^ B ^ C)) & (P | ~(A ^ B ^ C))", global_dict=glob)
+    print(to_cnf(formula))
+    formula = parse_expr("P & (~P | (A ^ B ^ C ^ D)) & (P | ~(A ^ B ^ C ^ D))", global_dict=glob)
+    print(to_cnf(formula))
+    '''
+    '''
+    formula = parse_expr("(~P | (A ^ B ^ C)) & (P | ~(A ^ B ^ C))", global_dict=glob)
+    print(formula)
+    print(tseitin(formula))
+
+    formula = parse_expr("(~P | (A ^ B ^ C ^ D)) & (P | ~(A ^ B ^ C ^D))", global_dict=glob)
+    print(formula)
+    print(to_cnf(formula))
+    '''
 
 if __name__ == "__main__":
     test()
