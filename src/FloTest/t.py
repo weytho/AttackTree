@@ -246,7 +246,7 @@ class Window(QWidget):
         toolBar.addWidget(toolButton)
 
         toolButton = QToolButton()
-        toolButton.setText("Quine-McCluskey")
+        toolButton.setText("Basic Conversion")
         toolButton.setCheckable(True)
         toolButton.setAutoExclusive(True)
         toolButton.toggle()
