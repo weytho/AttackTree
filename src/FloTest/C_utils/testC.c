@@ -523,6 +523,8 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
    char *saveptr;
    char *saveptr2;
 
+   char *negationptr = NULL;
+
 	char *ptr = strtok_r(RawText, delim2, &saveptr);
 
    DLL_List * whole_list = NULL;
@@ -585,6 +587,41 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
                      printf("5\n");
                      return 5;
                   }
+                  if(ptr2[0] == '~'){
+                     // Create negation NOT Node
+                     printf("INSIDE\n");
+                     int line_length = strlen(ptr2) + strlen(ptr2) - 1 + 7;
+
+                     char * bufferNeg = (char *) malloc(sizeof(char) * line_length);
+                     snprintf(bufferNeg, line_length, "%s-NOT-%s;", ptr2, ptr2+1);
+                     printf("newbuffer %d : #%s#\n", line_length, bufferNeg);
+
+                     // Determine new size
+                     int curr_size = 0;
+                     if (negationptr != NULL){
+                        curr_size = strlen(negationptr);
+                     }
+                     int newSize = curr_size + strlen(bufferNeg) + 1;
+
+                     // Allocate new buffer
+                     char * newBuffer = (char *) malloc(sizeof(char) * newSize);
+                     printf("5\n");
+                     // do the copy and concat
+                     if (negationptr != NULL){
+                        snprintf(newBuffer, newSize, "%s%s", negationptr, bufferNeg);
+                        printf("new1 : #%s#\n", newBuffer);
+                     } else {
+                        printf("new0000 : #%s#\n", newBuffer);
+                        strncpy(newBuffer, bufferNeg, line_length);
+                     }
+
+                     // release old buffer
+                     free(negationptr);
+                     free(bufferNeg);
+                     // store new pointer
+                     negationptr = newBuffer;
+                  }
+                  
                   DLL_List * tmp_dll;
                   if( isInList(whole_list, ptr2) == 0 ){
                      tmp_dll = createDLLNode(ptr2, "LEAF");
@@ -630,7 +667,6 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
                   
                   addParents(tmp_dll, dll_node);
                }
-               
                ptr2 = trimwhitespace(strtok_r(NULL, delim4, &saveptr2));
                replace_spaces(ptr2);
 
@@ -641,7 +677,13 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
          }
          free(ptr_copy);
       }
+      printf("SAVED POINTER : %s \n", saveptr);
       ptr = strtok_r(NULL, delim2, &saveptr);
+      if (ptr == NULL){
+         printf("ITS OVER : %s\n", negationptr);
+         ptr = strtok_r(negationptr, delim2, &saveptr);
+         negationptr = NULL;
+      }
 	}
 
    free(RawText);
