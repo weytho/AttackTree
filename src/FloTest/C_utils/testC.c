@@ -589,36 +589,26 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
                   }
                   if(ptr2[0] == '~'){
                      // Create negation NOT Node
-                     printf("INSIDE\n");
                      int line_length = strlen(ptr2) + strlen(ptr2) - 1 + 7;
-
                      char * bufferNeg = (char *) malloc(sizeof(char) * line_length);
                      snprintf(bufferNeg, line_length, "%s-NOT-%s;", ptr2, ptr2+1);
-                     printf("newbuffer %d : #%s#\n", line_length, bufferNeg);
 
-                     // Determine new size
                      int curr_size = 0;
                      if (negationptr != NULL){
                         curr_size = strlen(negationptr);
                      }
                      int newSize = curr_size + strlen(bufferNeg) + 1;
-
-                     // Allocate new buffer
                      char * newBuffer = (char *) malloc(sizeof(char) * newSize);
-                     printf("5\n");
-                     // do the copy and concat
+
                      if (negationptr != NULL){
                         snprintf(newBuffer, newSize, "%s%s", negationptr, bufferNeg);
-                        printf("new1 : #%s#\n", newBuffer);
                      } else {
-                        printf("new0000 : #%s#\n", newBuffer);
                         strncpy(newBuffer, bufferNeg, line_length);
                      }
 
-                     // release old buffer
+
                      free(negationptr);
                      free(bufferNeg);
-                     // store new pointer
                      negationptr = newBuffer;
                   }
                   
