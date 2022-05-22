@@ -667,10 +667,9 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
          }
          free(ptr_copy);
       }
-      printf("SAVED POINTER : %s \n", saveptr);
+      
       ptr = strtok_r(NULL, delim2, &saveptr);
       if (ptr == NULL){
-         printf("ITS OVER : %s\n", negationptr);
          ptr = strtok_r(negationptr, delim2, &saveptr);
          negationptr = NULL;
       }
