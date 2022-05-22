@@ -73,10 +73,7 @@ class SATWorker(QObject):
                 if newdict['variable'] not in node_list_uniq_cm:
                     node_list_uniq_cm.append(newdict['variable'])
             elif( newdict['leaf'] == 1 ):
-                if(newtuple[0][0] == '~'):
-                    node_list_uniq.append(newtuple[0][1:])
-                else:
-                    node_list_uniq.append(newtuple[0])
+                node_list_uniq.append(newtuple[0])
 
             while newlist.next != None:
                 newlist = CustomList.from_address(newlist.next)
@@ -91,10 +88,7 @@ class SATWorker(QObject):
                     if newdict['variable'] not in node_list_uniq_cm:
                         node_list_uniq_cm.append(newdict['variable'])
                 elif( newdict['leaf'] == 1 ):
-                    if(newtuple[0][0] == '~'):
-                        node_list_uniq.append(newtuple[0][1:])
-                    else:
-                        node_list_uniq.append(newtuple[0])
+                    node_list_uniq.append(newtuple[0])
 
         newEdgeList = CustomList.from_address(fulllist.el)
 

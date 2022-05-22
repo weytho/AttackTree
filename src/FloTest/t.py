@@ -713,12 +713,12 @@ class Window(QWidget):
                 self.cur_digraph_nodes_dict = dict(self.current_digraph.nodes(data=True))
 
                 for n in self.current_network.nodes :
-                    if n['id'] in ok_list or (n['id'][0] == '~' and n['id'][1:] not in ok_list):
+                    if n['id'] in ok_list:
                         n['group'] = 'model_leaf'
                         for e in self.current_network.edges :
                             if e['to'] == n['id']:
                                 self.recur_path(e, path_count_set, disabled_node, True)
-                    elif n['id'] in not_list or (n['id'][0] == '~' and n['id'][1:] not in not_list):
+                    elif n['id'] in not_list:
                         for e in self.current_network.edges :
                             if e['to'] == n['id']:
                                 self.recur_path(e, path_count_set, disabled_node, False)

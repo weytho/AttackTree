@@ -31,10 +31,7 @@ class SMTWorker(QObject):
 
         list_without_not = []
         for s in self.var_list:
-            if(s[0] == '~'):
-                list_without_not.append(s[1:])
-            else:
-                list_without_not.append(s)
+            list_without_not.append(s)
 
         if self.type == 0:
             if self.limit:

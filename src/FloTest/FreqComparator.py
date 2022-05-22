@@ -85,12 +85,12 @@ def compute_values(nodes, current_network, current_digraph, sol_array, var_array
         cur_digraph_nodes_dict = dict(current_digraph.nodes(data=True))
 
         for n in current_network.nodes :
-            if n['id'] in ok_list or (n['id'][0] == '~' and n['id'][1:] not in ok_list):
+            if n['id'] in ok_list:
                 values[n['id']] = True
                 for e in current_network.edges :
                     if e['to'] == n['id']:
                         recur_path(e, path_count_set, True, cur_net_nodes_dict, cur_digraph_nodes_dict, current_network, values, values_logic)
-            elif n['id'] in not_list or (n['id'][0] == '~' and n['id'][1:] not in not_list):
+            elif n['id'] in not_list:
                 for e in current_network.edges :
                     if e['to'] == n['id']:
                         recur_path(e, path_count_set, False, cur_net_nodes_dict, cur_digraph_nodes_dict, current_network, values, values_logic)
