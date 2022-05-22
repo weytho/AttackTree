@@ -76,14 +76,16 @@ def nodeGeneration2(NodeList, Relations, Properties, node, depth, maxdepth, bran
     NodeList.append(node)
     # this node is a leaf
     if rng < depth:
-        Properties += "\n"+node+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
+        Properties += "\n"+node+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+str(round(random.uniform(0.01, 1.00),2))+";"
         return Relations,Properties
     # node logic
-    rnglogic = random.randint(1,3)
+    rnglogic = random.randint(1,4)
     Relations += "\n"+node
     if rnglogic == 1:
         Relations += " -OR- "
     elif rnglogic == 2:
+        Relations += " -XOR- "    
+    elif rnglogic == 3:
         Relations += " -AND- "
     else:
         Relations += " -SAND- "
@@ -109,7 +111,7 @@ def nodeGeneration2(NodeList, Relations, Properties, node, depth, maxdepth, bran
     if depth == maxdepth:
         for i in range(0,rngchild):
             NodeList.append(child[i])
-            Properties += "\n"+child[i]+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
+            Properties += "\n"+child[i]+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+str(round(random.uniform(0.01, 1.00),2))+";"
         return Relations,Properties
     else:
         for i in range(0,rngchild):
@@ -172,14 +174,16 @@ def nodeGeneration3(NodeList, Relations, Properties, node, depth, maxdepth, bran
     NodeList.append(node)
     # this node is a leaf
     if rng < depth:
-        Properties += "\n"+node+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
+        Properties += "\n"+node+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+str(round(random.uniform(0.01, 1.00),2))+";"
         return Relations,Properties
     # node logic
-    rnglogic = random.randint(1,3)
+    rnglogic = random.randint(1,4)
     Relations += "\n"+node
     if rnglogic == 1:
         Relations += " -OR- "
     elif rnglogic == 2:
+        Relations += " -XOR- "    
+    elif rnglogic == 3:
         Relations += " -AND- "
     else:
         Relations += " -SAND- "
@@ -208,13 +212,13 @@ def nodeGeneration3(NodeList, Relations, Properties, node, depth, maxdepth, bran
     if depth == maxdepth:
         for i in range(0,rngchild):
             NodeList.append(child[i])
-            Properties += "\n"+child[i]+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
+            Properties += "\n"+child[i]+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+str(round(random.uniform(0.01, 1.00),2))+";"
         return Relations,Properties
     else:
         for i in range(0,rngchild):
             if notList[i]==0:
                 NodeList.append(child[i])
-                Properties += "\n"+child[i]+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
+                Properties += "\n"+child[i]+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+str(round(random.uniform(0.01, 1.00),2))+";"
             else:
                 Relations,Properties = nodeGeneration4(NodeList, Relations,Properties,child[i],depth+1,maxdepth,branching_factor)
     return Relations,Properties
@@ -225,111 +229,6 @@ def nodeGeneration3(NodeList, Relations, Properties, node, depth, maxdepth, bran
 # @param NodeList : list of nodes of the generated tree
 # @param CounterMeasures : the string of CounterMeasures
 def CMGeneration3(NodeList, CounterMeasures):
-    l = len(NodeList)
-    if l == 0:
-        return CounterMeasures
-    if l == 1:
-        CounterMeasures += "\nCM1"+" ("+NodeList[0]+")"
-        return CounterMeasures
-    if l == 2:
-        r = random.randint(0,1)
-        if r==0:
-            CounterMeasures += "\nCM1"+" ("+NodeList[1]+")"
-        else:
-            CounterMeasures += "\nCM1"+" ("+NodeList[0]+","+NodeList[1]+")"
-        return CounterMeasures
-    nbrCM = round(l/3)
-    for i in range(1,nbrCM+1):
-        r = random.randint(0,1)
-        if r==0:
-            CounterMeasures += "\nCM"+str(i)+" ("+random.choice(NodeList)+")"
-        elif r==1:
-            n1 = random.choice(NodeList)
-            n2 = random.choice(NodeList)
-            cnt = 10
-            while(n2==n1 and cnt>0):
-                n2 = random.choice(NodeList)
-                cnt-=1
-            if cnt > 0:
-                CounterMeasures += "\nCM"+str(i)+" ("+n1+","+n2+")"
-    return CounterMeasures
-
-
-##
-# recursive tree generator 3
-# This recursive generator will generate a simple tree using the grammar  
-# The maxdepth and branchingfactor arguments will forge the global shape of the tree
-# The generation is more complex and can generate shared childrens between the nodes
-# (this function does not produce countermeasures)
-# This functions creates negative leaf nodes with a probability 1/6
-# @param NodeList : the list of nodes of the tree
-# @param Relations : the string of relations
-# @param Properties : the string of Properties
-# @param node : the string naming the parent of the node (used to gerenate its own name)
-# @param depth : the actual depth of the recursive calls
-# @param maxdepth : the maximum depth of the tree
-# @param branching_factor : the maximum branching factor of each node
-def ShuffledNodeGeneration(NodeList, Relations, Properties, node, depth, maxdepth, branching_factor):
-
-    rng = random.randint(0,maxdepth)
-    NodeList.append(node)
-    # this node is a leaf
-    if rng < depth:
-        Properties += "\n"+node+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
-        return Properties
-    # node logic 
-    rnglogic = random.randint(1,3)
-    line = ""
-    line += "\n"+node
-    if rnglogic == 1:
-        line += " -OR- "
-    elif rnglogic == 2:
-        line += " -AND- "
-    else:
-        line += " -SAND- "
-    # node child
-    rngchild = random.randint(2,branching_factor)
-
-    child = [node+str(i) for i in range(0,rngchild)]
-    notList = [random.randint(0,5) for i in range(0,rngchild)]
-    for i in range(0,rngchild):
-        if notList[i] == 0:
-            line += "~"
-        line += child[i]
-        if i!=rngchild-1:
-            line += ","
-    # Random shared children
-    if random.randint(0,10)<8:
-        existingnode = random.choice(NodeList)
-        cnt = 5
-        while(existingnode in node and cnt > 0):
-            existingnode = random.choice(NodeList)
-            cnt-=1
-        if cnt > 0:
-            line += ","+existingnode
-    line += ";"
-    Relations.append(line)
-    # node child
-    if depth == maxdepth:
-        for i in range(0,rngchild):
-            NodeList.append(child[i])
-            Properties += "\n"+child[i]+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
-        return Properties
-    else:
-        for i in range(0,rngchild):
-            if notList[i]==0:
-                NodeList.append(child[i])
-                Properties += "\n"+child[i]+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
-            else:
-                Properties = ShuffledNodeGeneration(NodeList,Relations,Properties,child[i],depth+1,maxdepth,branching_factor)
-    return Properties
-
-##
-# recursive countermeasure generator 3
-# This recursive countermeasure generator will generate shared countermeasures with the list of node of the already generated tree 
-# @param NodeList : list of nodes of the generated tree
-# @param CounterMeasures : the string of CounterMeasures
-def CMShuffledGeneration(NodeList, CounterMeasures):
     l = len(NodeList)
     if l == 0:
         return CounterMeasures
@@ -379,14 +278,16 @@ def nodeGeneration4(NodeList, Relations, Properties, node, depth, maxdepth, bran
     NodeList.append(node)
     # this node is a leaf
     if rng < depth:
-        Properties += "\n"+node+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
+        Properties += "\n"+node+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+str(round(random.uniform(0.01, 1.00),2))+";"
         return Relations,Properties
     # node logic
-    rnglogic = random.randint(1,3)
+    rnglogic = random.randint(1,4)
     Relations += "\n"+node
     if rnglogic == 1:
         Relations += " -OR- "
     elif rnglogic == 2:
+        Relations += " -XOR- "    
+    elif rnglogic == 3:
         Relations += " -AND- "
     else:
         Relations += " -SAND- "
@@ -407,7 +308,7 @@ def nodeGeneration4(NodeList, Relations, Properties, node, depth, maxdepth, bran
     if depth == maxdepth:
         for i in range(0,rngchild):
             NodeList.append(child[i])
-            Properties += "\n"+child[i]+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+"1.0"+";"
+            Properties += "\n"+child[i]+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+str(round(random.uniform(0.01, 1.00),2))+";"
         return Relations,Properties
     else:
         for i in range(0,rngchild):
@@ -438,6 +339,113 @@ def CMGeneration4(NodeList, CounterMeasures):
             CounterMeasures += "\nCM"+str(i)+" ("+random.choice(NodeList)+","+random.choice(NodeList)+")"
     return CounterMeasures
 
+
+##
+# recursive tree generator 5 base on the generator 3
+# This recursive generator will generate a simple tree using the grammar  
+# The maxdepth and branchingfactor arguments will forge the global shape of the tree
+# The generation is more complex and can generate shared childrens between the nodes
+# (this function does not produce countermeasures)
+# This functions creates negative leaf nodes with a probability 1/6
+# The grammar lines of the tree are shuffled
+# @param NodeList : the list of nodes of the tree
+# @param Relations : the string of relations
+# @param Properties : the string of Properties
+# @param node : the string naming the parent of the node (used to gerenate its own name)
+# @param depth : the actual depth of the recursive calls
+# @param maxdepth : the maximum depth of the tree
+# @param branching_factor : the maximum branching factor of each node
+def ShuffledNodeGeneration(NodeList, Relations, Properties, node, depth, maxdepth, branching_factor):
+
+    rng = random.randint(0,maxdepth)
+    NodeList.append(node)
+    # this node is a leaf
+    if rng < depth:
+        Properties += "\n"+node+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+str(round(random.uniform(0.01, 1.00),2))+";"
+        return Relations,Properties
+    # node logic
+    rnglogic = random.randint(1,4)
+    line = "\n"+node
+    if rnglogic == 1:
+        line += " -OR- "
+    elif rnglogic == 2:
+        line += " -XOR- "    
+    elif rnglogic == 3:
+        line += " -AND- "
+    else:
+        line += " -SAND- "
+    # node child
+    rngchild = random.randint(2,branching_factor)
+
+    child = [node+str(i) for i in range(0,rngchild)]
+    notList = [random.randint(0,5) for i in range(0,rngchild)]
+    for i in range(0,rngchild):
+        if notList[i] == 0:
+            line += "~"
+        line += child[i]
+        if i!=rngchild-1:
+            line += ","
+    # Random shared children
+    if random.randint(0,10)<8:
+        existingnode = random.choice(NodeList)
+        cnt = 5
+        while(existingnode in node and cnt > 0):
+            existingnode = random.choice(NodeList)
+            cnt-=1
+        if cnt > 0:
+            line += ","+existingnode
+    line += ";"
+    Relations.append(line)
+    # node child
+    if depth == maxdepth:
+        for i in range(0,rngchild):
+            NodeList.append(child[i])
+            Properties += "\n"+child[i]+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+str(round(random.uniform(0.01, 1.00),2))+";"
+        return Relations,Properties
+    else:
+        for i in range(0,rngchild):
+            if notList[i]==0:
+                NodeList.append(child[i])
+                Properties += "\n"+child[i]+":"+"cost = "+str(random.randint(1,10))+","+"prob = "+str(round(random.uniform(0.01, 1.00),2))+";"
+            else:
+                Relations,Properties = ShuffledNodeGeneration(NodeList,Relations,Properties,child[i],depth+1,maxdepth,branching_factor)
+    return Relations,Properties
+
+##
+# recursive countermeasure generator 3
+# This recursive countermeasure generator will generate shared countermeasures with the list of node of the already generated tree 
+# @param NodeList : list of nodes of the generated tree
+# @param CounterMeasures : the string of CounterMeasures
+def CMShuffledGeneration(NodeList, CounterMeasures):
+    l = len(NodeList)
+    if l == 0:
+        return CounterMeasures
+    if l == 1:
+        CounterMeasures += "\nCM1"+" ("+NodeList[0]+")"
+        return CounterMeasures
+    if l == 2:
+        r = random.randint(0,1)
+        if r==0:
+            CounterMeasures += "\nCM1"+" ("+NodeList[1]+")"
+        else:
+            CounterMeasures += "\nCM1"+" ("+NodeList[0]+","+NodeList[1]+")"
+        return CounterMeasures
+    nbrCM = round(l/3)
+    for i in range(1,nbrCM+1):
+        r = random.randint(0,1)
+        if r==0:
+            CounterMeasures += "\nCM"+str(i)+" ("+random.choice(NodeList)+")"
+        elif r==1:
+            n1 = random.choice(NodeList)
+            n2 = random.choice(NodeList)
+            cnt = 10
+            while(n2==n1 and cnt>0):
+                n2 = random.choice(NodeList)
+                cnt-=1
+            if cnt > 0:
+                CounterMeasures += "\nCM"+str(i)+" ("+n1+","+n2+")"
+    return CounterMeasures
+
 ##
 # Main function to call to generate a random tree with the grammar
 # @param maxdepth : the maximum depth of he tree
@@ -448,6 +456,7 @@ def CMGeneration4(NodeList, CounterMeasures):
 # @param complexity = 4 : 2 + probably inconsistent tree
 # @param complexity = 5 : 3 + shuffled grammar sentences
 def TreeGen(maxdepth, branching_factor, complexity):
+    print("TREE GEN : "+str(maxdepth)+" "+str(branching_factor)+" "+str(complexity))
     maxdepth = max(1,maxdepth)
     branching_factor = max(2,branching_factor)
     Relations = """RELATIONS"""
@@ -470,11 +479,11 @@ def TreeGen(maxdepth, branching_factor, complexity):
     elif complexity == 5:
         NodeList = []
         Rel = []
-        Properties = ShuffledNodeGeneration(NodeList,Rel,Properties,"node",0,maxdepth, branching_factor)
+        Rel,Properties = ShuffledNodeGeneration(NodeList,Rel,Properties,"node",0,maxdepth, branching_factor)
         random.shuffle(Rel)
         for line in Rel:
             Relations += line
         CounterMeasures = CMShuffledGeneration(NodeList,CounterMeasures)
     else:
-        print("Wrong complexity : [0:3]")
+        print("Wrong complexity : [1:5]")
     return Relations,CounterMeasures,Properties
