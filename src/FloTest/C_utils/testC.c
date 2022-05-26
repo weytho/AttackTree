@@ -409,7 +409,7 @@ FList * mainfct(char * path, int with_cm) {
    return fl;
 }
 
-json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mode, HashTable *ht_CM){
+json_object * build_json(json_object * parent , Tree_LL * tree, int boolean_mode, HashTable *ht_CM){
    //printf("FUNCTION : build_json \n");
 
    json_object_object_add(parent, "Action", json_object_new_string(tree->n->title));
@@ -446,7 +446,7 @@ json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mod
       }
    }
 
-   DLL_List * new_tree = tree->children;
+   Tree_LL * new_tree = tree->children;
    if( new_tree != NULL ){
       json_object *children = json_object_new_array();
       json_object_object_add(parent, "Child", children);
@@ -460,7 +460,7 @@ json_object * build_json(json_object * parent , DLL_List * tree, int boolean_mod
    return parent;
 }
 
-void create_Json_file(DLL_List * wholeTree, int boolean_mode, HashTable *ht_CM, char *filename){
+void create_Json_file(Tree_LL * wholeTree, int boolean_mode, HashTable *ht_CM, char *filename){
    printf("FUNCTION : create_Json_file \n");
 
    printf(" NAME FINAL IS %s\n", wholeTree->n->title);
@@ -472,7 +472,7 @@ void create_Json_file(DLL_List * wholeTree, int boolean_mode, HashTable *ht_CM, 
    fclose(fopen(filename, "w"));
 
    // FULL RECURSIF PLEASE
-   DLL_List * new_tree = wholeTree;
+   Tree_LL * new_tree = wholeTree;
    json_object * new_root = build_json(root, new_tree, boolean_mode, ht_CM);
 
    if (json_object_to_file_ext(filename, new_root, JSON_C_TO_STRING_PRETTY))
@@ -525,73 +525,73 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
 
    char *negationptr = NULL;
 
-	char *ptr = strtok_r(RawText, delim2, &saveptr);
+	char *relation = strtok_r(RawText, delim2, &saveptr);
 
-   DLL_List * whole_list = NULL;
+   Tree_LL * whole_tree = NULL;
    int parent_is_in = 0;
 
-	while (ptr != NULL) {
+	while (relation != NULL) {
 
-      if(!is_empty(ptr)){
+      if(!is_empty(relation)){
          
-         size_t size2 = strlen(ptr) + 1;
-         char *ptr_copy = malloc(size2 * sizeof(char));
-         memcpy(ptr_copy, ptr, size2);
-         char *ptr2 = trimwhitespace(strtok_r(ptr_copy, delim3, &saveptr2));
-         replace_spaces(ptr2);
+         size_t size2 = strlen(relation) + 1;
+         char *relation_copy = malloc(size2 * sizeof(char));
+         memcpy(relation_copy, relation, size2);
+         char *nodename = trimwhitespace(strtok_r(relation_copy, delim3, &saveptr2));
+         replace_spaces(nodename);
          bool is_NOT = false;
          int cnt = 0;
 
-         if(ptr2 != NULL) {
+         if(nodename != NULL) {
 
-            char *ptr3 = trimwhitespace(strtok_r(NULL, delim3, &saveptr2));   
-            replace_spaces(ptr3);      
+            char *type = trimwhitespace(strtok_r(NULL, delim3, &saveptr2));   
+            replace_spaces(type);      
 
-            DLL_List * dll_node;
-            if( isInList(whole_list, ptr2) == 0){
+            Tree_LL * parent_node;
+            if( isInList(whole_tree, nodename) == 0){
 
-               dll_node = createDLLNode(ptr2, ptr3);
-               whole_list = addToEndList(whole_list, dll_node);
+               parent_node = createTreeNode(nodename, type);
+               whole_tree = addToEndList(whole_tree, parent_node);
 
             } else {
 
                parent_is_in = 1;
-               dll_node = getFromList(whole_list, ptr2);
+               parent_node = getFromList(whole_tree, nodename);
                // CHECK FOR REWRITE
-               if(dll_node->children != NULL){
+               if(parent_node->children != NULL){
                   free(RawText);
-                  free(ptr_copy);
+                  free(relation_copy);
                   // FREE PARENTS ?
-                  DLL_free_from_top(whole_list);
+                  Tree_free_from_top(whole_tree);
                   printf("2\n");
                   return 2;
                }
-               snprintf(dll_node->n->type, sizeof(dll_node->n->type), "%s", ptr3);
+               snprintf(parent_node->n->type, sizeof(parent_node->n->type), "%s", type);
             }
 
-            if(strcmp(ptr3, "NOT") == 0){
+            if(strcmp(type, "NOT") == 0){
                is_NOT = true;
             }
 
-            ptr2 = trimwhitespace(strtok_r(NULL, delim4, &saveptr2));
-            replace_spaces(ptr2);
+            nodename = trimwhitespace(strtok_r(NULL, delim4, &saveptr2));
+            replace_spaces(nodename);
 
-            while (ptr2 != NULL)   {
-               if (!is_empty(ptr2)) {
+            while (nodename != NULL)   {
+               if (!is_empty(nodename)) {
 
                   cnt = cnt + 1;
                   if( is_NOT && cnt > 1){
                      free(RawText);
-                     free(ptr_copy);
-                     DLL_free_from_top(whole_list);
+                     free(relation_copy);
+                     Tree_free_from_top(whole_tree);
                      printf("5\n");
                      return 5;
                   }
-                  if(ptr2[0] == '~'){
+                  if(nodename[0] == '~'){
                      // Create negation NOT Node
-                     int line_length = strlen(ptr2) + strlen(ptr2) - 1 + 7;
+                     int line_length = strlen(nodename) + strlen(nodename) - 1 + 7;
                      char * bufferNeg = (char *) malloc(sizeof(char) * line_length);
-                     snprintf(bufferNeg, line_length, "%s-NOT-%s;", ptr2, ptr2+1);
+                     snprintf(bufferNeg, line_length, "%s-NOT-%s;", nodename, nodename+1);
 
                      int curr_size = 0;
                      if (negationptr != NULL){
@@ -606,79 +606,78 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
                         strncpy(newBuffer, bufferNeg, line_length);
                      }
 
-
                      free(negationptr);
                      free(bufferNeg);
                      negationptr = newBuffer;
                   }
                   
-                  DLL_List * tmp_dll;
-                  if( isInList(whole_list, ptr2) == 0 ){
-                     tmp_dll = createDLLNode(ptr2, "LEAF");
+                  Tree_LL * child_node;
+                  if( isInList(whole_tree, nodename) == 0 ){
+                     child_node = createTreeNode(nodename, "LEAF");
                   } else {
                      
-                     tmp_dll = getFromList(whole_list, ptr2);
+                     child_node = getFromList(whole_tree, nodename);
 
-                     if(strcmp(tmp_dll->n->title, dll_node->n->title) == 0){
+                     if(strcmp(child_node->n->title, parent_node->n->title) == 0){
                         free(RawText);
-                        free(ptr_copy);
-                        DLL_free_from_top(whole_list);
+                        free(relation_copy);
+                        Tree_free_from_top(whole_tree);
                         printf("3\n");
                         return 3;
                      }
 
-                     if(parent_is_in == 1 && tmp_dll->children != NULL){
-                        int r = cycle_check(dll_node, tmp_dll->n->title);
+                     if(parent_is_in == 1 && child_node->children != NULL){
+                        int r = cycle_check(parent_node, child_node->n->title);
                         if(r != 0){
                            free(RawText);
-                           free(ptr_copy);
-                           DLL_free_from_top(whole_list);
+                           free(relation_copy);
+                           Tree_free_from_top(whole_tree);
                            printf("3\n");
                            return 3;
                         }
                      }
 
-                     if(tmp_dll->parents == NULL){
-                        tmp_dll = extractFromList(&whole_list, ptr2);
+                     if(child_node->parents == NULL){
+                        child_node = extractFromList(&whole_tree, nodename);
                         // Pas suffisant
-                        tmp_dll->next = NULL;
+                        child_node->next = NULL;
                      } else {
-                        DLL_List * new_tmp_dll = malloc(sizeof(DLL_List));
-                        new_tmp_dll->n = tmp_dll->n;
-                        new_tmp_dll->children = tmp_dll->children;
-                        new_tmp_dll->parents = tmp_dll->parents;
-                        new_tmp_dll->next = NULL;
-                        tmp_dll = new_tmp_dll;
+                        Tree_LL * new_child_node = malloc(sizeof(Tree_LL));
+                        new_child_node->n = child_node->n;
+                        new_child_node->children = child_node->children;
+                        new_child_node->parents = child_node->parents;
+                        new_child_node->next = NULL;
+                        child_node = new_child_node;
                      }
                      
                   }
 
-                  addChildren(dll_node, tmp_dll, whole_list);
+                  addChildren(parent_node, child_node, whole_tree);
                   
-                  addParents(tmp_dll, dll_node);
+                  addParents(child_node, parent_node);
                }
-               ptr2 = trimwhitespace(strtok_r(NULL, delim4, &saveptr2));
-               replace_spaces(ptr2);
+               nodename = trimwhitespace(strtok_r(NULL, delim4, &saveptr2));
+               replace_spaces(nodename);
 
             }
 
             parent_is_in = 0;
 
          }
-         free(ptr_copy);
+         free(relation_copy);
       }
       
-      ptr = strtok_r(NULL, delim2, &saveptr);
-      if (ptr == NULL){
-         ptr = strtok_r(negationptr, delim2, &saveptr);
+      relation = strtok_r(NULL, delim2, &saveptr);
+      if (relation == NULL){
+         relation = strtok_r(negationptr, delim2, &saveptr);
          negationptr = NULL;
       }
 	}
 
    free(RawText);
 
-   if(whole_list->next != NULL){
-      DLL_free_from_top(whole_list);
+   if(whole_tree->next != NULL){
+      Tree_free_from_top(whole_tree);
       printf("4\n");
       return 4;
    }
@@ -687,12 +686,12 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
 
    if( boolean_mode == 0 ){
       printf("BOOLEAN MODE\n");
-      set_properties_total(whole_list, ht_properties);
+      set_properties_total(whole_tree, ht_properties);
    }
 
    // ADD countermeasures
 
-   create_Json_file(whole_list, boolean_mode, ht_CM, filename);
+   create_Json_file(whole_tree, boolean_mode, ht_CM, filename);
    if( ht_CM != NULL ){
       freeH(ht_CM);
    }
@@ -700,7 +699,7 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
       freeH(ht_properties);
    }
 
-   DLL_free_from_top(whole_list);
+   Tree_free_from_top(whole_tree);
 
    printf("END\n");
 

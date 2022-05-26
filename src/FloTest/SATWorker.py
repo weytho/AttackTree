@@ -147,7 +147,6 @@ class SATWorker(QObject):
             tmp_formula, set_var, index_expr = tseitin(parsed_formula)
             node_list_uniq = list(set_var) + [str(l) for l in index_expr]
             tmp_formula_cm, set_var_cm, index_expr_cm = tseitin(parsed_formula)
-            #node_list_uniq_cm = list(set_var_cm) + [str(l) for l in index_expr_cm]
         else:
             tmp_formula = to_cnf(parsed_formula)
             tmp_formula_cm = to_cnf(parsed_formula_cm)

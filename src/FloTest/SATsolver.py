@@ -7,10 +7,11 @@ from pysat.solvers import Glucose3
 from sympy import *
 # From folder
 
-def sat_solver(formula, list_var, assumptions=[], max_val=20):
-    print("####################### SAT SOLVER !!! (Glucose3) #########################")
-    print(formula)
-    print(list_var)
+def sat_solver(formula, list_var, assumptions=[], max_val=20, to_print=True):
+    if to_print:
+        print("####################### SAT SOLVER !!! (Glucose3) #########################")
+        print(formula)
+        print(list_var)
     
     if formula == None:
         return

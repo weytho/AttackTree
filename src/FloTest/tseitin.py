@@ -7,13 +7,6 @@ from sympy import *
 import time
 from itertools import product 
 
-try:
-    # From folder
-    from SATsolver import sat_solver
-except ImportError:
-    # From package
-    from FloTest.SATsolver import sat_solver
-
 def recur_formula(formula, list_subformulas, dict_subs, var_cnt, set_var):
 
     if(type(formula) is Symbol):
@@ -211,22 +204,6 @@ def test():
     print(list_and_cnf)
     print(cnf_formula)
 
-    list_var = list(set_var) + [str(l) for l in index_expr]
-
-    print(list_var)
-
-    print("Solve SYMPY CNF")
-    start = time.time()
-    print(sat_solver(cnf_formula, list(set_var), [], -1))
-    end = time.time()
-    print(end - start)
-
-    print("Solve TSEITIN CNF")
-    start = time.time()
-    print(sat_solver(list_and_cnf, list_var, [], -1))
-    end = time.time()
-    print(end - start)
-
     '''
     formula = parse_expr("P & (~P | (A ^ B)) & (P | ~(A ^ B))", global_dict=glob)
     print(to_cnf(formula))
@@ -244,6 +221,10 @@ def test():
     print(formula)
     print(to_cnf(formula))
     '''
+
+    formula = parse_expr("( A & B ) | C", global_dict=glob)
+    print(formula)
+    print(tseitin(formula))
 
 if __name__ == "__main__":
     test()

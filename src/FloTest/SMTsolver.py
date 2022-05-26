@@ -2,11 +2,12 @@
 # @file
 # Solve the boolean formula in term of costs or probabilities
 #
-from pysmt.shortcuts import Solver, Symbol, Real, Plus, And, Equals, Ite, Times, GT, LT
+from pysmt.shortcuts import Solver, Symbol, Real, Plus, And, Equals, Ite, Times, GT, LT, GE, LE
 from pysmt.typing import REAL
 from pysmt.parsing import parse
 import z3
 from fractions import Fraction
+from pysmt.oracles import get_logic
 
 # ! Instead of using Forall to compare all existing models to find the minimum -> Minimize -> Simplex Z3
 
@@ -27,21 +28,26 @@ def SMTformating(solutions, list_var):
 def SMTcost(list_var, list_cost, formula, upper_bound=None):
     formula = formula.replace('~', '!')
     list_symbols = [Symbol(s) for s in list_var]
+    list_smt_cost = [Real(c) for c in list_cost]
+    zero = Real(0)
+
+    domains = And([GE(c, zero) for c in list_smt_cost])
 
     SOL = Symbol("%SOL%", REAL)
-    zero = Real(0)
-    list_cond_cost = [Ite(s, Real(c), zero) for s, c in zip(list_symbols, list_cost)]
+    list_cond_cost = [Ite(s, c, zero) for s, c in zip(list_symbols, list_smt_cost)]
 
     problem = parse(formula)
     sum = Plus(list_cond_cost)
 
-    f = And(problem, Equals(SOL, sum))
-    get_all = False
-
     if upper_bound != None:
-        f = And(f, LT(SOL, Real(upper_bound)))
+        f = And(domains, problem, Equals(SOL, sum), LT(SOL, Real(upper_bound)))
         get_all = True
+    else:
+        f = And(domains, problem, Equals(SOL, sum))
+        get_all = False
 
+    print("")
+    #print(get_logic(f))
     print("@@@@@@@@@@ SMT SOLVER Z3 COST @@@@@@@@@@")
 
     with Solver(name="z3") as sol_z3:
@@ -84,23 +90,30 @@ def SMTcost(list_var, list_cost, formula, upper_bound=None):
         return vars, sols, best, values
 
 def SMTproba(list_var, list_proba, formula, lower_bound=0):
+
     formula = formula.replace('~', '!')
     list_symbols = [Symbol(s) for s in list_var]
+    list_smt_proba = [Real(p) for p in list_proba]
+    one = Real(1)
+    zero = Real(0)
+
+    domains = And([And(LE(p, one), GE(p, zero)) for p in list_smt_proba])
 
     SOL = Symbol("%SOL%", REAL)
-    one = Real(1)
-    list_and_proba = [Ite(s, Real(c), one) for s, c in zip(list_symbols, list_proba)]
+    list_and_proba = [Ite(s, p, one) for s, p in zip(list_symbols, list_smt_proba)]
 
     problem = parse(formula)
-    sum = Times(list_and_proba)
-
-    f = And(problem, Equals(SOL, sum))
-    get_all = False
+    prod = Times(list_and_proba)
 
     if lower_bound > 0:
-        f = And(f, GT(SOL, Real(lower_bound)))
+        f = And(domains, problem, Equals(SOL, prod), GT(SOL, Real(lower_bound)))
         get_all = True
+    else:
+        f = And(domains, problem, Equals(SOL, prod))
+        get_all = False
+
     print("")
+    #print(get_logic(f))
     print("@@@@@@@@@@ SMT SOLVER Z3 PROBA @@@@@@@@@@")
 
     with Solver(name="z3") as sol_z3:
@@ -130,6 +143,7 @@ def SMTproba(list_var, list_proba, formula, lower_bound=0):
                 # MODEL COMPLETION OPTION TO GET EVERY VARIABLE
                 model.eval(Z3_form, model_completion=True)
             elif not get_all and z3.simplify(new_best < best):
+                # Get all min solutions with the same proba
                 break
 
             solutions.append(model)
@@ -155,19 +169,23 @@ if __name__ == "__main__":
     list_proba = [Fraction(str(x)) for x in list_proba]
 
     formula = " (X1 | X2) & (X3 | ~ X4) "
+    #formula = " (X1 | X2)"
 
     cost_max = Fraction(str(6))
     proba_min = Fraction(str(0.3))
 
+    #z3.set_option(verbose=10)
+
     print("COST")
-    print(SMTcost(list_var, list_cost, formula, cost_max))
+    #print(SMTcost(list_var, list_cost, formula, cost_max))
 
     print()
-    #print(SMTcost(list_var, list_cost, formula))
+    print(SMTcost(list_var, list_cost, formula))
 
     print("PROBA")
-    print(SMTproba(list_var, list_proba, formula, proba_min))
+    #print(SMTproba(list_var, list_proba, formula, proba_min))
 
     print()
-    #print(SMTproba(list_var, list_proba, formula))
+    print(SMTproba(list_var, list_proba, formula))
+
 

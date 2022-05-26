@@ -10,12 +10,12 @@
 #include <ctype.h>
 
 
-typedef struct custom_List DLL_List;
+typedef struct custom_List Tree_LL;
 struct custom_List {
       Node* n;
-      DLL_List *next;
-      DLL_List* parents;
-      DLL_List* children;
+      Tree_LL *next;
+      Tree_LL* parents;
+      Tree_LL* children;
 };
 
 Node * copy_node(Node *old){
@@ -64,12 +64,12 @@ int is_empty(char *s) {
   return 1;
 }
 
-void printDLL_List(DLL_List * list){
-   DLL_List * current = list;
+void printTree_LL(Tree_LL * list){
+   Tree_LL * current = list;
 
       printf("title : %s ", current->n->title);
       printf(" -- > ");
-      DLL_List * new_current = current->parents;
+      Tree_LL * new_current = current->parents;
 
       while (new_current != NULL) {
          printf("par : %s ", new_current->n->title);
@@ -77,7 +77,7 @@ void printDLL_List(DLL_List * list){
       }
       printf(" ||| ");
 
-      DLL_List * new_current2 = current->children;
+      Tree_LL * new_current2 = current->children;
       while (new_current2 != NULL) { 
          printf("child: %s ", new_current2->n->title);
          new_current2 = new_current2->next;
@@ -85,24 +85,24 @@ void printDLL_List(DLL_List * list){
       printf("\n");
 }
 
-void printDLL_total(DLL_List * list){
+void printTree_total(Tree_LL * list){
    printf("Print\n");
-   DLL_List * current = list;
+   Tree_LL * current = list;
    if(current != NULL){
-      printDLL_List(current);
+      printTree_LL(current);
       current = current->children;
       while (current != NULL) {
-         printDLL_total(current);
+         printTree_total(current);
          current = current->next;
       }
    }
 }
 
-DLL_List * addToEndList(DLL_List *head_list, DLL_List *node){
+Tree_LL * addToEndList(Tree_LL *head_list, Tree_LL *node){
    if( head_list == NULL ){
       head_list = node;
    } else {
-      DLL_List * current = head_list;
+      Tree_LL * current = head_list;
       while (current->next != NULL) {
          current = current->next;
       }
@@ -111,10 +111,10 @@ DLL_List * addToEndList(DLL_List *head_list, DLL_List *node){
    return head_list;
 }
 
-DLL_List * extractFromList(DLL_List **head_list, char *name){
-   DLL_List * current = *head_list;
-   DLL_List * last = NULL;
-   DLL_List * tmp = NULL;
+Tree_LL * extractFromList(Tree_LL **head_list, char *name){
+   Tree_LL * current = *head_list;
+   Tree_LL * last = NULL;
+   Tree_LL * tmp = NULL;
 
    while (current != NULL && current->n != NULL) {
       if (strcmp(current->n->title, name) == 0){
@@ -135,12 +135,12 @@ DLL_List * extractFromList(DLL_List **head_list, char *name){
    return NULL;
 }
 
-int isInList(DLL_List *head_list, char * name){
+int isInList(Tree_LL *head_list, char * name){
    if( head_list == NULL ){
       return 0;
    }
 
-   DLL_List * current = head_list;
+   Tree_LL * current = head_list;
    while (current != NULL) {
       if (strcmp(current->n->title, name) == 0){
          return 1;
@@ -153,9 +153,9 @@ int isInList(DLL_List *head_list, char * name){
    return 0;
 }
 
-DLL_List * getFromList(DLL_List *head_list, char * name){
-   DLL_List * current = head_list;
-   DLL_List * tmp = NULL;
+Tree_LL * getFromList(Tree_LL *head_list, char * name){
+   Tree_LL * current = head_list;
+   Tree_LL * tmp = NULL;
    while (current != NULL) {
       if (strcmp(current->n->title, name) == 0){
          return current;
@@ -169,9 +169,9 @@ DLL_List * getFromList(DLL_List *head_list, char * name){
    return NULL;
 }
 
-void addParents(DLL_List *node, DLL_List *parent){
+void addParents(Tree_LL *node, Tree_LL *parent){
 
-   DLL_List * new_parent = malloc(sizeof(DLL_List));
+   Tree_LL * new_parent = malloc(sizeof(Tree_LL));
    new_parent->n = parent->n;
    new_parent->children = parent->children;
    new_parent->parents = parent->parents;
@@ -180,7 +180,7 @@ void addParents(DLL_List *node, DLL_List *parent){
    if(node->parents == NULL){
       node->parents = new_parent;
    } else {
-      DLL_List * current = node->parents;
+      Tree_LL * current = node->parents;
       while (current->next != NULL) {
          current = current->next;
       }
@@ -188,8 +188,8 @@ void addParents(DLL_List *node, DLL_List *parent){
    }
 }
 
-void addChildrentoAllInstances(DLL_List * whole, DLL_List *child, DLL_List *node){
-   DLL_List * current = whole;
+void addChildrentoAllInstances(Tree_LL * whole, Tree_LL *child, Tree_LL *node){
+   Tree_LL * current = whole;
    while (current != NULL) {
       if (strcmp(current->n->title, node->n->title) == 0){
          current->children = child;
@@ -200,13 +200,13 @@ void addChildrentoAllInstances(DLL_List * whole, DLL_List *child, DLL_List *node
    }
 }
 
-void addChildren(DLL_List * node, DLL_List *child, DLL_List * whole){
+void addChildren(Tree_LL * node, Tree_LL *child, Tree_LL * whole){
 
    if(node->children == NULL){
       // Pobleme modif all nodes les mêmes
       addChildrentoAllInstances(whole, child, node);
    } else {
-      DLL_List * current = node->children;
+      Tree_LL * current = node->children;
       while (current->next != NULL) {
          current = current->next;
       }
@@ -216,9 +216,9 @@ void addChildren(DLL_List * node, DLL_List *child, DLL_List * whole){
 }
 
 
-DLL_List * createDLLNode(char * title, char * type){
+Tree_LL * createTreeNode(char * title, char * type){
 
-   DLL_List * new_DLL = malloc(sizeof(DLL_List));
+   Tree_LL * new_TLL = malloc(sizeof(Tree_LL));
    Node * new_Node = malloc(sizeof(Node));
 
    snprintf(new_Node->title, sizeof(new_Node->title), "%s", title);
@@ -226,17 +226,17 @@ DLL_List * createDLLNode(char * title, char * type){
    new_Node->cost = 0;
    new_Node->prob = 1.0;
 
-   new_DLL->n = new_Node;
-   new_DLL->children = NULL;
-   new_DLL->parents = NULL;
-   new_DLL->next = NULL;
+   new_TLL->n = new_Node;
+   new_TLL->children = NULL;
+   new_TLL->parents = NULL;
+   new_TLL->next = NULL;
 
-   return new_DLL;
+   return new_TLL;
 }
 
 typedef struct basic_List BasicList;
 struct basic_List {
-      DLL_List *data;
+      Tree_LL *data;
       BasicList *next;
 };
 
@@ -259,7 +259,7 @@ int is_in_flatList(BasicList *list, char* name){
    return 0;
 }
 
-int is_in_pointer_list(BasicList *list, DLL_List *current){
+int is_in_pointer_list(BasicList *list, Tree_LL *current){
    BasicList * runner = list;
 
    while (runner != NULL) {
@@ -271,7 +271,7 @@ int is_in_pointer_list(BasicList *list, DLL_List *current){
    return 0;
 }
 
-DLL_List * get_from_flatList(BasicList *list, char* name){
+Tree_LL * get_from_flatList(BasicList *list, char* name){
    BasicList * runner = list;
    while (runner != NULL) {
       if (strcmp(runner->data->n->title, name) == 0){
@@ -290,7 +290,7 @@ void printFlatList(BasicList *list){
    }
 }
 
-BasicList *createNode_flatList(DLL_List *list){
+BasicList *createNode_flatList(Tree_LL *list){
     BasicList *newNode = malloc(sizeof(BasicList));
     newNode->data = list;
     newNode->next = NULL;
@@ -302,13 +302,13 @@ BasicList * push_flatlist(BasicList *list, BasicList* topush){
    return topush;
 }
 
-DoubleBList * flatten_tree_uniq(DLL_List *list, DoubleBList* results){
+DoubleBList * flatten_tree_uniq(Tree_LL *list, DoubleBList* results){
    if( list == NULL ){
       return results;
    }
-   DLL_List * current = list;
-   DLL_List * children = NULL;
-   DLL_List * next = NULL;
+   Tree_LL * current = list;
+   Tree_LL * children = NULL;
+   Tree_LL * next = NULL;
    while (current != NULL) {
 
       if (is_in_flatList(results->good, current->n->title) == 0){
@@ -344,8 +344,8 @@ void free_flat_list(BasicList *list)
    }
    BasicList * runner = list;
    BasicList * current = NULL;
-   DLL_List * parent = NULL;
-   DLL_List * tmp = NULL;
+   Tree_LL * parent = NULL;
+   Tree_LL * tmp = NULL;
    while (runner != NULL) {
       current = runner;
       runner = current->next;
@@ -368,7 +368,7 @@ void free_flat_list(BasicList *list)
    }
 }
 
-BasicList * init_flatten(DLL_List *list){
+BasicList * init_flatten(Tree_LL *list){
    BasicList * flatList = createNode_flatList(list);
    BasicList * final;
 
@@ -403,7 +403,7 @@ BasicList * init_flatten(DLL_List *list){
    return final;
 }
 
-void DLL_free_from_top(DLL_List *list){
+void Tree_free_from_top(Tree_LL *list){
 
    if (list == NULL){
       return;
@@ -412,9 +412,9 @@ void DLL_free_from_top(DLL_List *list){
    init_flatten(list);
 }
 
-int cycle_check(DLL_List *parent, char * child_name){
+int cycle_check(Tree_LL *parent, char * child_name){
 
-   DLL_List * current = parent;
+   Tree_LL * current = parent;
 
    if (strcmp(current->n->title, child_name) == 0){
       return 1;
@@ -431,9 +431,9 @@ int cycle_check(DLL_List *parent, char * child_name){
 }
 
 
-void set_properties(DLL_List * list, HashTable * h){
-   DLL_List * current = list;
-   DLL_List * new_current2 = current->children;
+void set_properties(Tree_LL * list, HashTable * h){
+   Tree_LL * current = list;
+   Tree_LL * new_current2 = current->children;
 
    if (new_current2 == NULL) {
       // check for properties
@@ -449,8 +449,8 @@ void set_properties(DLL_List * list, HashTable * h){
    }
 }
 
-void set_properties_total(DLL_List * list, HashTable * h){
-   DLL_List * current = list;
+void set_properties_total(Tree_LL * list, HashTable * h){
+   Tree_LL * current = list;
    if(current != NULL){
       set_properties(current, h);
       current = current->children;
