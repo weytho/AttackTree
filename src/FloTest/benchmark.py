@@ -9,6 +9,7 @@ from sympy import *
 import time
 from itertools import product
 import math
+import signal
 
 try:
     # From folder
@@ -18,6 +19,18 @@ except ImportError:
     # From package
     from FloTest.SATsolver import sat_solver
     from FloTest.tseitin import tseitin
+
+class timeout:
+    def __init__(self, seconds=1, error_message='Timeout'):
+        self.seconds = seconds
+        self.error_message = error_message
+    def handle_timeout(self, signum, frame):
+        raise TimeoutError(self.error_message)
+    def __enter__(self):
+        signal.signal(signal.SIGALRM, self.handle_timeout)
+        signal.alarm(self.seconds)
+    def __exit__(self, type, value, traceback):
+        signal.alarm(0)
 
 def benchmark():
 
@@ -66,8 +79,8 @@ def benchmark():
     
     # many variables and long formula
     form_4 = []
-    form_4.append("( ( ( (  ~ node000 ) & (  ~ node001 ) & ( ( (  ~ node00200 ) | (  ~ node00201 ) | node00202 ) & node0021 ) ) | node01 ) & ( node10 | node11 | node12 | ( node130 ^ node131 ^ ( ( node13200 & node13201 & node000 ) ^ node1321 ^ node1322 ^ node1323 ) ^ node001 ) | node0021 ) & ( ( ( node2000 | ( node20010 & (  ~ node20011 ) & (  ~ node20012 ) & node20013 ) | node2002 ) & node201 ) ^ node21 ) & ( node30 & ( node310 ^ ( node3110 | node3111 | node3112 ) ^ node312 ^ (  ~ node313 ) ^ node001 ) & node32 & ( ( node3300 | node3301 | node3302 ) ^ node331 ^ ( node3320 ^ node3321 ^ ( node33220 | node33221 | node33222 | ( (  ~ node00200 ) | (  ~ node00201 ) | node00202 ) ) ^ node3323 ^ node3302 ) ^ (  ~ node333 ) ^ node3111 ) ) )")
-    form_4.append("( ( node00 & node01 & ( ( node0200 & node0201 & node0202 ) | node021 | node022 | node01 ) & node03 ) | node1 | ( node20 & ( node210 & node211 & (  ~ node212 ) & ( node2130 | node2131 | node2132 | node2133 ) & node1 ) & ( ( node2200 | node2201 | node2202 | node2203 ) ^ ( node2210 | node2211 | node2212 | node2213 ) ) & ( node230 & node231 & ( node2320 & node2321 & node2322 & node2323 ) & ( node2210 | node2211 | node2212 | node2213 ) ) ) )")
+    #form_4.append("( ( ( (  ~ node000 ) & (  ~ node001 ) & ( ( (  ~ node00200 ) | (  ~ node00201 ) | node00202 ) & node0021 ) ) | node01 ) & ( node10 | node11 | node12 | ( node130 ^ node131 ^ ( ( node13200 & node13201 & node000 ) ^ node1321 ^ node1322 ^ node1323 ) ^ node001 ) | node0021 ) & ( ( ( node2000 | ( node20010 & (  ~ node20011 ) & (  ~ node20012 ) & node20013 ) | node2002 ) & node201 ) ^ node21 ) & ( node30 & ( node310 ^ ( node3110 | node3111 | node3112 ) ^ node312 ^ (  ~ node313 ) ^ node001 ) & node32 & ( ( node3300 | node3301 | node3302 ) ^ node331 ^ ( node3320 ^ node3321 ^ ( node33220 | node33221 | node33222 | ( (  ~ node00200 ) | (  ~ node00201 ) | node00202 ) ) ^ node3323 ^ node3302 ) ^ (  ~ node333 ) ^ node3111 ) ) )")
+    #form_4.append("( ( node00 & node01 & ( ( node0200 & node0201 & node0202 ) | node021 | node022 | node01 ) & node03 ) | node1 | ( node20 & ( node210 & node211 & (  ~ node212 ) & ( node2130 | node2131 | node2132 | node2133 ) & node1 ) & ( ( node2200 | node2201 | node2202 | node2203 ) ^ ( node2210 | node2211 | node2212 | node2213 ) ) & ( node230 & node231 & ( node2320 & node2321 & node2322 & node2323 ) & ( node2210 | node2211 | node2212 | node2213 ) ) ) )")
     form_4.append("( node0 & ( node10 & node11 & node0 ) & node2 & ( ( node300 ^ node301 ^ node11 ) & ( node310 ^ node311 ) & ( ( ( node32000 & node32001 & node311 ) & ( (  ~ node32010 ) & node32011 & node10 ) & node3202 & node3203 ) ^ ( node3210 | node3211 ) ^ node322 ^ ( node3230 & node3231 & node3232 ) ^ node310 ) ) )")
     #form_4.append("")
     #form_4.append("")
@@ -86,31 +99,51 @@ def benchmark():
     tse = [0, 0, 0, 0]
     solve_tse = [0, 0, 0, 0]
 
+    timer = 5
+
     for i in [0, 1, 2, 3]:
         for s in str_formula[i]:
             formula = parse_expr(s, global_dict=glob)
             print(formula)
-            
-            start = time.time()
-            cnf_formula = to_cnf(formula)
-            print("1")
-            #print(cnf_formula)
-            end = time.time()
-            basic[i] += end - start
 
-            start = time.time()
-            cnf_formula_qmc = to_cnf(formula, True, True)
-            print("2")
-            #print(cnf_formula_qmc)
-            end = time.time()
-            qmc[i] += end - start
+            try:
+                with timeout(seconds=timer):
+                    print("1")
+                    start = time.time()
+                    cnf_formula = to_cnf(formula)
+                    end = time.time()
+                    #print(cnf_formula)
+                    basic[i] += end - start
+            except:
+                print("timeout")
+                basic[i] += timer
+                cnf_formula = False
 
-            start = time.time()
-            list_and_cnf, set_var, index_expr = tseitin(formula)
-            print("3")
-            #print(list_and_cnf)
-            end = time.time()
-            tse[i] = end - start
+            try:
+                with timeout(seconds=timer):
+                    print("2")
+                    start = time.time()
+                    cnf_formula_qmc = to_cnf(formula, True, True)
+                    end = time.time()
+                    #print(cnf_formula_qmc)
+                    qmc[i] += end - start
+            except:
+                print("timeout")
+                qmc[i] += timer
+                cnf_formula_qmc = False
+
+            try:
+                with timeout(seconds=timer):
+                    print("3")
+                    start = time.time()
+                    list_and_cnf, set_var, index_expr = tseitin(formula)
+                    end = time.time()
+                    #print(list_and_cnf)
+                    tse[i] += end - start
+            except:
+                print("timeout")
+                tse[i] += timer
+                list_and_cnf = False
 
             list_var = list(set_var) + [str(l) for l in index_expr]
 
@@ -138,14 +171,18 @@ def benchmark():
     ind = np.arange(3)  
     width = 0.4
 
-    fig, ((ax1, ax2, ax3, ax4), (ax5, ax6, ax7, ax8)) = plt.subplots(2, 4)
-    axs = [ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8]
+    #fig, ((ax1, ax2, ax3, ax4), (ax5, ax6, ax7, ax8)) = plt.subplots(2, 4)
+    #axs = [ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8]
+
+    fig, ((ax1, ax2, ax3, ax4)) = plt.subplots(1, 4)
+    axs = [ax1, ax2, ax3, ax4]
 
     encoding = []
     solving = []
 
     for i in [0, 1, 2, 3]:
         print(i)
+        cnt = len(str_formula[i])
         print("")
 
         print("TIME CNF BASIC = " + str(basic[i]))
@@ -158,9 +195,8 @@ def benchmark():
         print("TIME SOLVE QMC = " + str(solve_qmc[i]))
         print("TIME SOLVE TSEITIN = " + str(solve_tse[i]))
 
-        encoding.append([basic[i], qmc[i], tse[i]])
-        solving.append([solve_basic[i], solve_qmc[i], solve_tse[i]])
-
+        encoding.append([basic[i]/cnt, qmc[i]/cnt, tse[i]/cnt])
+        solving.append([solve_basic[i]/cnt, solve_qmc[i]/cnt, solve_tse[i]/cnt])
 
     #plt.yscale('log')
 
@@ -174,14 +210,15 @@ def benchmark():
     p3_both = axs[2].bar(ind + width, solving[2], width, bottom = encoding[2], color=['orange'], edgecolor='black')
 
     p4 = axs[3].bar(ind + width, encoding[3], width, color=['blue'], edgecolor='black')
-    p4_both = axs[3].bar(ind + width, solving[3], width, bottom = encoding[2], color=['orange'], edgecolor='black')
+    p4_both = axs[3].bar(ind + width, solving[3], width, bottom = encoding[3], color=['orange'], edgecolor='black')
 
+    print([sum(x) for x in zip(encoding[0], solving[0])])
+
+    '''
     axs[4].set_yscale('log')
     axs[5].set_yscale('log')
     axs[6].set_yscale('log')
     axs[7].set_yscale('log')
-
-    print([sum(x) for x in zip(encoding[0], solving[0])])
 
     p1_tot = axs[4].bar(ind, [sum(x) for x in zip(encoding[0], solving[0])], width, color=['blue'], edgecolor='black')
 
@@ -190,6 +227,7 @@ def benchmark():
     p3_tot = axs[6].bar(ind, [sum(x) for x in zip(encoding[2], solving[2])], width, color=['blue'], edgecolor='black')
 
     p4_tot = axs[7].bar(ind, [sum(x) for x in zip(encoding[3], solving[3])], width, color=['blue'], edgecolor='black')
+    '''
 
     #plt.autoscale(tight=True)
 
