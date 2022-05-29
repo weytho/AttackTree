@@ -4,12 +4,10 @@
 # used to convert a boolan formula to its CNF-form
 #
 from matplotlib import pyplot as plt
-import numpy as np
 from sympy import *
 import time
-from itertools import product
-import math
 import signal
+from sympy.logic.boolalg import *
 
 try:
     # From folder
@@ -31,6 +29,44 @@ class timeout:
         signal.alarm(self.seconds)
     def __exit__(self, type, value, traceback):
         signal.alarm(0)
+
+def _find_predicates(expr):
+    """Helper to find logical predicates in BooleanFunctions.
+
+    A logical predicate is defined here as anything within a BooleanFunction
+    that is not a BooleanFunction itself.
+
+    """
+    if not isinstance(expr, BooleanFunction):
+        return {expr}
+    return set().union(*(map(_find_predicates, expr.args)))
+
+def compute_truthtable(expr, find_all):
+    expr = sympify(expr)
+    if not isinstance(expr, BooleanFunction):
+        return expr, []
+
+    variables = _find_predicates(expr)
+    from sympy.simplify.simplify import simplify
+    s = tuple(map(simplify, variables))
+    expr = expr.xreplace(dict(zip(variables, s)))
+    variables = _find_predicates(expr)
+
+    c, v = sift(ordered(variables), lambda x: x in (True, False), binary=True)
+    variables = c + v
+    truthtable = []
+
+    c = [1 if i == True else 0 for i in c]
+    for t in product((0, 1), repeat=len(v)):
+        if expr.xreplace(dict(zip(v, t))) == True:
+            truthtable.append(c + list(t))
+            if not find_all:
+                break
+            else:
+                if len(truthtable) >= 1000: # Limit
+                    break
+                
+    return v, truthtable
 
 def benchmark():
 
@@ -79,13 +115,13 @@ def benchmark():
     
     # many variables and long formula
     form_4 = []
-    #form_4.append("( ( ( (  ~ node000 ) & (  ~ node001 ) & ( ( (  ~ node00200 ) | (  ~ node00201 ) | node00202 ) & node0021 ) ) | node01 ) & ( node10 | node11 | node12 | ( node130 ^ node131 ^ ( ( node13200 & node13201 & node000 ) ^ node1321 ^ node1322 ^ node1323 ) ^ node001 ) | node0021 ) & ( ( ( node2000 | ( node20010 & (  ~ node20011 ) & (  ~ node20012 ) & node20013 ) | node2002 ) & node201 ) ^ node21 ) & ( node30 & ( node310 ^ ( node3110 | node3111 | node3112 ) ^ node312 ^ (  ~ node313 ) ^ node001 ) & node32 & ( ( node3300 | node3301 | node3302 ) ^ node331 ^ ( node3320 ^ node3321 ^ ( node33220 | node33221 | node33222 | ( (  ~ node00200 ) | (  ~ node00201 ) | node00202 ) ) ^ node3323 ^ node3302 ) ^ (  ~ node333 ) ^ node3111 ) ) )")
-    #form_4.append("( ( node00 & node01 & ( ( node0200 & node0201 & node0202 ) | node021 | node022 | node01 ) & node03 ) | node1 | ( node20 & ( node210 & node211 & (  ~ node212 ) & ( node2130 | node2131 | node2132 | node2133 ) & node1 ) & ( ( node2200 | node2201 | node2202 | node2203 ) ^ ( node2210 | node2211 | node2212 | node2213 ) ) & ( node230 & node231 & ( node2320 & node2321 & node2322 & node2323 ) & ( node2210 | node2211 | node2212 | node2213 ) ) ) )")
+    form_4.append("( ( ( (  ~ node000 ) & (  ~ node001 ) & ( ( (  ~ node00200 ) | (  ~ node00201 ) | node00202 ) & node0021 ) ) | node01 ) & ( node10 | node11 | node12 | ( node130 ^ node131 ^ ( ( node13200 & node13201 & node000 ) ^ node1321 ^ node1322 ^ node1323 ) ^ node001 ) | node0021 ) & ( ( ( node2000 | ( node20010 & (  ~ node20011 ) & (  ~ node20012 ) & node20013 ) | node2002 ) & node201 ) ^ node21 ) & ( node30 & ( node310 ^ ( node3110 | node3111 | node3112 ) ^ node312 ^ (  ~ node313 ) ^ node001 ) & node32 & ( ( node3300 | node3301 | node3302 ) ^ node331 ^ ( node3320 ^ node3321 ^ ( node33220 | node33221 | node33222 | ( (  ~ node00200 ) | (  ~ node00201 ) | node00202 ) ) ^ node3323 ^ node3302 ) ^ (  ~ node333 ) ^ node3111 ) ) )")
+    form_4.append("( ( node00 & node01 & ( ( node0200 & node0201 & node0202 ) | node021 | node022 | node01 ) & node03 ) | node1 | ( node20 & ( node210 & node211 & (  ~ node212 ) & ( node2130 | node2131 | node2132 | node2133 ) & node1 ) & ( ( node2200 | node2201 | node2202 | node2203 ) ^ ( node2210 | node2211 | node2212 | node2213 ) ) & ( node230 & node231 & ( node2320 & node2321 & node2322 & node2323 ) & ( node2210 | node2211 | node2212 | node2213 ) ) ) )")
     form_4.append("( node0 & ( node10 & node11 & node0 ) & node2 & ( ( node300 ^ node301 ^ node11 ) & ( node310 ^ node311 ) & ( ( ( node32000 & node32001 & node311 ) & ( (  ~ node32010 ) & node32011 & node10 ) & node3202 & node3203 ) ^ ( node3210 | node3211 ) ^ node322 ^ ( node3230 & node3231 & node3232 ) ^ node310 ) ) )")
-    #form_4.append("")
-    #form_4.append("")
-    #form_4.append("")
-    #form_4.append("")
+    form_4.append("( ( ( node000 & node001 & node002 ) | ( node010 & ( node0110 | node0111 | node0112 ) & node012 & node000 ) ) & ( ( node100 ^ ( node1010 & node1011 & ( node010 & ( node0110 | node0111 | node0112 ) & node012 & node000 ) ) ^ node102 ) | node11 ) & ( node20 & ( node210 | node211 | ( node2120 & node2121 & node102 ) ) & node22 & node0111 ) )")
+    form_4.append("( ( ( node000 & ( ( node00100 ^ node00101 ^ node00102 ^ node000 ) ^ node0011 ^ node0012 ^ node0013 ) & node002 & node003 ) | node01 | ( ( node0200 | node0201 | node003 ) | node021 | ( node0220 | node0221 | ( node00100 ^ node00101 ^ node00102 ^ node000 ) ) | node0011 ) | ( node030 & node031 ) ) | node1 | ( ( ( node2000 & node2001 & node2002 ) | ( node2010 ^ node2011 ^ node2012 ) | node202 | node203 | node1 ) ^ node21 ^ node22 ^ ( ( node2300 ^ ( node23010 | node23011 ) ^ node22 ) & node231 & node232 & ( node2330 | ( node23310 & node23311 ) | node2332 | node2333 | ( node23010 | node23011 ) ) & node21 ) ) )")
+    form_4.append("( ( node00 | ( node010 ^ node011 ^ node012 ^ node013 ^ node00 ) | node02 ) | ( node10 & ( ( node1100 & node1101 ) | node111 | node112 | node113 ) & node12 & ( ( node1300 & ( node13010 | node13011 ) & node1302 & node12 ) | ( ( node13100 ^ node13101 ^ node13102 ^ node13103 ^ node1300 ) | node1311 | node1312 | node1313 | node011 ) | ( node1320 & node1321 & node1322 & node1323 ) | ( ( node13300 | node13301 | node13302 | ( node13010 | node13011 ) ) | node1331 | node1332 | ( node13330 ^ node13331 ^ node13332 ^ node13333 ) | node1313 ) ) ) )")
+    form_4.append("( ( ( ( node0000 ^ node0001 ) & node001 & node002 & ( node0030 | node0033 ) ) & node01 ) | ( ( ( ( node10000 & node10001 & node0030 ) & node1001 & ( node0000 & node0001 ) ) ^ ( node1010 & node001 ) ^ ( node1030 & node1031 ) ^ node0031 ) & node11 & ( node120 & node121 & node10000 ) & ( ( node1300 ^ node0000 ) & node131 & ( node1320 & ( node13210 ^ node13211 ) & node1322 & node11 ) & node133 ) ) | ( ( ( node2001 ^ ( node10000 & node0030 ) ) & ( node2010 ^ node13213 ) & node120 ) & ( ( node2100 & node2101 ) | node211 ) & ( node220 & ( node2210 ^ ( ( node1300 ^ node0000 ) & ( node1320 & node1322 & node11 ) & node133 ) ) & node222 ) ) )")
 
     str_formula.append(form_4)
 
@@ -94,12 +130,13 @@ def benchmark():
 
     basic = [0, 0, 0, 0]
     solve_basic = [0, 0, 0, 0]
-    qmc = [0, 0, 0, 0]
-    solve_qmc = [0, 0, 0, 0]
+    tt = [0, 0, 0, 0]
+    solve_tt = [0, 0, 0, 0]
     tse = [0, 0, 0, 0]
     solve_tse = [0, 0, 0, 0]
 
-    timer = 5
+    timer = 300 #150
+    etimer = [0, 0, 0]
 
     for i in [0, 1, 2, 3]:
         for s in str_formula[i]:
@@ -113,9 +150,10 @@ def benchmark():
                     cnf_formula = to_cnf(formula)
                     end = time.time()
                     #print(cnf_formula)
-                    basic[i] += end - start
+                    etimer[0] = end - start
+                    basic[i] += etimer[0]
             except:
-                print("timeout")
+                print("encoding timeout 1")
                 basic[i] += timer
                 cnf_formula = False
 
@@ -123,59 +161,61 @@ def benchmark():
                 with timeout(seconds=timer):
                     print("2")
                     start = time.time()
-                    cnf_formula_qmc = to_cnf(formula, True, True)
-                    end = time.time()
-                    #print(cnf_formula_qmc)
-                    qmc[i] += end - start
-            except:
-                print("timeout")
-                qmc[i] += timer
-                cnf_formula_qmc = False
-
-            try:
-                with timeout(seconds=timer):
-                    print("3")
-                    start = time.time()
                     list_and_cnf, set_var, index_expr = tseitin(formula)
                     end = time.time()
                     #print(list_and_cnf)
-                    tse[i] += end - start
+                    etimer[2] = end - start
+                    tse[i] += etimer[2]
             except:
-                print("timeout")
+                print("encoding timeout 2")
                 tse[i] += timer
                 list_and_cnf = False
 
             list_var = list(set_var) + [str(l) for l in index_expr]
 
             if cnf_formula != True and cnf_formula != False:
-                start = time.time()
-                sat_solver(cnf_formula, list(set_var), [], -1, False)
-                end = time.time()
-                solve_basic[i] += end - start
+                try:
+                    with timeout(seconds=round(timer-etimer[0])):
+                        print("solve 1")
+                        start = time.time()
+                        sat_solver(cnf_formula, list(set_var), [], 1000, False)
+                        end = time.time()
+                        solve_basic[i] += end - start
+                except:
+                    print("solving timeout")
+                    solve_basic[i] += timer-etimer[0]
 
-            if cnf_formula_qmc != True and cnf_formula_qmc != False:
-                start = time.time()
-                sat_solver(cnf_formula_qmc, list(set_var), [], -1, False)
-                end = time.time()
-                solve_qmc[i] += end - start
+            try:
+                with timeout(seconds=round(timer-etimer[1])):
+                    print("solve 2")
+                    start = time.time()
+                    compute_truthtable(formula, True)
+                    end = time.time()
+                    solve_tt[i] += end - start
+            except Exception as e:
+                print("solving timeout")
+                solve_tt[i] += timer-etimer[1]
+            
 
             if list_and_cnf != True and list_and_cnf != False:
-                start = time.time()
-                sat_solver(list_and_cnf, list_var, [], -1, False)
-                end = time.time()
-                solve_tse[i] += end - start
+                try:
+                    with timeout(seconds=round(timer-etimer[2])):
+                        print("solve 3")
+                        start = time.time()
+                        sat_solver(list_and_cnf, list_var, [], 1000, False)
+                        end = time.time()
+                        solve_tse[i] += end - start
+                except Exception as e:
+                    print("solving timeout")
+                    solve_tse[i] += timer-etimer[2]
 
             #break # to remove
         #break
 
-    ind = np.arange(3)  
-    width = 0.4
+    ind = ['TruthTable', 'Basic', 'Tseitin'] 
+    width = 0.75
 
-    #fig, ((ax1, ax2, ax3, ax4), (ax5, ax6, ax7, ax8)) = plt.subplots(2, 4)
-    #axs = [ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8]
-
-    fig, ((ax1, ax2, ax3, ax4)) = plt.subplots(1, 4)
-    axs = [ax1, ax2, ax3, ax4]
+    fig, axs = plt.subplots(1, 4, figsize=(14,5))
 
     encoding = []
     solving = []
@@ -183,62 +223,42 @@ def benchmark():
     for i in [0, 1, 2, 3]:
         print(i)
         cnt = len(str_formula[i])
+        #print(cnt)
         print("")
-
-        print("TIME CNF BASIC = " + str(basic[i]))
-        print("TIME CNF QMC = " + str(qmc[i]))
-        print("TIME CNF TSEITIN = " + str(tse[i]))
-
+        print("TIME CNF TRUTHTABLE = " + str(tt[i]/cnt))
+        print("TIME CNF BASIC = " + str(basic[i]/cnt))
+        print("TIME CNF TSEITIN = " + str(tse[i]/cnt))
         print("")
+        print("TIME SOLVE TRUTHTABLE = " + str(solve_tt[i]/cnt))
+        print("TIME SOLVE BASIC = " + str(solve_basic[i]/cnt))
+        print("TIME SOLVE TSEITIN = " + str(solve_tse[i]/cnt))
 
-        print("TIME SOLVE BASIC = " + str(solve_basic[i]))
-        print("TIME SOLVE QMC = " + str(solve_qmc[i]))
-        print("TIME SOLVE TSEITIN = " + str(solve_tse[i]))
+        encoding.append([tt[i]/cnt, basic[i]/cnt, tse[i]/cnt])
+        solving.append([solve_tt[i]/cnt, solve_basic[i]/cnt, solve_tse[i]/cnt])
 
-        encoding.append([basic[i]/cnt, qmc[i]/cnt, tse[i]/cnt])
-        solving.append([solve_basic[i]/cnt, solve_qmc[i]/cnt, solve_tse[i]/cnt])
+    fig.suptitle('Encoding and solving comparison')
 
-    #plt.yscale('log')
-
-    p1 = axs[0].bar(ind - width, encoding[0], width, color=['blue'], edgecolor='black')
-    p1_both = axs[0].bar(ind - width, solving[0], width, bottom = encoding[0], color=['orange'], edgecolor='black')
+    p1 = axs[0].bar(ind, encoding[0], width, color=['blue'], edgecolor='black')
+    p1_both = axs[0].bar(ind, solving[0], width, bottom = encoding[0], color=['orange'], edgecolor='black')
+    axs[0].set_title('Few vars and few operators', size='medium')
 
     p2 = axs[1].bar(ind, encoding[1], width, color=['blue'], edgecolor='black')
     p2_both = axs[1].bar(ind, solving[1], width, bottom = encoding[1], color=['orange'], edgecolor='black')
+    axs[1].set_title('Few vars and many operators', size='medium')
 
-    p3 = axs[2].bar(ind + width, encoding[2], width, color=['blue'], edgecolor='black')
-    p3_both = axs[2].bar(ind + width, solving[2], width, bottom = encoding[2], color=['orange'], edgecolor='black')
+    p3 = axs[2].bar(ind, encoding[2], width, color=['blue'], edgecolor='black')
+    p3_both = axs[2].bar(ind, solving[2], width, bottom = encoding[2], color=['orange'], edgecolor='black')
+    axs[2].set_title('Many vars and few operators', size='medium')
 
-    p4 = axs[3].bar(ind + width, encoding[3], width, color=['blue'], edgecolor='black')
-    p4_both = axs[3].bar(ind + width, solving[3], width, bottom = encoding[3], color=['orange'], edgecolor='black')
+    p4 = axs[3].bar(ind, encoding[3], width, color=['blue'], edgecolor='black', label='encoding')
+    p4_both = axs[3].bar(ind, solving[3], width, bottom = encoding[3], color=['orange'], edgecolor='black', label='solving')
+    axs[3].set_title('Many vars and many operators', size='medium')
 
-    print([sum(x) for x in zip(encoding[0], solving[0])])
+    handles, labels = axs[3].get_legend_handles_labels()
+    fig.legend(handles, labels, loc='center right')
 
-    '''
-    axs[4].set_yscale('log')
-    axs[5].set_yscale('log')
-    axs[6].set_yscale('log')
-    axs[7].set_yscale('log')
-
-    p1_tot = axs[4].bar(ind, [sum(x) for x in zip(encoding[0], solving[0])], width, color=['blue'], edgecolor='black')
-
-    p2_tot = axs[5].bar(ind, [sum(x) for x in zip(encoding[1], solving[1])], width, color=['blue'], edgecolor='black')
-
-    p3_tot = axs[6].bar(ind, [sum(x) for x in zip(encoding[2], solving[2])], width, color=['blue'], edgecolor='black')
-
-    p4_tot = axs[7].bar(ind, [sum(x) for x in zip(encoding[3], solving[3])], width, color=['blue'], edgecolor='black')
-    '''
-
-    #plt.autoscale(tight=True)
-
-    #plt.ylabel('Time')
-    #plt.title('Encoding and solving Test')
-    #plt.xticks(ind, ('T1', 'T2', 'T3', 'T4'))
-
-
-
-    #plt.yticks(np.arange(0, 81, 10))
-    #plt.legend((p1_basic[0], p2_basic[0], p1_qmc[0], p2_qmc[0], p1_tse[0], p2_tse[0]), ('CNF converter', 'SAT solver'))
+    fig.supxlabel('Method used')
+    fig.supylabel('Time (s)')
     
     plt.show()
 
