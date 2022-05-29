@@ -31,12 +31,6 @@ class timeout:
         signal.alarm(0)
 
 def _find_predicates(expr):
-    """Helper to find logical predicates in BooleanFunctions.
-
-    A logical predicate is defined here as anything within a BooleanFunction
-    that is not a BooleanFunction itself.
-
-    """
     if not isinstance(expr, BooleanFunction):
         return {expr}
     return set().union(*(map(_find_predicates, expr.args)))
@@ -63,7 +57,7 @@ def compute_truthtable(expr, find_all):
             if not find_all:
                 break
             else:
-                if len(truthtable) >= 1000: # Limit
+                if len(truthtable) >= 10000: # Limit
                     break
                 
     return v, truthtable
@@ -178,7 +172,7 @@ def benchmark():
                     with timeout(seconds=round(timer-etimer[0])):
                         print("solve 1")
                         start = time.time()
-                        sat_solver(cnf_formula, list(set_var), [], 1000, False)
+                        sat_solver(cnf_formula, list(set_var), [], 10000, False)
                         end = time.time()
                         solve_basic[i] += end - start
                 except:
@@ -202,15 +196,13 @@ def benchmark():
                     with timeout(seconds=round(timer-etimer[2])):
                         print("solve 3")
                         start = time.time()
-                        sat_solver(list_and_cnf, list_var, [], 1000, False)
+                        sat_solver(list_and_cnf, list_var, [], 10000, False)
                         end = time.time()
                         solve_tse[i] += end - start
                 except Exception as e:
                     print("solving timeout")
                     solve_tse[i] += timer-etimer[2]
 
-            #break # to remove
-        #break
 
     ind = ['TruthTable', 'Basic', 'Tseitin'] 
     width = 0.75
@@ -223,7 +215,7 @@ def benchmark():
     for i in [0, 1, 2, 3]:
         print(i)
         cnt = len(str_formula[i])
-        #print(cnt)
+
         print("")
         print("TIME CNF TRUTHTABLE = " + str(tt[i]/cnt))
         print("TIME CNF BASIC = " + str(basic[i]/cnt))
