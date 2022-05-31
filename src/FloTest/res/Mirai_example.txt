@@ -1,12 +1,11 @@
 RELATIONS
 SpreadMirai -SAND- FindDevice,Penetrate,AdvertiseMaster,Hide,Perpetuate;
 FindDevice -SAND- NetworkScan,GetIoTResponse;
-Penetrate -OR- GuessCredentials,ANOTHER;
+Penetrate -OR- FactoryCredentials,GuessCredentials;
 AdvertiseMaster -AND- Connect,LoadMalware;
 Hide -AND- BlocAdminPorts,EraseCompetitor;
 COUNTERMEASURES
-Strong password (GuessCredentials)
-Reboot timers (SpreadMirai)
+Strong password (FactoryCredentials,GuessCredentials)
 Resilient ports (GetIoTResponse)
 PROPERTIES
 NetworkScan:cost = 0,prob = 1,0;
