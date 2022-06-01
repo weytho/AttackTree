@@ -101,7 +101,7 @@ def SMTcost(list_var, list_cost, formula, upper_bound=None):
         vars, sols, values = SMTformating(solutions, list_var)
         return vars, sols, best, values
 
-def SMTproba(list_var, list_proba, formula, lower_bound=0):
+def SMTproba(list_var, list_proba, formula, lower_bound=None):
     formula = formula.replace('~', '!')
     list_symbols = [Symbol(s) for s in list_var]
     list_smt_proba = [Real(p) for p in list_proba]
@@ -123,7 +123,7 @@ def SMTproba(list_var, list_proba, formula, lower_bound=0):
 
     prod = Times(list_and_proba)
 
-    if lower_bound > 0:
+    if lower_bound != None:
         f = And(domains, problem, Equals(SOL, prod), GT(SOL, Real(lower_bound)))
         get_all = True
     else:
