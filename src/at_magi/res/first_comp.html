@@ -1,0 +1,80 @@
+<html>
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.css" type="text/css" />
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis-network.min.js"> </script>
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+
+<style type="text/css">
+
+        #mynetwork {
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+            border: 1px solid lightgray;
+            position: relative;
+            float: left;
+        }
+
+        
+
+        
+
+        
+</style>
+
+</head>
+
+<body>
+<div id = "mynetwork"></div>
+
+
+<script type="text/javascript">
+
+    // initialize global variables.
+    var edges;
+    var nodes;
+    var network; 
+    var container;
+    var options, data;
+
+    
+    // This method is responsible for drawing the graph, returns the drawn network
+    function drawGraph() {
+        var container = document.getElementById('mynetwork');
+        
+        
+
+        // parsing and collecting nodes and edges from the python
+        nodes = new vis.DataSet([{"id": "node", "label": "node", "shape": "box", "title": "node", "x": 400.07, "y": -594.0}, {"id": "node0", "label": "node0", "shape": "box", "title": "node0", "x": 204.07, "y": -450.0}, {"group": "leaf", "id": "node00", "label": "node00", "shape": "box", "title": "node00: cost = 4, prob = 0.43", "x": 81.067, "y": -306.0}, {"group": "leaf", "id": "node01", "label": "node01", "shape": "box", "title": "node01: cost = 10, prob = 0.79", "x": 256.07, "y": -162.0}, {"id": "node1", "label": "node1", "shape": "box", "title": "node1", "x": 400.07, "y": -450.0}, {"group": "leaf", "id": "node10", "label": "node10", "shape": "box", "title": "node10: cost = 6, prob = 0.53", "x": 323.07, "y": -306.0}, {"id": "node11", "label": "node11", "shape": "box", "title": "node11", "x": 511.07, "y": -306.0}, {"group": "leaf", "id": "node110", "label": "node110", "shape": "box", "title": "node110: cost = 1, prob = 0.97", "x": 482.07, "y": -162.0}, {"id": "node111", "label": "node111", "shape": "box", "title": "node111", "x": 689.07, "y": -162.0}, {"group": "leaf", "id": "node1110", "label": "node1110", "shape": "box", "title": "node1110: cost = 8, prob = 0.96", "x": 460.07, "y": -18.0}, {"group": "leaf", "id": "node1111", "label": "node1111", "shape": "box", "title": "node1111: cost = 8, prob = 0.59", "x": 689.07, "y": -18.0}, {"group": "leaf", "id": "node1112", "label": "node1112", "shape": "box", "title": "node1112: cost = 8, prob = 0.02", "x": 919.07, "y": -18.0}, {"group": "leaf", "id": "node2", "label": "node2", "shape": "box", "title": "node2: cost = 8, prob = 0.05", "x": 567.07, "y": -450.0}, {"group": "logic", "id": "node_LOGIC", "label": "AND", "shape": "box", "x": 400.07, "y": -522.0}, {"group": "logic", "id": "node0_LOGIC", "label": "AND", "shape": "box", "x": 140.07, "y": -378.0}, {"group": "logic", "id": "node1_LOGIC", "label": "AND", "shape": "box", "x": 433.07, "y": -378.0}, {"group": "logic", "id": "node11_LOGIC", "label": "OR", "shape": "box", "x": 496.07, "y": -234.0}, {"group": "logic", "id": "node111_LOGIC", "label": "SAND", "shape": "box", "x": 689.07, "y": -90.0}]);
+        edges = new vis.DataSet([{"from": "node_LOGIC", "to": "node0"}, {"from": "node0_LOGIC", "to": "node00"}, {"from": "node0_LOGIC", "to": "node01"}, {"from": "node_LOGIC", "to": "node1"}, {"from": "node1_LOGIC", "to": "node10"}, {"from": "node1_LOGIC", "to": "node11"}, {"from": "node11_LOGIC", "to": "node110"}, {"from": "node11_LOGIC", "to": "node111"}, {"from": "node111_LOGIC", "to": "node1110"}, {"from": "node111_LOGIC", "to": "node1111"}, {"from": "node111_LOGIC", "to": "node1112"}, {"from": "node11_LOGIC", "to": "node01"}, {"from": "node_LOGIC", "to": "node2"}, {"color": "#000000", "from": "node", "to": "node_LOGIC", "width": 4}, {"color": "#000000", "from": "node0", "to": "node0_LOGIC", "width": 4}, {"color": "#000000", "from": "node1", "to": "node1_LOGIC", "width": 4}, {"color": "#000000", "from": "node11", "to": "node11_LOGIC", "width": 4}, {"color": "#000000", "from": "node111", "to": "node111_LOGIC", "width": 4}]);
+
+        // adding nodes and edges to the graph
+        data = {nodes: nodes, edges: edges};
+
+        var options = {"configure": {"enabled": false}, "nodes": {"font": {"size": 24, "bold": true, "color": "#000000"}, "color": {"border": "#000000", "background": "#FFFFFF"}}, "edges": {"width": 2, "color": {"inherit": false, "color": "#000000"}, "smooth": {"enabled": false, "type": "continuous"}}, "interaction": {"dragNodes": true, "hideEdgesOnDrag": false, "hideNodesOnDrag": false}, "physics": {"enabled": false, "stabilization": {"enabled": true, "fit": true, "iterations": 1000, "onlyDynamicEdges": false, "updateInterval": 50}}, "groups": {"leaves": {"color": {"background": "#9999FF"}}, "logic": {"font": {"color": "#000000"}, "color": {"background": "#FF7F00"}}, "cm": {"color": {"background": "#00FF00"}}, "test": {"color": {"background": "#FFA500"}}, "model": {"color": {"background": "#FF0000"}}, "model_leaf": {"font": {"color": "#FFFFFF"}, "color": {"background": "#FF0000"}}}};
+        
+        
+
+        
+
+        network = new vis.Network(container, data, options);
+	 
+        
+
+
+        
+
+        return network;
+
+    }
+
+    drawGraph();
+
+</script>
+</body>
+</html>

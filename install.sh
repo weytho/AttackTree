@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "$0" )" && pwd )"
-REL_DIR="/src/FloTest"
+REL_DIR="/src/at_magi"
 FULLDIR="${DIR}${REL_DIR}"
 
 echo "full directory: ${FULLDIR}"

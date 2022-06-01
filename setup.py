@@ -1,22 +1,22 @@
 from setuptools import setup, Extension
 
-C_utils = Extension("FloTest.testlib",
-                    sources=["src/FloTest/C_utils/testC.c"],
+C_utils = Extension("at_magi.testlib",
+                    sources=["src/at_magi/C_utils/testC.c"],
                     extra_compile_args=['-shared','-Wl,-soname,testlib','-fPIC'],
                     extra_link_args =['-ljson-c'],
-                    include_dirs=["src/FloTest/include"],
+                    include_dirs=["src/at_magi/include"],
                     language='c'
                     )
 def run_setup():
     setup(
-        name = 'attack_tree',
+        name = 'AttackTree_MAGI',
         version = '0.1',
-        description = 'An example of an installable program',
-        author = 'flo',
+        description = 'Attack Tree Modelling and Analysis Graphical Interface',
+        author = 'Delcourt F. and Weiser T.',
         url = '',
         license = '',
         package_dir={"": "src"},
-        packages=["FloTest"],
+        packages=["at_magi"],
         package_data = {
             '': ['resources_directory.txt'],
         },
@@ -24,7 +24,7 @@ def run_setup():
         ext_modules=[C_utils],
         entry_points={
             "console_scripts": [
-                "tree_launcher=FloTest.t:start",
+                "atmagi_launcher=at_magi.t:start",
             ],
         },
     )

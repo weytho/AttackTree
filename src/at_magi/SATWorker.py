@@ -17,9 +17,9 @@ try:
     from SATsolver import sat_solver
 except ImportError:
     # From package
-    from FloTest.Struct import *
-    from FloTest.tseitin import *
-    from FloTest.SATsolver import sat_solver
+    from at_magi.Struct import *
+    from at_magi.tseitin import *
+    from at_magi.SATsolver import sat_solver
 
 class SATWorker(QObject):
     finished = pyqtSignal()

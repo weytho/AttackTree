@@ -18,8 +18,8 @@ try:
     from SATsolver import sat_solver
 except ImportError:
     # From package
-    from FloTest.SATWorker import *
-    from FloTest.SATsolver import sat_solver
+    from at_magi.SATWorker import *
+    from at_magi.SATsolver import sat_solver
 
 # Set Working Directory
 dirname = os.path.dirname(__file__)

@@ -41,14 +41,14 @@ try:
     from global_proba import get_global_proba
 except ImportError:
     # From package
-    from FloTest.SATWorker import *
-    from FloTest.ParserWorker import *
-    from FloTest.Comparison import *
-    from FloTest.SMTWorker import *
-    from FloTest.randomTree import *
-    from FloTest.FreqComparator import frequency_comparator
-    from FloTest.SolutionSorter import sorter
-    from FloTest.global_proba import get_global_proba
+    from at_magi.SATWorker import *
+    from at_magi.ParserWorker import *
+    from at_magi.Comparison import *
+    from at_magi.SMTWorker import *
+    from at_magi.randomTree import *
+    from at_magi.FreqComparator import frequency_comparator
+    from at_magi.SolutionSorter import sorter
+    from at_magi.global_proba import get_global_proba
 
 from PyQt5.QtWidgets import (
     QApplication, QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QLabel, QSpinBox, QWidget, QGridLayout, QListWidget, QListWidgetItem

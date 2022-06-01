@@ -2,6 +2,6 @@
 trash/*
 html/*
 latex/*
-src/FloTest/__pycache__/*
+src/at_magi/__pycache__/*
 build/*
 src/attack_tree.egg-info/*

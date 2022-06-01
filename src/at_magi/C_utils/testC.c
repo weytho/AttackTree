@@ -8,10 +8,6 @@
 #include "grammar.c"
 #include <ctype.h>
 #include <locale.h>
-// sudo apt install libjson-c-dev
-// gcc -shared -Wl,-soname,testlib -o testlib.so -fPIC testC.c -ljson-c
-// /bin/python3 /home/flo/Desktop/Github/AttackTree/testThread.py
-// https://stackoverflow.com/questions/38661635/ctypes-struct-returned-from-library
 
 typedef struct full_List FList;
 struct full_List {
@@ -709,7 +705,6 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
 
 int main (int argc, char * argv[]) { 
 	printf("STARTING TEST \n");
-	//char *path = "/home/flo/Desktop/Github/AttackTree/Structure/StructureGraph.json";
 	//mainfct(path);
 	//CustomList * l = getList();
 	//CustomNode * n = getNode();

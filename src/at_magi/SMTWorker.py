@@ -13,9 +13,9 @@ try:
     from SMTsolver import SMTcost, SMTproba
 except ImportError:
     # From package 
-    from FloTest.Struct import *
-    from FloTest.tseitin import *
-    from FloTest.SMTsolver import SMTcost, SMTproba
+    from at_magi.Struct import *
+    from at_magi.tseitin import *
+    from at_magi.SMTsolver import SMTcost, SMTproba
 
 class SMTWorker(QObject):
     finished = pyqtSignal()

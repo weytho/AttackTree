@@ -15,8 +15,8 @@ try:
     from tseitin import tseitin
 except ImportError:
     # From package
-    from FloTest.SATsolver import sat_solver
-    from FloTest.tseitin import tseitin
+    from at_magi.SATsolver import sat_solver
+    from at_magi.tseitin import tseitin
 
 class timeout:
     def __init__(self, seconds=1, error_message='Timeout'):
