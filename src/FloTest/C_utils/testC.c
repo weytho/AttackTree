@@ -81,7 +81,7 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
             printf("[Node] Malloc error\n");
          }
          char buf[101];
-         snprintf(buf, sizeof(buf), "%s_%s", json_object_get_string(CMtitle), json_object_get_string(action));
+         snprintf(buf, sizeof(buf), "%s#%s", json_object_get_string(CMtitle), json_object_get_string(action));
          strcpy(CMnode->title, buf);
          strncpy(CMnode->variable, json_object_get_string(CMtitle), sizeof(CMnode->variable));
          strncpy(CMnode->type, "CtMs", sizeof(CMnode->type));

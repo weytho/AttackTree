@@ -701,7 +701,7 @@ class Window(QWidget):
                 for n in self.current_network.nodes :
                     if 'group' in n and n['group'] == 'cm' and n['label'] in ok_list:
                         n['group'] = 'model_leaf'
-                        l = n['id'].split("_", 1)
+                        l = n['id'].split('#', 1)
                         disabled_node.add(l[1])
                         for e in self.current_network.edges :
                             if e['to'] == n['id']:
@@ -908,7 +908,7 @@ class Window(QWidget):
         list_to_toggle = []
 
         for (u, v, _) in self.current_digraph.edges(data=True):
-            l = v.split("_", 1)
+            l = v.split("#", 1)
             if l[0] == cm_name:
                 list_to_toggle.append(u.rsplit('_', 1)[0])
 
