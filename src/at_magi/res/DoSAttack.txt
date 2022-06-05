@@ -1,0 +1,39 @@
+RELATIONS
+DoSAttack -OR- VolumeAttack,ProtocolAttack,ApplicationAttack,ZeroDayAttack;
+VolumeAttack -OR- UDPflood,ICMPflood,DRDoS,AmplifiedDRDoS;
+ProtocolAttack -OR- SYNflood,PingofDeath,Slowloris,PerpetualEcho;
+ApplicationAttack -OR- HTTPflood,SophisticatedDDoS;
+UDPflood -SAND- BuildBotnet,UDPattack;
+ICMPflood -SAND- BuildBotnet,ICMPattack;
+DRDoS -SAND- BuildBotnet,SpoofVictimAdress,ReflectedAttack;
+AmplifiedDRDoS -SAND- BuildBotnet,SpoofVictimAdress,AmplifyAttack;
+SYNflood -SAND- SendManySYN,KeepConnectionsAlive;
+PingofDeath -SAND- ForgePacket,SendtoVictim;
+Slowloris -SAND- OpenPOSTtransmissions,InfiniteSlowDataSend;
+PerpetualEcho -SAND- ForgeEchoRequest,SendtoVictim;
+HTTPflood -SAND- ForgeHTTPrequest,ExhaustVictimResources;
+ 
+COUNTERMEASURES
+Upstream filtering (ProtocolAttack)
+Blackholing (VolumeAttack)
+DDS (VolumeAttack,ProtocolAttack)
+Firewalls (ProtocolAttack)
+
+PROPERTIES
+BuildBotnet:cost = 10,prob = 1,0;
+UDPattack:cost = 0,prob = 1,0;
+ICMPattack:cost = 0,prob = 1,0;
+SpoofVictimAdress:cost = 0,prob = 1,0;
+ReflectedAttack:cost = 0,prob = 0,8;
+AmplifiedDRDoS:cost = 0,prob = 0,8;
+SendManySYN:cost = 0,prob = 1,0;
+KeepConnectionsAlive:cost = 1,prob = 1,0;
+ForgePacket:cost = 1,prob = 0,8;
+SendtoVictim:cost = 0,prob = 0,8;
+OpenPOSTtransmissions:cost = 0,prob = 1,0;
+InfiniteSlowDataSend:cost = 1,prob = 1,0;
+ForgeEchoRequest:cost = 1,prob = 0,8;
+ForgeHTTPrequest:cost = 1,prob = 0,8;
+ExhaustVictimResources:cost = 0,prob = 0,8;
+SophisticatedDDoS:cost = 5,prob = 0,2;
+ZeroDayAttack:cost = 20,prob = 1,0;
