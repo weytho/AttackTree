@@ -114,9 +114,17 @@ def recur_path(current_edge, path_count_set, taken, cur_net_nodes_dict, cur_digr
                 else:
                     path_count_set[current] = {current_edge['to']}
 
-                if d['inputNbr'] == -1 or d['inputNbr'] == len(path_count_set[current]) or (d['inputNbr'] == -3 and len(path_count_set[current]) % 2 != 0) :
+                if d['inputNbr'] == -1 or d['inputNbr'] == len(path_count_set[current]):
                     next_taken = True
                     values_logic[n['id']] = True
+
+                elif d['inputNbr'] == -3 :
+                    if len(path_count_set[current]) % 2 != 0 :
+                        next_taken = True
+                        values_logic[n['id']] = True
+                    else:
+                        values_logic[n['id']] = False
+
                 elif d['inputNbr'] == -2:
                     values_logic[n['id']] = False
             else :
@@ -127,6 +135,17 @@ def recur_path(current_edge, path_count_set, taken, cur_net_nodes_dict, cur_digr
                 if d['inputNbr'] == -2 :
                     next_taken = True
                     values_logic[n['id']] = not values_logic[n['id']]
+
+                elif d['inputNbr'] == -3 :
+                    if current in path_count_set:
+                        if current_edge['to'] in path_count_set[current]:
+                            path_count_set[current].remove(current_edge['to'])
+                        if len(path_count_set[current]) % 2 != 0 :
+                            next_taken = True
+                            values_logic[n['id']] = True
+                        else:
+                            values_logic[n['id']] = False
+
                 elif values_logic[n['id']] == True:
                     return
             else:

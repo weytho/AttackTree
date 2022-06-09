@@ -746,9 +746,6 @@ class Window(QWidget):
         d = self.cur_digraph_nodes_dict[current]
         
         next_taken = False
-        print(current_edge)
-        print(n)
-        print(d)
         if taken:
             if d['type'] == 'logic' or d['type'] == 'cmlogic' :
                 if current in path_count_set :
@@ -756,12 +753,20 @@ class Window(QWidget):
                 else:
                     path_count_set[current] = {current_edge['to']}
 
-                if d['inputNbr'] == -1 or d['inputNbr'] == len(path_count_set[current]) or (d['inputNbr'] == -3 and len(path_count_set[current]) % 2 != 0) :
+                if d['inputNbr'] == -1 or d['inputNbr'] == len(path_count_set[current]) :
                     next_taken = True
                     if 'group' not in n or n['group'] != 'model' :
                         n['group'] = 'model'
 
-                elif d['inputNbr'] == -2:
+                elif d['inputNbr'] == -3 :
+                    if len(path_count_set[current]) % 2 != 0 :
+                        next_taken = True
+                        if 'group' not in n or n['group'] != 'model' :
+                            n['group'] = 'model'
+                    else:
+                        n['group'] = 'logic'
+
+                elif d['inputNbr'] == -2 :
                     n['group'] = 'logic'
 
             else :
@@ -778,6 +783,18 @@ class Window(QWidget):
                         n['group'] = 'model'
                     else:
                         n['group'] = 'logic'
+
+                elif d['inputNbr'] == -3 :
+                    if current in path_count_set:
+                        if current_edge['to'] in path_count_set[current]:
+                            path_count_set[current].remove(current_edge['to'])
+                        if len(path_count_set[current]) % 2 != 0 :
+                            next_taken = True
+                            if 'group' not in n or n['group'] != 'model' :
+                                n['group'] = 'model'
+                        else:
+                            n['group'] = 'logic'
+
                 elif 'group' in n and n['group'] == 'model':
                     return
             else:
