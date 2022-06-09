@@ -1,7 +1,7 @@
 from setuptools import setup, Extension
 
 C_utils = Extension("at_magi.testlib",
-                    sources=["src/at_magi/C_utils/testC.c"],
+                    sources=["src/at_magi/C_utils/UtilsC.c"],
                     extra_compile_args=['-shared','-Wl,-soname,testlib','-fPIC'],
                     extra_link_args =['-ljson-c'],
                     include_dirs=["src/at_magi/include"],
@@ -24,7 +24,7 @@ def run_setup():
         ext_modules=[C_utils],
         entry_points={
             "console_scripts": [
-                "atmagi_launcher=at_magi.t:start",
+                "atmagi_launcher=at_magi.ATMAGI:start",
             ],
         },
     )

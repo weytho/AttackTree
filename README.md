@@ -10,8 +10,8 @@ doxygen settings/attacktree.conf
 
 # With Installer
 > sh install.sh
-> tree_launcher
+> atmagi_launcher
 
 # Manual usage
-> gcc -shared -Wl,-soname,testlib -o testlib.so -fPIC testC.c -ljson-c
-> python t.py
+> gcc -shared -Wl,-soname,testlib -o testlib.so -fPIC UtilsC.c -ljson-c
+> python ATMAGI.py

@@ -62,9 +62,7 @@ class ParserWorker(QObject):
         self.finished.emit(ret)
 
         if ret == 0 :
-            print("Parser is OK")
-            #pass
+            print("Success")
         else:
             print("Error in Parser")
             print("Code : " + str(ret))
-            #pass

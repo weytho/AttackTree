@@ -54,9 +54,8 @@ def SMTcost(list_var, list_cost, formula, upper_bound=None):
         f = And(domains, problem, Equals(SOL, sum))
         get_all = False
 
-    print("")
     #print(get_logic(f))
-    print("@@@@@@@@@@ SMT SOLVER Z3 COST @@@@@@@@@@")
+    print("####################### SMT SOLVER (Z3 COST) #########################")
 
     with Solver(name="z3") as sol_z3:
         converter = sol_z3.converter
@@ -68,7 +67,6 @@ def SMTcost(list_var, list_cost, formula, upper_bound=None):
         o.add(Z3_form)
         print(Z3_form)
         o.minimize(Z3_sol)
-        print(Z3_sol)
         print(o.check())
         if o.check() != z3.sat:
             print(o.reason_unknown())
@@ -130,9 +128,8 @@ def SMTproba(list_var, list_proba, formula, lower_bound=None):
         f = And(domains, problem, Equals(SOL, prod))
         get_all = False
 
-    print("")
     #print(get_logic(f))
-    print("@@@@@@@@@@ SMT SOLVER Z3 PROBA @@@@@@@@@@")
+    print("####################### SMT SOLVER (Z3 PROBA) #########################")
 
     with Solver(name="z3") as sol_z3:
         converter = sol_z3.converter
@@ -144,7 +141,6 @@ def SMTproba(list_var, list_proba, formula, lower_bound=None):
         o.add(Z3_form)
         print(Z3_form)
         o.maximize(Z3_sol)
-        print(Z3_sol)
         print(o.check())
         if o.check() != z3.sat:
             print(o.reason_unknown())

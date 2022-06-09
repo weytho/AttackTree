@@ -1,0 +1,9 @@
+node0,node10,node11,node2
+True,False,False,False
+False,False,True,False
+False,True,False,False
+False,False,False,True
+True,False,True,True
+True,True,True,False
+True,True,False,True
+False,True,True,True

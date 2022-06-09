@@ -13,12 +13,12 @@ from collections import OrderedDict
 try:
     # From folder
     from Struct import *
-    from tseitin import *
+    from Tseitin import *
     from SATsolver import sat_solver
 except ImportError:
     # From package
     from at_magi.Struct import *
-    from at_magi.tseitin import *
+    from at_magi.Tseitin import *
     from at_magi.SATsolver import sat_solver
 
 class SATWorker(QObject):
@@ -42,7 +42,7 @@ class SATWorker(QObject):
     def working(self):
         self.get_file_so()
         
-        print("WORKER")
+        #print("WORKER")
         self.node_list= []
         self.edge_list = []
         self.formula = []
@@ -168,7 +168,7 @@ class SATWorker(QObject):
         #self.data.emit(node_list, edge_list)
         self.finished.emit()
 
-        print("HAS ENDED WORKER")
+        #print("HAS ENDED WORKER")
         #self.plot
 
     def start_with_assumptions(self):

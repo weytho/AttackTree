@@ -200,7 +200,7 @@ class Comparison(QObject):
 
     def subplot(self, node_list, edge_list, web, name):
         self.get_canvas(node_list, edge_list, name)    
-        html_file = os.path.join(dirname, 'res/'+ name +'.html')
+        html_file = os.path.join(dirname, 'settings/'+ name +'.html')
         local_url = QUrl.fromLocalFile(html_file)
         web.load(local_url)
 
@@ -314,7 +314,7 @@ class Comparison(QObject):
 
         vis_str = "var options = " + json.dumps(data_options)
         nt.set_options(vis_str)
-        nt.save_graph('res/'+ filename +'.html')
+        nt.save_graph('settings/'+ filename +'.html')
 
 class cmpWorker(QObject):
     finished = pyqtSignal()

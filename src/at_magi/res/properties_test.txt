@@ -1,7 +1,7 @@
 RELATIONS
-    A -OR-> B, C, D;
+    A -OR- B, C, D;
     B -AND- E, F;
-    D -OR-> G;
+    D -OR- G;
 COUNTERMEASURES
     CM1 (F)
 PROPERTIES

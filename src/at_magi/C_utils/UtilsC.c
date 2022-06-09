@@ -1,11 +1,11 @@
 /**
 *  @file
 */
-#include<stdio.h>
-#include<json-c/json.h>
+#include <stdio.h>
+#include <json-c/json.h>
 #include <string.h>
 #include <stdlib.h>
-#include "grammar.c"
+#include "Grammar.c"
 #include <ctype.h>
 #include <locale.h>
 
@@ -302,8 +302,8 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
 
 
 FList * mainfct(char * path, int with_cm) {
-   printf("FUNCTION : mainfct \n");
-	printf("Path to file is : %s \n", path);
+   //printf("FUNCTION : mainfct \n");
+	//printf("Path to file is : %s \n", path);
 
 	FILE *fp; 
 	struct json_object *parsed_json;
@@ -457,12 +457,12 @@ json_object * build_json(json_object * parent , Tree_LL * tree, int boolean_mode
 }
 
 void create_Json_file(Tree_LL * wholeTree, int boolean_mode, HashTable *ht_CM, char *filename){
-   printf("FUNCTION : create_Json_file \n");
+   //printf("FUNCTION : create_Json_file \n");
 
-   printf(" NAME FINAL IS %s\n", wholeTree->n->title);
+   //printf(" NAME FINAL IS %s\n", wholeTree->n->title);
    json_object *root = json_object_new_object();
 
-   printf("CREATING FILE\n");
+   //printf("CREATING FILE\n");
 
    // Clean file
    fclose(fopen(filename, "w"));
@@ -481,14 +481,14 @@ void create_Json_file(Tree_LL * wholeTree, int boolean_mode, HashTable *ht_CM, c
 }
 
 int parser(char * toParse, char * prop_text, char * counter_text, char * filename) {
-   printf("FUNCTION : parser \n");
+   //printf("FUNCTION : parser \n");
    if(toParse == NULL || is_empty(toParse)){
       return 1;
    }
    int boolean_mode = 0;
 
    if(is_empty(prop_text)){
-      printf("BOOLEAN MODE \n");
+      //printf("BOOLEAN MODE \n");
       boolean_mode = 1;
    }
    setlocale(LC_NUMERIC, "C");
@@ -510,7 +510,7 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
    char * RawText = malloc(size * sizeof(char));
    memcpy(RawText, toParse, size);
 
-   printf("TEXT IS HERE '%s'\n", RawText);
+   printf("'%s'\n", RawText);
 
    char delim2[] = ";";
    char delim3[] = "-";
@@ -681,7 +681,6 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
    // ADD properties
 
    if( boolean_mode == 0 ){
-      printf("BOOLEAN MODE\n");
       set_properties_total(whole_tree, ht_properties);
    }
 
@@ -697,8 +696,7 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
 
    Tree_free_from_top(whole_tree);
 
-   printf("END\n");
-
+   //printf("END\n");
 	return 0;
 }
 

@@ -202,6 +202,8 @@ def test():
 
     print("OUTPUT")
     print(list_and_cnf)
+    print(set_var)
+    print(index_expr)
     print(cnf_formula)
 
     '''

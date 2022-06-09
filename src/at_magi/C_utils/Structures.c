@@ -1,5 +1,6 @@
 /**
 *  @file
+*  Basic structures with specialized methods
 */
 // -------- NODES
 

@@ -1,23 +1,16 @@
 RELATIONS
-SpreadMirai -SAND- FindDevice,Penetrate,AdvertiseMaster,Hide;
+SpreadMirai -SAND- FindDevice,Penetrate,AdvertiseMaster,Hide,Perpetuate;
 FindDevice -SAND- NetworkScan,GetIoTResponse;
-NetworkScan -OR- Telnet,HTTPS,FTP,SSH,CWMP;
-Penetrate -OR- GuessCredentials,FactoryCredential;
-AdvertiseMaster -SAND- Connect,LoadMalware;
+Penetrate -OR- GuessCredentials,ANOTHER;
+AdvertiseMaster -AND- Connect,LoadMalware;
 Hide -AND- BlocAdminPorts,EraseCompetitor;
 COUNTERMEASURES
-Strong password (GuessCredentials, FactoryCredential)
-Limited Remote Access (GetIoTResponse)
-Isolation boundaries (LoadMalware,BlocAdminPorts)
-Scan Notification (NetworkScan)
+Strong password (GuessCredentials)
+Reboot timers (SpreadMirai)
+Resilient ports (GetIoTResponse)
 PROPERTIES
-Telnet:cost = 0,prob = 1,0;
-HTTPS:cost = 0,prob = 1,0;
-FTP:cost = 0,prob = 1,0;
-SSH:cost = 0,prob = 1,0;
-CWMP:cost = 0,prob = 1,0;
-GetIoTResponse:cost = 0,prob = 0,001;
-FactoryCredential:cost = 0,prob = 0,001;
+NetworkScan:cost = 0,prob = 1,0;
+GetIoTResponse:cost = 0,prob = 0,0001;
 GuessCredentials:cost = 0,prob =0,01;
 Connect:cost = 0,prob = 1.0;
 LoadMalware:cost = 1,prob = 1.0;

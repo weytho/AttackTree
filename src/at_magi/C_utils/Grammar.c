@@ -1,11 +1,12 @@
 /**
 *  @file
+*  Grammar parser helper functions
 */
 
-#include<stdio.h>
-#include<string.h>
-#include<json-c/json.h>
-#include"structures.c"
+#include <stdio.h>
+#include <string.h>
+#include <json-c/json.h>
+#include "Structures.c"
 #include "HashTable.c"
 #include <ctype.h>
 
@@ -479,7 +480,7 @@ HashTable * parse_properties(char * prop_text){
    char *length_ptr = malloc(size_prop * sizeof(char));
    memcpy(length_ptr, prop_text, size_prop);
 
-   printf("@@@@@@@@@@@@@ NODES @@@@@@@@@@@@@\n");
+   //printf("@@@@@@@@@@@@@ NODES @@@@@@@@@@@@@\n");
 
    int count = 0;
    char *length_runner = strtok_r(length_ptr, delim6, &saveptr5);
@@ -666,7 +667,7 @@ HashTable * parse_countermeasures(char * counter_text, HashTable *ht_properties)
       
    }
 
-   printf("END OF PARSER CM ! \n");
+   //printf("END OF PARSER CM ! \n");
    //displayH(ht_CM);
    return ht_CM;
 

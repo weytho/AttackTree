@@ -12,11 +12,11 @@ from sympy.logic.boolalg import *
 try:
     # From folder
     from SATsolver import sat_solver
-    from tseitin import tseitin
+    from at_magi.Tseitin import tseitin
 except ImportError:
     # From package
     from at_magi.SATsolver import sat_solver
-    from at_magi.tseitin import tseitin
+    from at_magi.Tseitin import tseitin
 
 class timeout:
     def __init__(self, seconds=1, error_message='Timeout'):

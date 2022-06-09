@@ -9,12 +9,12 @@ from fractions import Fraction
 try:
     # From folder
     from Struct import *
-    from tseitin import *
+    from Tseitin import *
     from SMTsolver import SMTcost, SMTproba
 except ImportError:
     # From package 
     from at_magi.Struct import *
-    from at_magi.tseitin import *
+    from at_magi.Tseitin import *
     from at_magi.SMTsolver import SMTcost, SMTproba
 
 class SMTWorker(QObject):

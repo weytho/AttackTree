@@ -1,55 +1,28 @@
 {
-  "Action":"NODE",
-  "Type":"OR",
+  "Action":"node",
+  "Type":"XOR",
   "Child":[
     {
-      "Action":"A",
-      "Type":"SAND",
+      "Action":"node0",
+      "Type":"LEAF"
+    },
+    {
+      "Action":"node1",
+      "Type":"XOR",
       "Child":[
         {
-          "Action":"C",
-          "Type":"LEAF",
-          "Cost":1,
-          "Prob":1.0
+          "Action":"node10",
+          "Type":"LEAF"
         },
         {
-          "Action":"D",
-          "Type":"LEAF",
-          "Cost":1,
-          "Prob":1.0
+          "Action":"node11",
+          "Type":"LEAF"
         }
       ]
     },
     {
-      "Action":"B",
-      "Type":"AND",
-      "Child":[
-        {
-          "Action":"D",
-          "Type":"LEAF",
-          "Cost":1,
-          "Prob":1.0
-        },
-        {
-          "Action":"E",
-          "Type":"LEAF",
-          "Cost":1,
-          "Prob":1.0,
-          "CM":[
-            {
-              "CMtitle":"CM1",
-              "CMcost":0,
-              "CMprob":1.0
-            }
-          ]
-        },
-        {
-          "Action":"F",
-          "Type":"LEAF",
-          "Cost":1,
-          "Prob":1.0
-        }
-      ]
+      "Action":"node2",
+      "Type":"LEAF"
     }
   ]
 }

@@ -35,20 +35,20 @@ try:
     from ParserWorker import *
     from Comparison import *
     from SMTWorker import *
-    from randomTree import *
+    from RandomTree import *
     from FreqComparator import frequency_comparator
     from SolutionSorter import sorter
-    from global_proba import get_global_proba
+    from GlobalProba import get_global_proba
 except ImportError:
     # From package
     from at_magi.SATWorker import *
     from at_magi.ParserWorker import *
     from at_magi.Comparison import *
     from at_magi.SMTWorker import *
-    from at_magi.randomTree import *
+    from at_magi.RandomTree import *
     from at_magi.FreqComparator import frequency_comparator
     from at_magi.SolutionSorter import sorter
-    from at_magi.global_proba import get_global_proba
+    from at_magi.GlobalProba import get_global_proba
 
 from PyQt5.QtWidgets import (
     QApplication, QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QLabel, QSpinBox, QWidget, QGridLayout, QListWidget, QListWidgetItem
@@ -408,8 +408,6 @@ class Window(QWidget):
     #  @param le List of the Edges of the JSON file
     def get_canvas(self, ln, le):
 
-        print("###########################################")
-
         g = nx.DiGraph()
         g.add_nodes_from(ln)
 
@@ -546,7 +544,7 @@ class Window(QWidget):
 
         vis_str = "var options = " + json.dumps(data_options)
         nt.set_options(vis_str)
-        nt.save_graph('res/nx.html')
+        nt.save_graph('settings/nx.html')
 
         self.current_network = nt
         self.current_digraph = g
@@ -559,10 +557,10 @@ class Window(QWidget):
     #  @param node_list List of the Edges of the JSON file
     def plot(self, node_list, edge_list):
         self.get_canvas(node_list, edge_list)
-        html_file = os.path.join(dirname, 'res/nx.html')
+        html_file = os.path.join(dirname, 'settings/nx.html')
         local_url = QUrl.fromLocalFile(html_file)
         self.canvas.load(local_url)
-        print("pressed")
+        #print("pressed")
 
     ## Action called by the import JSON button :
     #   Use a file explorer to choose the JSON file to import
@@ -723,10 +721,10 @@ class Window(QWidget):
                             if e['to'] == n['id']:
                                 self.recur_path(e, path_count_set, disabled_node, False)
 
-                self.current_network.save_graph('res/nx_with_sol.html')
+                self.current_network.save_graph('settings/nx_with_sol.html')
                 self.current_network.nodes = old_nodes
 
-                html_file = os.path.join(dirname, 'res/nx_with_sol.html')
+                html_file = os.path.join(dirname, 'settings/nx_with_sol.html')
                 local_url = QUrl.fromLocalFile(html_file)
                 self.canvas.load(local_url)
             else :
@@ -748,6 +746,9 @@ class Window(QWidget):
         d = self.cur_digraph_nodes_dict[current]
         
         next_taken = False
+        print(current_edge)
+        print(n)
+        print(d)
         if taken:
             if d['type'] == 'logic' or d['type'] == 'cmlogic' :
                 if current in path_count_set :
@@ -794,7 +795,7 @@ class Window(QWidget):
         self.tracesFound.setText("")
         self.tracesFound.repaint()
         self.result_layout.setCurrentWidget(self.tracesFound)
-        html_file = os.path.join(dirname, 'res/nx.html')
+        html_file = os.path.join(dirname, 'settings/nx.html')
         local_url = QUrl.fromLocalFile(html_file)
         self.canvas.load(local_url)
 
@@ -933,7 +934,8 @@ class Window(QWidget):
                     current[0].setStyleSheet("QPushButton { background-color: red }")
                     current[0].setChecked(False)
             else:
-                print("parent node is not a leaf")
+                #print("parent node is not a leaf")
+                pass
                 
             if state == 0:
                 self.mandatory_cm_counter -= 1
@@ -958,7 +960,7 @@ class Window(QWidget):
         else:
             self.worker.str_formula = self.curr_formula
             self.worker.uniq_node_list = self.uniq_node_list
-        print("Compute With Assumptions")
+        #print("Compute With Assumptions")
 
         self.worker.assumptions = []
 
@@ -1129,7 +1131,7 @@ class Window(QWidget):
         self.reduce_button.setChecked(False)
 
         # to csv file
-        with open("res/solutionsSMT.csv", "wt") as fp:
+        with open("settings/solutionsSMT.csv", "wt") as fp:
             writer = csv.writer(fp, delimiter=",")
             writer.writerow(self.var_array)  # write header
             writer.writerows(boolean_array)
@@ -1329,7 +1331,7 @@ class Window(QWidget):
         self.reduce_button.setChecked(False)
 
         # to csv file
-        with open("res/solutions.csv", "wt") as fp:
+        with open("settings/solutions.csv", "wt") as fp:
             writer = csv.writer(fp, delimiter=",")
             writer.writerow(self.var_array)  # write header
             writer.writerows(boolean_array)
