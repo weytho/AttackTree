@@ -4,11 +4,6 @@
 
 <!-- PROJECT LOGO -->
 <br />
-<div align="center">
-  <a href="https://github.com/github_username/repo_name">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a>
-
 <h3 align="center">project_title</h3>
 
   <p align="center">
@@ -94,5 +89,5 @@ _For more examples, please refer to the [Documentation](https://github.com/weyth
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/github_username/repo_name.svg?style=for-the-badge
+[contributors-shield]: https://img.shields.io/github/contributors/weytho/AttackTree.svg?style=for-the-badge
 [contributors-url]: https://github.com/weytho/AttackTree/graphs/contributors
