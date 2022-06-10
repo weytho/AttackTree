@@ -6,8 +6,11 @@
 from PyQt5.QtCore import QObject, pyqtSignal
 import ctypes
 import os
-# From folder
 
+## ParserWorker Class
+#
+#  Create and manage the parsing
+#  of an attack tree from GUI given text
 class ParserWorker(QObject):
     finished = pyqtSignal(int)
 

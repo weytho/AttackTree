@@ -5,8 +5,9 @@
 from json.encoder import INFINITY
 from pysat.solvers import Glucose3
 from sympy import *
-# From folder
 
+## SAT solving method :
+#   
 def sat_solver(formula, list_var, assumptions=[], max_val=20, to_print=True):
     if to_print:
         print("####################### SAT SOLVER (Glucose3) #########################")

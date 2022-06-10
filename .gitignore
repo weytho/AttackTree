@@ -2,6 +2,7 @@
 trash/*
 html/*
 latex/*
+src/at_magi/latex/*
 src/at_magi/__pycache__/*
 build/*
 src/attack_tree.egg-info/*

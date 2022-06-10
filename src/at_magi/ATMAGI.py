@@ -117,9 +117,9 @@ class Window(QWidget):
 
         Vlayout_left.addWidget(reload_and_path)
 
-        ##################################
+        
         # Create pyqt toolbar
-        ##################################
+        
         toolBar = QToolBar()
         toolBar.setOrientation(Qt.Vertical)
         toolBar.setFixedWidth(170)

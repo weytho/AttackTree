@@ -30,12 +30,16 @@ with open('resources_directory.txt') as f:
     dirname = dirname.rstrip("\n")
     os.chdir(dirname)
 
+## Comparison Class
+#
+#  Create and manage the Comparison
+#  of two attack trees
 class Comparison(QObject):
     finished = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__()
-        print("[CMP] initialisation")
+        #print("[CMP] initialisation")
         self.formula1 = None
         self.cnf1 = None
         self.sol_array1 = None
@@ -50,6 +54,14 @@ class Comparison(QObject):
         self.var_array3 = None
         self.sem = Semaphore()
 
+    ## Launch each tree computation :
+    #   Create Workers QThreads to compute 
+    #   each tree
+    #  @param self The object pointer.
+    #  @param fileName1 First tree filename.
+    #  @param fileName2 Second tree filename.
+    #  @param text1 Pointer to the GUI text holder for the first tree.
+    #  @param text2 Pointer to the GUI text holder for the second tree.
     def tree_comparison(self,fileName1,fileName2,text1,text2):
         
         worker1 = SATWorker()
@@ -82,10 +94,15 @@ class Comparison(QObject):
 
         self.t1.start()
         self.t2.start()
-        print("[CMP] 2 threads launched")
+        #print("[CMP] 2 threads launched")
 
+    ## Clean the SAT workers :
+    #   Get results and delete workers
+    #  @param self The object pointer.
+    #  @param nbr Number of the tree worker.
+    #  @param text Pointer to the GUI text holder.
     def clean_Worker(self,nbr,text):
-        print("[CMP] cleaning")
+        #print("[CMP] cleaning")
         if nbr==1:
             self.formula1 = self.worker1.str_formula
             self.cnf1 = self.worker1.str_cnf
@@ -104,7 +121,7 @@ class Comparison(QObject):
             self.sol2.setText("number of solutions found : " + str(len(self.sol_array2)))
             self.subplot(self.worker2.node_list, self.worker2.edge_list, self.webengine2, "second_comp")
             self.worker2.deleteLater
-        ### UPDATE WINDOW WITH ARGUMENT ###
+        # UPDATE WINDOW WITH ARGUMENT
         self.sem.acquire()
         self.cnt += 1
         if self.cnt == 2:
@@ -113,11 +130,15 @@ class Comparison(QObject):
         else:
             self.sem.release()
 
+    ## Launch the comparison :
+    #   Create Workers QThreads to compute 
+    #   the comparison between the two trees
+    #  @param self The object pointer.
     def compare(self):
         if self.formula1 == None or self.formula2 == None:
             print("[CMP] Some formulas are None .. aborting")
             return
-        ### THREAD ###
+        # THREAD 
         #self.formula3 = "( "+self.formula1+" & ( ~ "+self.formula1+" | "+self.formula2+" ) )"
         self.formula3 = "( "+self.formula1+" & "+self.formula2+" )"
         worker3 = cmpWorker()
@@ -149,6 +170,10 @@ class Comparison(QObject):
         self.t4 = thread4
         self.t4.start()
 
+    ## Clean the comparison workers :
+    #   Get results and delete workers
+    #  @param self The object pointer.
+    #  @param nbr Number of the tree worker.
     def clean_cmpWorker(self, nbr):
         if nbr == 1:
             self.cnf3 = self.worker3.cnf
@@ -188,7 +213,7 @@ class Comparison(QObject):
                     boolean_array.append(l)
                 self.boolean_sol_arr4 = boolean_array
             self.worker4.deleteLater
-        ### UPDATE WINDOW WITH ARGUMENT ###
+        # UPDATE WINDOW WITH ARGUMENT
         self.sem.acquire()
         self.cnt += 1
         if self.cnt == 4:
@@ -198,12 +223,29 @@ class Comparison(QObject):
         else:
             self.sem.release()
 
+    ## Plot Trees :
+    #   Use results to save and
+    #   plot the trees
+    #  @param self The object pointer.
+    #  @param node_list List of nodes.
+    #  @param edge_list List of edges.
+    #  @param web WebEngine.
+    #  @param name Name of the file.
     def subplot(self, node_list, edge_list, web, name):
         self.get_canvas(node_list, edge_list, name)    
         html_file = os.path.join(dirname, 'settings/'+ name +'.html')
         local_url = QUrl.fromLocalFile(html_file)
         web.load(local_url)
 
+    ## Creation of the Digraph using Networkx and Pyvis :
+    #   Create graph from given information by adding logic nodes,
+    #   Get the layout from Networkx and send it to a Pyvis network,
+    #   Use settings for Pyvis from a JSON file and save the graph
+    #   to a HTML file
+    #  @param self The object pointer.
+    #  @param ln List of the Nodes of the JSON file
+    #  @param le List of the Edges of the JSON file
+    #  @param filename Name of the file
     def get_canvas(self, ln, le, filename):
 
         g = nx.DiGraph()
@@ -316,6 +358,9 @@ class Comparison(QObject):
         nt.set_options(vis_str)
         nt.save_graph('settings/'+ filename +'.html')
 
+## Comparison Worker Class
+#
+#   Compute the solutions of a given formula
 class cmpWorker(QObject):
     finished = pyqtSignal()
 

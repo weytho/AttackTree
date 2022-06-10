@@ -21,6 +21,8 @@ except ImportError:
     from at_magi.Tseitin import *
     from at_magi.SATsolver import sat_solver
 
+## SATWorker Class
+#
 class SATWorker(QObject):
     finished = pyqtSignal()
     finishedWithError = pyqtSignal()

@@ -8,6 +8,8 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 
+## Launch frequency comparator :
+#
 def frequency_comparator(nodes, edges, current_network, current_digraph, sol_array, var_array):
 
     values = compute_values(nodes, current_network, current_digraph, sol_array, var_array)
@@ -60,7 +62,8 @@ def frequency_comparator(nodes, edges, current_network, current_digraph, sol_arr
     
     fig.tight_layout()
 
-
+## Compute frequencies by iterating the tree :
+#
 def compute_values(nodes, current_network, current_digraph, sol_array, var_array):
 
     counter = {i[0]:0 for i in nodes if i[1]["type"] != "CtMs"}
@@ -101,6 +104,8 @@ def compute_values(nodes, current_network, current_digraph, sol_array, var_array
 
     return counter
 
+## Recursively iterate the tree :
+#
 def recur_path(current_edge, path_count_set, taken, cur_net_nodes_dict, cur_digraph_nodes_dict, current_network, values, values_logic):
         current = current_edge['from']
         n = cur_net_nodes_dict[current]
@@ -156,4 +161,4 @@ def recur_path(current_edge, path_count_set, taken, cur_net_nodes_dict, cur_digr
                 recur_path(e, path_count_set, next_taken, cur_net_nodes_dict, cur_digraph_nodes_dict, current_network, values, values_logic)
 
 if __name__ == "__main__":
-    frequency_comparator(None, None, None)
+    pass

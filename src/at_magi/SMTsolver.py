@@ -10,9 +10,11 @@ from fractions import Fraction
 from pysmt.oracles import get_logic
 from collections import namedtuple
 
-# ! Instead of using Forall to compare all existing models to find the minimum -> Minimize -> Simplex Z3
+# ! Instead of using Forall to compare all existing models to find the minimum -> Minimize -> Z3
 
-def SMTformating(solutions, list_var):
+## SMT solutions formatting :
+# 
+def SMTformatting(solutions, list_var):
     bool_only_list = []
     values_array = []
     for l in solutions:
@@ -26,6 +28,8 @@ def SMTformating(solutions, list_var):
 
     return list_var, bool_only_list, values_array
 
+## SMT cost solving method :
+#   
 def SMTcost(list_var, list_cost, formula, upper_bound=None):
     formula = formula.replace('~', '!')
     list_symbols = [Symbol(s) for s in list_var]
@@ -96,9 +100,11 @@ def SMTcost(list_var, list_cost, formula, upper_bound=None):
             solutions.append(filtered_model)
             o.add(z3.Or(block))
 
-        vars, sols, values = SMTformating(solutions, list_var)
+        vars, sols, values = SMTformatting(solutions, list_var)
         return vars, sols, best, values
 
+## SMT proba solving method :
+#   
 def SMTproba(list_var, list_proba, formula, lower_bound=None):
     formula = formula.replace('~', '!')
     list_symbols = [Symbol(s) for s in list_var]
@@ -171,7 +177,7 @@ def SMTproba(list_var, list_proba, formula, lower_bound=None):
             solutions.append(filtered_model)
             o.add(z3.Or(block))
 
-        vars, sols, values = SMTformating(solutions, list_var)
+        vars, sols, values = SMTformatting(solutions, list_var)
         if len(solutions) > 0:
             values = [round(float(e.as_fraction()), 5) for e in values]
             best = round(float(best.as_fraction()), 5)

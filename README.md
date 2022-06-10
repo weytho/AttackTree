@@ -3,6 +3,7 @@
 # Doxygen
 doxygen -g settings/attacktree.conf
 doxygen settings/attacktree.conf
+make
 
 # then make in the latex folder
 

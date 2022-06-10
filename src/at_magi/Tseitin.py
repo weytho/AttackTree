@@ -7,6 +7,13 @@ from sympy import *
 import time
 from itertools import product 
 
+## Create sub-expressions auxiliary variables :
+#   
+#  @param formula The Formula to convert to its CNF form.
+#  @param list_subformulas List of subformulas.
+#  @param dict_subs Dictionary of sub-expressions correspondence.
+#  @param var_cnt Count sub-expressions for naming.
+#  @param set_var Set of variables.
 def recur_formula(formula, list_subformulas, dict_subs, var_cnt, set_var):
 
     if(type(formula) is Symbol):
@@ -58,6 +65,9 @@ def recur_formula(formula, list_subformulas, dict_subs, var_cnt, set_var):
     
     return var_cnt
 
+## Compute Tseitin Transformation :
+#   
+#  @param formula The Formula to convert to its CNF form.
 def tseitin(formula):
 
     # Notation new varibles : %1 %2 %3 ...

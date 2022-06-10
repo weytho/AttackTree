@@ -17,6 +17,8 @@ except ImportError:
     from at_magi.Tseitin import *
     from at_magi.SMTsolver import SMTcost, SMTproba
 
+## SMTWorker Class
+#
 class SMTWorker(QObject):
     finished = pyqtSignal()
 

@@ -1,3 +1,0 @@
-[console_scripts]
-atmagi_launcher = at_magi.ATMAGI:start
-

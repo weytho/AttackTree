@@ -300,7 +300,6 @@ CostProb * JsonReader(struct json_object *parsed_json, List **list, EList **edge
    return retval;
 }
 
-
 FList * mainfct(char * path, int with_cm) {
    //printf("FUNCTION : mainfct \n");
 	//printf("Path to file is : %s \n", path);

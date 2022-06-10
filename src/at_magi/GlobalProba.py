@@ -1,10 +1,15 @@
 ##
 # @file
+# Compute the global probability
+# of success of any attack
 
 from collections import Counter
 
+## Compute Global Probability of Successful Attack :
+#   
+#  @param ln List of the Nodes
+#  @param le List of the Edges
 def get_global_proba(ln, le):
-    # Compute Global Probability of Successful Attack
 
     full_dict = dict(ln)
     dict_proba = dict()

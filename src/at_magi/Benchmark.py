@@ -1,7 +1,7 @@
 ##
 # @file
-# Methods use to compute the Tseitin transformation
-# used to convert a boolan formula to its CNF-form
+# Comparison of the methods used to compute 
+# CNF transformation
 #
 from matplotlib import pyplot as plt
 from sympy import *
@@ -35,6 +35,10 @@ def _find_predicates(expr):
         return {expr}
     return set().union(*(map(_find_predicates, expr.args)))
 
+## Compute the truth table of a given formula :
+#  Imported from Sympy extension and lightly modified
+#  @param expr Formula to evaluate.
+#  @param find_all Used tp return the first True ouput.
 def compute_truthtable(expr, find_all):
     expr = sympify(expr)
     if not isinstance(expr, BooleanFunction):
@@ -62,6 +66,9 @@ def compute_truthtable(expr, find_all):
                 
     return v, truthtable
 
+## Benchmark of the three methods :
+#  Uses multiple set of expressions to compare
+#  Truth Table, Basic Conversion and Tseitin Transform
 def benchmark():
 
     str_formula = []
