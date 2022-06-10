@@ -4,10 +4,10 @@
 
 <!-- PROJECT LOGO -->
 <br />
-<h3 align="center">project_title</h3>
+<h3 align="center">Attack Tree Modelling and Analysis Graphical Interface (ATMAGI)</h3>
 
   <p align="center">
-    project_description
+    PyQT5 GUI Implementation for Attack Tree Analysis with various tools
   </p>
 </div>
 
@@ -16,7 +16,7 @@
   <summary>Table of Contents</summary>
   <ol>
     <li><a href="#about-the-project">About The Project</a></li>
-    <li><a href="#installation">Installation</a></li>
+    <li><a href="#installation">Install & Run</a></li>
     <li><a href="#usage">Usage</a></li>
   </ol>
 </details>
@@ -26,28 +26,15 @@
 
 [![Product Name Screen Shot][product-screenshot]](https://github.com/weytho/AttackTree)
 
-Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `github_username`, `repo_name`, `twitter_handle`, `linkedin_username`, `email_client`, `email`, `project_title`, `project_description`
+Implementation made by [Florentin Delcourt](https://github.com/delcourtfl) and [Thomas Weiser](https://github.com/weytho) for their master thesis.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
 <!-- GETTING STARTED -->
-## Getting Started
+## Install & Run
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
-
-### Prerequisites
-
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
-
-### Install & Run
-
-_With Installer :_
+_Installer :_
 
 1. Clone the repository
    ```sh
@@ -81,9 +68,12 @@ _Manual Launch :_
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+The implementation is launched from the 'ATMAGI.py' file in 'src/at_magi' folder.
+'res' folder is used to store resources of the project (such as .json and .txt file).
+Once launched the GUI display its main window with all its components.
+Python requirements can be found in 'requirements.txt' file.
 
-_For more examples, please refer to the [Documentation](https://github.com/weytho/AttackTree/blob/main/documentation.pdf)_
+_For more detailled information, please refer to the [Documentation](https://github.com/weytho/AttackTree/blob/main/documentation.pdf)_
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
