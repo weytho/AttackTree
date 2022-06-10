@@ -24,9 +24,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://github.com/weytho/AttackTree)
-
-Implementation made by [Florentin Delcourt](https://github.com/delcourtfl) and [Thomas Weiser](https://github.com/weytho) for their master thesis.
+Implementation made by [Florentin Delcourt](https://github.com/delcourtfl) and [Thomas Weiser](https://github.com/weytho) for their 2022 master thesis at UCLouvain.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
