@@ -700,49 +700,5 @@ int parser(char * toParse, char * prop_text, char * counter_text, char * filenam
 }
 
 
-int main (int argc, char * argv[]) { 
-	printf("STARTING TEST \n");
-	//mainfct(path);
-	//CustomList * l = getList();
-	//CustomNode * n = getNode();
-	//freeNode(n);
-	//freeList(l);
-
-   char a[]= " node -AND- node0,node1,node2; \
-node0 -OR- node00,node01,node02; \
-node00 -AND- node000,node001,node002; \
-node000 -SAND- node0000,node0001; \
-node001 -OR- node0010,node0011,node0012,node000; \
-node0011 -OR- node00110,node00111,node00112,node000; \
-node01 -SAND- node010,node011,node012; \
-node1 -AND- node10,node11; \
-node10 -SAND- node100,node101,node102,node000; \
-node102 -AND- node1020,node1021; \
-node1021 -AND- node10210,node10211,node10212,node02; \
-node11 -OR- node110,node111,node100; \
-node2 -SAND- node20,node21,node22,node0010; \
-node20 -AND- node200,node201,node202,node00110; \
-node201 -OR- node2010,node2011,node200; \
-node21 -OR- node210,node211,node212,node111; \
-node22 -SAND- node220,node221; \
-node221 -OR- node2210,node2211,node2212,node00;";
-   char b[]= " CM1 (node20,node2) \
-CM2 (node,node2) \
-CM3 (node120,node20) \
-CM4 (node21,node01) \
-CM5 (node20,node10) ";
-   char c[]= " node00: cost = 4,prob = 1.0; \
-node01: cost = 2,prob = 1.0; \
-node10: cost = 1,prob = 1.0; \
-node11: cost = 6,prob = 1.0; \
-node1200: cost = 8,prob = 1.0; \
-node1201: cost = 8,prob = 1.0; \
-node121: cost = 7,prob = 1.0; \
-node122: cost = 9,prob = 1.0; \
-node20: cost = 1,prob = 1.0;  \
-node21: cost = 4,prob = 1.0; ";
-
-   int r = parser(a, " ", " ", "test");
-   int r2 = parser(a, b, c, "test");
-	return r;
+int main (int argc, char * argv[]) {
 }
