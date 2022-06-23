@@ -73,6 +73,8 @@ Python requirements can be found in 'requirements.txt' file.
 
 _For more detailled information, please refer to the [Documentation](https://github.com/weytho/AttackTree/blob/main/documentation.pdf)_
 
+![Screenshot](ScreenApp.png)
+
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 <!-- MARKDOWN LINKS & IMAGES -->
